@@ -1,0 +1,145 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Cabecera */
+.challenges-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.header-text h1 { font-size: 2rem; margin-bottom: 5px; }
+.header-text p { font-size: 1rem; opacity: 0.9; }
+
+.coin-display {
+    background: rgba(255,255,255,0.2);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.coin-display i { color: #f1c40f; }
+
+/* Grid de Tarjetas */
+.challenges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Tarjeta de Reto */
+.challenge-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s;
+    border-left: 5px solid #ccc; /* Default borde gris */
+}
+
+.challenge-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.icon-box {
+    width: 50px; height: 50px;
+    background: #eef2f3;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #2c3e50;
+}
+
+.reward-badge {
+    background: #fff3cd;
+    color: #856404;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.card-body h3 { margin-bottom: 5px; font-size: 1.1rem; }
+.card-body p { color: #666; font-size: 0.9rem; margin-bottom: 15px; }
+
+/* Barra de Progreso */
+.progress-container {
+    background: #eee;
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #3498db;
+    width: 0%;
+    transition: width 0.5s;
+}
+
+/* Botón de Acción */
+.btn-claim {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+/* ESTADOS */
+
+/* 1. Pendiente */
+.challenge-card.pending { border-left-color: #3498db; }
+.challenge-card.pending .btn-claim {
+    background: #e0e0e0; color: #888; cursor: not-allowed;
+}
+
+/* 2. Completado (Listo para reclamar) */
+.challenge-card.completed { border-left-color: #27ae60; }
+.challenge-card.completed .btn-claim {
+    background: #27ae60; color: white; cursor: pointer;
+    animation: pulse 2s infinite;
+}
+
+/* 3. Reclamado */
+.challenge-card.claimed { border-left-color: #95a5a6; opacity: 0.7; }
+.challenge-card.claimed .btn-claim {
+    background: transparent; color: #27ae60; border: 1px solid #27ae60;
+    cursor: default;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+

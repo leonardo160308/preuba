@@ -1,0 +1,258 @@
+.container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 60px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.container img {
+  width: 320px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* ======== SECCIÓN PRINCIPAL ======== */
+.pagina-principal {
+  justify-content: center;
+  text-align: center;
+  flex-direction:row-reverse; /* <-- Imagen a la derecha */
+}
+
+.pagina-principal .contenido-principal {
+  max-width: 400px;
+}
+
+.pagina-principal h2 {
+  margin-bottom: 20px;
+}
+
+/* ======== RESPONSIVO ======== */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pagina-principal {
+    flex-direction: column-reverse;
+  }
+
+  .container img {
+    width: 250px;
+    margin-top: 20px;
+  }
+}
+
+
+/* Contenedor de todas las tarjetas */
+/* ======== CONTENEDOR DE TODAS LAS TARJETAS ======== */
+.tarjetas {
+  display: flex;
+  flex-wrap: wrap;         
+  justify-content: center; 
+  gap: 30px;               
+  padding: 20px; /* Fondo claro opcional */
+  text-align: center;
+}
+
+/* ======== TARJETA ======== */
+.tarjetaA {
+  background-color: #ffffff;
+  border-radius: 18px;
+  width: 280px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+/* Efecto hover bonito */
+.tarjetaA:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* ======== ENCABEZADO ======== */
+
+
+
+.tarjeta-headerD {
+  background-color: #2C405B; /* Azul oscuro */
+  color: white;
+  padding: 12px 15px;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 6px solid #B6823E; /* Franja dorada */
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  text-align: center;  
+  position: relative;
+}
+
+.tarjeta-headerD::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left:18px;
+  width: 15px;              /* ancho de la franja */
+  height: 15px;             /* alto de la franja */
+  background-color: #B6823E; /* mismo dorado que usas */
+  border-top-left-radius: px; /* redondeo opcional */
+}
+
+/* ======== CUERPO ======== */
+.tarjeta-bodyD {
+  padding: 18px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+/* ======== TEXTO ======== */
+.tarjeta-bodyD p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* ======== BOTÓN IZQUIERDA ======== */
+.tarjeta-bodyD button {
+  background-color: #B6823E;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color:white;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+/*COLO AZUL TARJETAS*/
+.tarjetaD {
+  background-color: #ffffff;
+  border-radius: 18px;
+  width: 280px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+/* Efecto hover bonito */
+.tarjetaD:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* ======== ENCABEZADO ======== */
+
+
+
+.tarjeta-headerA {
+  background-color: #2C405B; /* Azul oscuro */
+  color: white;
+  padding: 12px 15px;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 6px solid #8FA3C2; /* Franja dorada */
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  text-align: center; 
+  position: relative; 
+}
+
+.tarjeta-headerA::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left:18px;
+  width: 15px;              /* ancho de la franja */
+  height: 15px;             /* alto de la franja */
+  background-color: #8FA3C2; /* mismo dorado que usas */
+  border-top-left-radius: px; /* redondeo opcional */
+}
+/* ======== CUERPO ======== */
+.tarjeta-bodyA {
+  padding: 18px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+/* ======== TEXTO ======== */
+.tarjeta-bodyA p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* ======== BOTÓN IZQUIERDA ======== */
+.tarjeta-bodyA button {
+  background-color: #2C405B;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color:white;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.tarjeta-bodyD button:hover {
+  opacity: 0.8;
+  transition: opacity 0.3s ease; 
+}
+.tarjeta-bodyA button:hover {
+  opacity: 0.8;
+  transition: opacity 0.3s ease; 
+}
+
+/* ======== RESPONSIVO ======== */
+@media (max-width: 768px) {
+  .tarjetas {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tarjeta {
+    width: 90%;
+  }
+}
+
+.tarjeta-bodyA a{
+  text-decoration:none ;
+}
+
+.tarjeta-bodyD a{
+  text-decoration: none;
+}

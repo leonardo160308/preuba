@@ -1,0 +1,221 @@
+:root {
+  --accent: #B6823E;
+  --accent-dark: #96603a;
+  --muted-bg: #f0f3f5;
+  --card-radius: 12px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--muted-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  box-sizing: border-box; /* Asegura que padding no aumente el tamaño total */
+}
+
+.container {
+  position: relative;
+  width: 840px;
+  max-width: 95%;
+  /* Eliminado display: flex y flex-direction: column para que las tarjetas fluyan horizontalmente si el JS lo permite */
+  /* El centrado ya lo maneja el body */
+  display: flex; /* Añadimos flex para alinear las tarjetas */
+  justify-content: center; /* Centra las tarjetas si solo una es visible */
+  align-items: center; /* Alinea verticalmente las tarjetas */
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan si hay muchas tarjetas o en móvil */
+}
+
+.card {
+  perspective: 1000px;
+  width: 100%; /* La tarjeta ocupa el 100% del ancho disponible en .container */
+  height: 420px; 
+  margin: 0 auto 18px auto; /* Centra la tarjeta horizontalmente */
+  cursor: pointer;
+
+  /* IMPORTANTE: Si solo quieres mostrar una tarjeta a la vez, 
+     necesitarás JavaScript para mostrar/ocultar las otras.
+     Si todas se muestran, el carrusel se verá raro. */
+  /* z-index: 1; Esto es para asegurar que la tarjeta esté encima de otros elementos, si los hubiera */
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  will-change: transform; /* Fuerza aceleración por hardware para evitar el "salto" */
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--card-radius);
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.08);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto */
+}
+
+/* =================== FRONT ========================= */
+
+.card-front {
+  background-color: var(--accent);
+  justify-content: flex-start;
+}
+
+.card-title {
+  font-size: 32px;
+  color: white;
+  margin: 6px 0 14px 0;
+  text-align: center;
+  width: 100%;
+}
+
+.card-front img {
+  width: 80%;
+  max-width: 360px;
+  border-radius: 8px;
+  height: auto; /* Asegura que la imagen no se distorsione */
+}
+
+/* =================== BACK ========================= */
+
+.card-back {
+  background-color: white;
+  transform: rotateY(180deg);
+  overflow-y: auto; /* Permite el scroll si el contenido excede la altura fija */
+  flex-direction: row; 
+  align-items: flex-start;
+  gap: 28px;
+  border: 5px var(--accent) solid; 
+  padding: 35px 40px;
+  border-radius: 18px; 
+}
+
+.container-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* **SELECTORES FUSIONADOS Y LIMPIOS** */
+.title-back {
+  background-color: var(--accent);
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 12px; 
+  border-radius: 6px; 
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box; /* Incluye padding en el ancho/alto */
+}
+
+/* **SELECTORES FUSIONADOS Y LIMPIOS** */
+.card-text {
+  font-size: 16px; 
+  line-height: 1.55;
+  color: black;
+  text-align: justify; 
+  padding: 0 12px 18px 12px;
+}
+
+
+/* ============ BOTONES FLECHA ================ */
+
+.arrow-btn {
+  position: absolute; /* Mantiene la posición absoluta */
+  top: 50%;
+  transform: translateY(-50%);
+  color: black; /* Esto se superpone a tu imagen */
+  background: none;
+  border: none;
+  width: 65px;
+  height: 50px;
+  font-size: 30px;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ajusta la posición de las flechas para que no se metan en la tarjeta */
+/* Aquí es donde el -140px puede ser problemático si el ancho de .container no es fijo */
+#prevCard { 
+    left: -100px; /* Ajustado para que quede visible pero sin estorbar */
+}
+#nextCard { 
+    right: -100px; /* Ajustado */
+}
+
+.arrow-btn:hover {
+  transform: translateY(-50%) scale(1.35);
+}
+
+/* ============ BOTONES ABAJO ================ */
+
+.buttons {
+  /* margin-top: 20px; ya lo tienes */
+  padding-top: 25px; /* Devolvemos el padding para separación */
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  width: 100%; /* Asegura que ocupe todo el ancho para centrar los enlaces */
+}
+
+.buttons a {
+  display: inline-block;
+  background-color: var(--accent);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.14s ease, opacity 0.14s ease;
+}
+
+.buttons a:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+/* ============ RESPONSIVE ================ */
+
+@media (max-width: 700px){
+  .card { height: 520px; }
+  
+  /* Ajusta la posición de las flechas en móvil para que estén más pegadas */
+  #prevCard { left: 8px; }
+  #nextCard { right: 8px; }
+  
+  .container { padding: 0 10px; }
+  .card-front img { width: 100%; }
+
+  .card-back {
+    flex-direction: column;
+    padding: 25px;
+  }
+
+  .container-info {
+    width: 100%;
+  }
+}

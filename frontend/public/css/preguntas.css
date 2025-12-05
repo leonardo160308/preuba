@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  background-color: #f0f0f0;
+}
+
+.contenedor-quiz {
+  display: flex;
+  height: 100vh;
+}
+
+.lado-izquierdo {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #d9d9d9;
+}
+
+.lado-izquierdo img {
+  width: 80%;
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+.lado-derecho {
+  flex: 2;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.progreso-container {
+  height: 10px;
+  background: #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.progreso {
+  height: 10px;
+  width: 0;
+  background: #2C405B;
+  transition: width 0.3s ease;
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.opcion {
+  background: white;
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.opcion:hover {
+  background: #e6e6e6;
+}
+
+.opcion.seleccionada {
+  border-color: #2C405B;
+  
+}
+
+.opcion.correcta {
+  background: #C8E6C9;
+  border-color: #4CAF50;
+}
+
+.opcion.incorrecta {
+  background: #fab1a0;
+  border-color: #d63031;
+}
+
+.resultado {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.resultado.correcto {
+  color: #2C405B;
+}
+
+.resultado.incorrecto {
+  color: #d63031;
+}
+
+.boton-siguiente,
+.boton-comprobar {
+  background: #2C405B;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.boton-siguiente:hover,
+.boton-comprobar:hover {
+  background: #2C405B;
+}
+
+.boton-comprobar {
+  align-self: flex-start;
+  display: none;
+}

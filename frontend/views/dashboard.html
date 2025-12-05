@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero Personal - TOO-EASY</title>
+    
+    <!-- AJUSTE DE RUTA CSS: Asumo que el CSS está en la carpeta assets/css -->
+    <link rel="stylesheet" href="../public/css/dashboard.css"> 
+    <link rel="stylesheet" href="../public/css/header.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <h1>TOO-EASY</h1>
+        <p>JUEGA HOY, TRIUNFA MAÑANA</p>
+    </div>
+
+    <nav class="nav">
+        <!-- AJUSTE DE RUTAS DE NAVEGACIÓN (Deben apuntar a la carpeta views, o si el menú es global, a sus archivos HTML) -->
+        <a href="dashboard.html">DASHBOARD</a>
+        <a href="retos.html">RETOS</a>
+        <a href="lecciones.html">LECCIONES</a>
+        <a href="perfil.html">PERFIL</a>
+        <!-- ID NECESARIO: Usamos este botón para ejecutar la función de cerrar sesión en JS -->
+        <a href="login.html" id="logout-btn"><img src="../assets/icons/salida.png" alt="Salir"></a> 
+    </nav>
+</header>
+
+<div class="app-container">
+    
+    <!-- El nombre del usuario se inyectará aquí (si tu CSS lo permite) -->
+    <h2 style="padding: 1rem; color: #333;">Bienvenido, <span id="user-name-display">Cargando...</span></h2>
+
+    <div class="izquierda">
+        <section id="monthly-calculator" class="card module-calculator">
+            <h2>Resumen Mensual y Metas</h2>
+            
+            <div class="fixed-data-grid">
+                <!-- ID REQUERIDO: fixed-income -->
+                <div class="input-group">
+                    <label for="fixed-income">Ingreso Fijo Mensual ($)</label>
+                    <input type="number" id="fixed-income" placeholder="0.00" step="10.00">
+                </div>
+                <!-- ID REQUERIDO: fixed-expense -->
+                <div class="input-group">
+                    <label for="fixed-expense">Egreso Fijo Mensual ($)</label>
+                    <input type="number" id="fixed-expense" placeholder="0.00" step="10.00">
+                </div>
+            </div>
+
+            <div class="goal-data-grid">
+                <!-- ID REQUERIDO: goal-name -->
+                <div class="input-group">
+                    <label for="goal-name">Nombre de Meta</label>
+                    <input type="text" id="goal-name" placeholder="Ej: Vacaciones" maxlength="50">
+                </div>
+                <!-- ID REQUERIDO: goal-amount -->
+                <div class="input-group">
+                    <label for="goal-amount">Meta ($)</label>
+                    <input type="number" id="goal-amount" placeholder="0.00" step="10.00">
+                </div>
+            </div>
+            
+            <!-- Botón para guardar las metas y fijos -->
+            <button id="save-goals-btn" class="btn-primary" style="margin-top: 1rem;">Guardar Fijos y Metas</button>
+
+
+            <div class="summary-results">
+                <div class="result-item">
+                    <span>Ahorro Actual:</span>
+                    <!-- ID REQUERIDO: calculated-savings -->
+                    <strong id="calculated-savings">$0.00</strong>
+                </div>
+                <div class="result-item">
+                    <span>Falta para Meta:</span>
+                    <!-- ID REQUERIDO: calculated-remaining -->
+                    <strong id="calculated-remaining">$0.00</strong>
+                </div>
+                <div class="result-item">
+                    <span>Estado:</span>
+                    <!-- ID REQUERIDO: goal-status -->
+                    <strong id="goal-status">En progreso</strong>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <!-- ID REQUERIDO: monthlyChart (Para Chart.js) -->
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </section>
+    </div>
+        
+    <div class="derecha">
+        <section id="financial-calendar" class="card module-calendar">
+            <h2>Calendario de Movimientos</h2>
+            <div class="calendar-header">
+                <!-- ID REQUERIDO: prev-month -->
+                <button id="prev-month">&lt;</button>
+                <!-- ID REQUERIDO: current-month-year -->
+                <h2 id="current-month-year">Diciembre 2025</h2>
+                <!-- ID REQUERIDO: next-month -->
+                <button id="next-month">&gt;</button>
+            </div>
+            
+            <!-- ID REQUERIDO: calendar-grid (Donde se inyectan los días) -->
+            <div id="calendar-grid" class="calendar-grid">
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL (Debe estar fuera de los contenedores izquierda/derecha para ocupar toda la pantalla) -->
+    <!-- ID REQUERIDO: day-modal -->
+    <div id="day-modal" class="modal hidden">
+        <div class="modal-content">
+            <!-- ID REQUERIDO: close-modal -->
+            <span id="close-modal" class="close-btn">&times;</span>
+            
+            <!-- ID REQUERIDO: modal-date-title -->
+            <h2 id="modal-date-title">Detalle del Día</h2>
+            
+            <div class="day-balance-summary">
+                <div class="balance-item">
+                    <span>Ingresos:</span> 
+                    <!-- ID REQUERIDO: day-income -->
+                    <span id="day-income" class="text-green">$0</span>
+                </div>
+                <div class="balance-item">
+                    <span>Egresos:</span> 
+                    <!-- ID REQUERIDO: day-expense -->
+                    <span id="day-expense" class="text-red">$0</span>
+                </div>
+                <div class="balance-item total">
+                    <span>Balance:</span> 
+                    <!-- ID REQUERIDO: day-total -->
+                    <strong id="day-total">$0</strong>
+                </div>
+            </div>
+
+            <div class="recommendations-section">
+                <h3>💡 Recomendaciones del día</h3>
+                <!-- ID REQUERIDO: recommendations-list -->
+                <ul id="recommendations-list">
+                </ul>
+            </div>
+
+            <div class="movements-list-section">
+                <h3>Movimientos</h3>
+                <!-- ID REQUERIDO: movements-list -->
+                <ul id="movements-list">
+                </ul>
+            </div>
+
+            <div class="add-movement-form">
+                <h3>Nuevo Movimiento</h3>
+                <!-- ID REQUERIDO: transaction-form -->
+                <form id="transaction-form">
+                    <!-- ID REQUERIDO: trans-type -->
+                    <select id="trans-type" required>
+                        <option value="expense">Egreso (-)</option>
+                        <option value="income">Ingreso (+)</option>
+                    </select>
+                    
+                    <!-- ID REQUERIDO: trans-category -->
+                    <input type="text" id="trans-category" placeholder="Categoría (ej: Comida, Deuda)" required>
+
+                    <!-- ID REQUERIDO: trans-amount -->
+                    <input type="number" id="trans-amount" placeholder="Monto" step="10.00" required>
+                    
+                    <button type="submit" class="btn-add">Agregar</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+    
+<!-- ⚠️ CONEXIÓN DEL SCRIPT: Debe apuntar a assets/js/pages/dashboard.js -->
+<script type="module" src="../public/js/pages/dashboard.js"></script>
+
+</body>
+</html>
