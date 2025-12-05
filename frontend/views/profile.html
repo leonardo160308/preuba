@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - TOO-EASY</title>
+    
+    <!-- ✅ CSS CORREGIDOS -->
+    <link rel="stylesheet" href="../public/css/perfil.css">
+    <link rel="stylesheet" href="../public/css/header.css">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ========================================
+     ENCABEZADO CON NAVEGACIÓN
+     ======================================== -->
+<header class="header">
+    <div class="logo">
+        <h1>TOO-EASY</h1>
+        <p>JUEGA HOY, TRIUNFA MAÑANA</p>
+    </div>
+
+    <nav class="nav">
+        <a href="dashboard.html">DASHBOARD</a>
+        <a href="retos.html">RETOS</a>
+        <a href="lecciones.html">LECCIONES</a>
+        <a href="perfil.html">PERFIL</a>
+        <!-- ✅ ID IMPORTANTE: logout-btn -->
+        <a href="#" id="logout-btn">
+            <img src="../assets/icons/salida.png" alt="Salir" style="width: 24px; height: 24px;">
+        </a>
+    </nav>
+</header>
+
+<!-- ========================================
+     CONTENEDOR PRINCIPAL (2 COLUMNAS)
+     ======================================== -->
+<div class="main-container">
+    
+    <!-- ========================================
+         COLUMNA IZQUIERDA: INFO Y MEJORAS
+         ======================================== -->
+    <div class="left-column">
+        
+        <!-- Saludo Personalizado -->
+        <div class="header-card">
+            <h2 id="welcome-msg">Cargando...</h2>
+        </div>
+
+        <!-- Tarjeta de Información del Usuario -->
+        <div class="info-card">
+            <div class="avatar-container">
+                <img 
+                    src="../assets/img/perfil.jpg" 
+                    alt="Avatar" 
+                    id="user-avatar" 
+                    onerror="this.src='https://via.placeholder.com/100'"
+                >
+                <button class="btn-edit" title="Próximamente">✏️</button>
+            </div>
+            
+            <div class="user-details">
+                <div class="detail-row">
+                    <span class="label">Nombre:</span>
+                    <span class="value" id="user-name">...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Nivel Educativo:</span>
+                    <span class="value" id="user-level">1</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Nivel Casa:</span>
+                    <span class="value" id="lbl-house-level">1</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Nivel Castor:</span>
+                    <span class="value" id="lbl-beaver-level">1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Recursos -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <i class="fas fa-coins coin-icon"></i>
+                <span id="coin-count">0</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-tree wood-icon"></i>
+                <span id="wood-count">0</span>
+            </div>
+        </div>
+
+        <!-- Botones de Mejora -->
+        <div class="upgrade-actions">
+            
+            <!-- Botón Mejorar Casa -->
+            <button id="btn-upgrade-house" class="btn-upgrade btn-wood">
+                <div class="btn-icon">🏠</div>
+                <div class="btn-text">
+                    <span>Mejorar Casa</span>
+                    <small>Costo: <span id="cost-house">20</span> 🪵</small>
+                </div>
+            </button>
+
+            <!-- Botón Entrenar Castor -->
+            <button id="btn-upgrade-beaver" class="btn-upgrade btn-coin">
+                <div class="btn-icon">🦫</div>
+                <div class="btn-text">
+                    <span>Entrenar Castor</span>
+                    <small>Costo: <span id="cost-beaver">34</span> 🪙</small>
+                </div>
+            </button>
+
+        </div>
+
+        <!-- Caja Azul (Placeholder para futuras funciones) -->
+        <div class="blue-card">
+            <p style="color: white; text-align: center; padding: 20px;">
+                🚧 Próximamente: Estadísticas avanzadas
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ========================================
+         COLUMNA DERECHA: VISORES DE SKINS
+         ======================================== -->
+    <div class="right-column"> 
+        
+        <!-- ========================================
+             VISOR DE LA CASA
+             ======================================== -->
+        <div class="skin-viewer-container">
+            <h3>🏠 Tu Hogar</h3>
+            
+            <!-- Imagen de la Casa -->
+            <div class="skin-display">
+                <img id="house-img" src="../assets/img/casadefault.png" alt="Casa">
+                <!-- Badge de "Equipado" (se oculta si no está activo) -->
+                <div class="skin-status" id="house-status" style="display: none;">
+                    ✅ Equipado
+                </div>
+            </div>
+            
+            <!-- Controles del Carrusel -->
+            <div class="skin-controls">
+                <button id="btn-prev-house" class="nav-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                
+                <div class="skin-info-center">
+                    <span id="house-name-lbl">Choza Inicial</span>
+                    <button id="btn-equip-house" class="btn-equip">Equipar</button>
+                </div>
+                
+                <button id="btn-next-house" class="nav-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================
+             VISOR DEL CASTOR
+             ======================================== -->
+        <div class="skin-viewer-container">
+            <h3>🦫 Tu Castor</h3>
+            
+            <!-- Imagen del Castor -->
+            <div class="skin-display">
+                <img id="beaver-img" src="../assets/img/castordefault.png" alt="Castor">
+                <!-- Badge de "Equipado" -->
+                <div class="skin-status" id="beaver-status" style="display: none;">
+                    ✅ Equipado
+                </div>
+            </div>
+            
+            <!-- Controles del Carrusel -->
+            <div class="skin-controls">
+                <button id="btn-prev-beaver" class="nav-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                
+                <div class="skin-info-center">
+                    <span id="beaver-name-lbl">Castor Bebé</span>
+                    <button id="btn-equip-beaver" class="btn-equip">Equipar</button>
+                </div>
+                
+                <button id="btn-next-beaver" class="nav-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================
+     SCRIPT CONECTADO AL BACKEND
+     ======================================== -->
+<script type="module" src="../public/js/pages/profile.js"></script>
+
+</body>
+</html>

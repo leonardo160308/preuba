@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retos - TOO-EASY</title>
+    
+    <!-- ✅ CSS CORREGIDOS -->
+    <link rel="stylesheet" href="../public/css/retos.css">
+    <link rel="stylesheet" href="../public/css/header.css">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ========================================
+     ENCABEZADO CON NAVEGACIÓN
+     ======================================== -->
+<header class="header">
+    <div class="logo">
+        <h1>TOO-EASY</h1>
+        <p>JUEGA HOY, TRIUNFA MAÑANA</p>
+    </div>
+
+    <nav class="nav">
+        <a href="dashboard.html">DASHBOARD</a>
+        <a href="retos.html">RETOS</a>
+        <a href="lecciones.html">LECCIONES</a>
+        <a href="perfil.html">PERFIL</a>
+        <!-- ✅ ID IMPORTANTE: logout-btn -->
+        <a href="#" id="logout-btn">
+            <img src="../assets/icons/salida.png" alt="Salir" style="width: 24px; height: 24px;">
+        </a>
+    </nav>
+</header>
+
+<!-- ========================================
+     CONTENEDOR PRINCIPAL
+     ======================================== -->
+<div class="main-container">
+    
+    <!-- ========================================
+         CABECERA DE RETOS
+         ======================================== -->
+    <header class="challenges-header">
+        <div class="header-text">
+            <h1>🏆 Centro de Retos</h1>
+            <p>Completa misiones para ganar recursos y subir de nivel más rápido.</p>
+        </div>
+        
+        <!-- ✅ Contador de Recursos (se actualiza con JS) -->
+        <div class="resources-display">
+            <div class="coin-display">
+                <i class="fas fa-coins"></i> 
+                <span id="user-coins">0</span>
+            </div>
+            <div class="wood-display" style="margin-left: 20px;">
+                🪵 <span id="user-wood">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================
+         GRID DE TARJETAS DE RETOS
+         ======================================== -->
+    <div class="challenges-grid" id="challenges-container">
+        <!-- ✅ Las tarjetas se generan dinámicamente con challenges.js -->
+        <div class="loading" style="text-align: center; padding: 2rem; font-size: 1.2rem; color: #666;">
+            <i class="fas fa-spinner fa-spin"></i> Cargando retos...
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================================
+     SCRIPT CONECTADO AL BACKEND
+     ======================================== -->
+<script type="module" src="../public/js/pages/challenges.js"></script>
+
+</body>
+</html>

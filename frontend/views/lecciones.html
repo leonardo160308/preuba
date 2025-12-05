@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecciones - TOO-EASY</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/Imagen1.png">
+    
+    <!-- ✅ CSS CORREGIDOS -->
+    <link rel="stylesheet" href="../public/css/lecciones.css">
+    <link rel="stylesheet" href="../public/css/header.css">
+</head>
+<body>
+
+<!-- ========================================
+     ENCABEZADO CON NAVEGACIÓN
+     ======================================== -->
+<header class="header">
+    <div class="logo">
+        <h1>TOO-EASY</h1>
+        <p>JUEGA HOY, TRIUNFA MAÑANA</p>
+    </div>
+
+    <nav class="nav">
+        <a href="dashboard.html">DASHBOARD</a>
+        <a href="retos.html">RETOS</a>
+        <a href="lecciones.html">LECCIONES</a>
+        <a href="perfil.html">PERFIL</a>
+        <!-- ✅ ID IMPORTANTE: logout-btn -->
+        <a href="#" id="logout-btn">
+            <img src="../assets/icons/salida.png" alt="Salir" style="width: 24px; height: 24px;">
+        </a>
+    </nav>
+</header>
+
+<!-- ========================================
+     CONTENIDO PRINCIPAL
+     ======================================== -->
+<main>
+    <!-- Sección Hero -->
+    <section class="container pagina-principal">
+        <div class="contenido-principal">
+            <h2>🎓 Tu Camino hacia la Libertad Financiera</h2>
+            <p>
+                Selecciona un nivel para comenzar tu aprendizaje. Cada lección desbloqueada 
+                te acerca más a dominar tus finanzas personales.
+            </p>
+        </div>
+        <div class="imagen-principal">
+            <img src="../assets/img/Imagen2.png" alt="Educación Financiera">
+        </div>
+    </section>
+
+    <!-- ========================================
+         GRID DE NIVELES DINÁMICO
+         ======================================== -->
+    <section class="container lecciones">
+        <!-- ✅ ID IMPORTANTE: levels-container (se llena con JS) -->
+        <div id="levels-container" class="tarjetas">
+            <!-- Loading mientras carga -->
+            <div class="loading-levels" style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                <p style="font-size: 1.2rem; color: #666;">
+                    ⏳ Cargando tu progreso...
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECCIÓN DE CATEGORÍAS (OPCIONAL - Para mostrar estructura)
+         ======================================== -->
+    <section class="container categorias-info" style="margin-top: 4rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #2C405B;">
+            📖 Categorías de Aprendizaje
+        </h2>
+        
+        <div class="tarjetas">
+            <!-- Fundamentos -->
+            <div class="tarjetaD">
+                <div class="tarjeta-headerD">
+                    <h3>Fundamentos</h3>
+                </div>
+                <div class="tarjeta-bodyD">
+                    <p>
+                        Aprende los conceptos básicos del dinero: qué son los ingresos y gastos, 
+                        cómo ahorrar correctamente y la importancia de contar con un fondo de 
+                        emergencia para tu seguridad financiera.
+                    </p>
+                    <span class="category-badge">Niveles 1-3</span>
+                </div>
+            </div>
+
+            <!-- Cuentas Bancarias -->
+            <div class="tarjetaA">
+                <div class="tarjeta-headerA">
+                    <h3>Cuentas Bancarias</h3>
+                </div>
+                <div class="tarjeta-bodyA">
+                    <p>
+                        Conoce los distintos tipos de cuentas bancarias, cómo abrir tu primera cuenta, 
+                        manejar tu nómina y entender los intereses y comisiones que aplican los bancos.
+                    </p>
+                    <span class="category-badge">Niveles 4-6</span>
+                </div>
+            </div>
+
+            <!-- Tarjetas -->
+            <div class="tarjetaD">
+                <div class="tarjeta-headerD">
+                    <h3>Tarjetas</h3>
+                </div>
+                <div class="tarjeta-bodyD">
+                    <p>
+                        Descubre cómo funcionan las tarjetas de débito y crédito, sus diferencias, 
+                        tipos disponibles y cómo utilizarlas de manera segura para controlar tus finanzas.
+                    </p>
+                    <span class="category-badge">Niveles 7-10</span>
+                </div>
+            </div>
+
+            <!-- Administración -->
+            <div class="tarjetaA">
+                <div class="tarjeta-headerA">
+                    <h3>Administración de Dinero</h3>
+                </div>
+                <div class="tarjeta-bodyA">
+                    <p>
+                        Aprende a organizar tus ingresos, aplicar la regla 50/30/20, elaborar presupuestos 
+                        inteligentes y controlar tus gastos para alcanzar tus metas financieras.
+                    </p>
+                    <span class="category-badge">Niveles 11-13</span>
+                </div>
+            </div>
+
+            <!-- Deudas y Créditos -->
+            <div class="tarjetaD">
+                <div class="tarjeta-headerD">
+                    <h3>Deudas y Créditos</h3>
+                </div>
+                <div class="tarjeta-bodyD">
+                    <p>
+                        Conoce cómo funciona tu historial crediticio, identifica la diferencia entre 
+                        deuda buena y mala, y aprende cómo construir un buen historial financiero.
+                    </p>
+                    <span class="category-badge">Niveles 14-17</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ========================================
+     SCRIPT CONECTADO AL BACKEND
+     ======================================== -->
+<script type="module" src="../public/js/pages/lessons.js"></script>
+
+</body>
+</html>

@@ -346,3 +346,70 @@ body {
     font-size: 0.8rem;
     opacity: 0.9;
 }
+/* ========================================
+   MEJORAS VISUALES
+   ======================================== */
+
+/* Nivel Educativo */
+#user-level {
+    color: #3498db;
+    font-weight: bold;
+}
+
+/* Botón Editar Avatar */
+.btn-edit {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background: #34495e;
+}
+
+/* Caja Azul Placeholder */
+.blue-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    flex: 1;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badge Equipado */
+.skin-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #27ae60;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Filtro de escala de grises para skins bloqueadas */
+.skin-display img.locked {
+    filter: grayscale(100%) brightness(0.8);
+}
+
+/* Animación de hover en botones de navegación */
+.nav-btn:hover {
+    background: #2c3e50;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Efecto de clic en botones de mejora */
+.btn-upgrade:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}

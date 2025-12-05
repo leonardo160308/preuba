@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financiero Personal - TOO-EASY</title>
+    <title>Dashboard Financiero - TOO-EASY</title>
     
-    <!-- AJUSTE DE RUTA CSS: Asumo que el CSS está en la carpeta assets/css -->
+    <!-- ✅ CSS CORREGIDOS -->
     <link rel="stylesheet" href="../public/css/dashboard.css"> 
     <link rel="stylesheet" href="../public/css/header.css">
     
+    <!-- Chart.js para las gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+<!-- ========================================
+     ENCABEZADO CON NAVEGACIÓN
+     ======================================== -->
 <header class="header">
     <div class="logo">
         <h1>TOO-EASY</h1>
@@ -19,165 +24,186 @@
     </div>
 
     <nav class="nav">
-        <!-- AJUSTE DE RUTAS DE NAVEGACIÓN (Deben apuntar a la carpeta views, o si el menú es global, a sus archivos HTML) -->
         <a href="dashboard.html">DASHBOARD</a>
         <a href="retos.html">RETOS</a>
         <a href="lecciones.html">LECCIONES</a>
         <a href="perfil.html">PERFIL</a>
-        <!-- ID NECESARIO: Usamos este botón para ejecutar la función de cerrar sesión en JS -->
-        <a href="login.html" id="logout-btn"><img src="../assets/icons/salida.png" alt="Salir"></a> 
+        <!-- ✅ ID IMPORTANTE: logout-btn -->
+        <a href="#" id="logout-btn">
+            <img src="../assets/icons/salida.png" alt="Salir" style="width: 24px; height: 24px;">
+        </a> 
     </nav>
 </header>
 
+<!-- ========================================
+     CONTENEDOR PRINCIPAL
+     ======================================== -->
 <div class="app-container">
     
-    <!-- El nombre del usuario se inyectará aquí (si tu CSS lo permite) -->
-    <h2 style="padding: 1rem; color: #333;">Bienvenido, <span id="user-name-display">Cargando...</span></h2>
+    <!-- ✅ Saludo Personalizado (Se llena con JS) -->
+    <div class="main-header" style="padding: 1rem;">
+        <h1 id="user-greeting">Cargando...</h1>
+    </div>
 
+    <!-- ========================================
+         COLUMNA IZQUIERDA: RESUMEN Y GRÁFICAS
+         ======================================== -->
     <div class="izquierda">
-        <section id="monthly-calculator" class="card module-calculator">
-            <h2>Resumen Mensual y Metas</h2>
+        <section class="card module-calculator">
+            <h2>Resumen Mensual y Metas 📊</h2>
             
+            <!-- Datos Fijos: Ingreso y Egreso -->
             <div class="fixed-data-grid">
-                <!-- ID REQUERIDO: fixed-income -->
                 <div class="input-group">
                     <label for="fixed-income">Ingreso Fijo Mensual ($)</label>
                     <input type="number" id="fixed-income" placeholder="0.00" step="10.00">
                 </div>
-                <!-- ID REQUERIDO: fixed-expense -->
+                
                 <div class="input-group">
                     <label for="fixed-expense">Egreso Fijo Mensual ($)</label>
                     <input type="number" id="fixed-expense" placeholder="0.00" step="10.00">
                 </div>
             </div>
 
+            <!-- Datos de Meta -->
             <div class="goal-data-grid">
-                <!-- ID REQUERIDO: goal-name -->
                 <div class="input-group">
                     <label for="goal-name">Nombre de Meta</label>
                     <input type="text" id="goal-name" placeholder="Ej: Vacaciones" maxlength="50">
                 </div>
-                <!-- ID REQUERIDO: goal-amount -->
+                
                 <div class="input-group">
-                    <label for="goal-amount">Meta ($)</label>
+                    <label for="goal-amount">Monto de Meta ($)</label>
                     <input type="number" id="goal-amount" placeholder="0.00" step="10.00">
                 </div>
             </div>
-            
-            <!-- Botón para guardar las metas y fijos -->
-            <button id="save-goals-btn" class="btn-primary" style="margin-top: 1rem;">Guardar Fijos y Metas</button>
 
-
+            <!-- Resumen de Resultados -->
             <div class="summary-results">
                 <div class="result-item">
                     <span>Ahorro Actual:</span>
-                    <!-- ID REQUERIDO: calculated-savings -->
                     <strong id="calculated-savings">$0.00</strong>
                 </div>
                 <div class="result-item">
                     <span>Falta para Meta:</span>
-                    <!-- ID REQUERIDO: calculated-remaining -->
                     <strong id="calculated-remaining">$0.00</strong>
                 </div>
                 <div class="result-item">
                     <span>Estado:</span>
-                    <!-- ID REQUERIDO: goal-status -->
-                    <strong id="goal-status">En progreso</strong>
+                    <strong id="goal-status">Sin datos</strong>
                 </div>
             </div>
 
+            <!-- Gráfica de Barras -->
             <div class="chart-container">
-                <!-- ID REQUERIDO: monthlyChart (Para Chart.js) -->
                 <canvas id="monthlyChart"></canvas>
             </div>
         </section>
     </div>
         
+    <!-- ========================================
+         COLUMNA DERECHA: CALENDARIO
+         ======================================== -->
     <div class="derecha">
-        <section id="financial-calendar" class="card module-calendar">
-            <h2>Calendario de Movimientos</h2>
+        <section class="card module-calendar">
+            <h2>Calendario de Movimientos 📅</h2>
+            
+            <!-- Controles del Calendario -->
             <div class="calendar-header">
-                <!-- ID REQUERIDO: prev-month -->
                 <button id="prev-month">&lt;</button>
-                <!-- ID REQUERIDO: current-month-year -->
-                <h2 id="current-month-year">Diciembre 2025</h2>
-                <!-- ID REQUERIDO: next-month -->
+                <h2 id="current-month-year">Cargando...</h2>
                 <button id="next-month">&gt;</button>
             </div>
             
-            <!-- ID REQUERIDO: calendar-grid (Donde se inyectan los días) -->
+            <!-- Grid del Calendario (Se llena con JS) -->
             <div id="calendar-grid" class="calendar-grid">
+                <!-- Los días se inyectan dinámicamente -->
             </div>
         </section>
     </div>
 
-    <!-- MODAL (Debe estar fuera de los contenedores izquierda/derecha para ocupar toda la pantalla) -->
-    <!-- ID REQUERIDO: day-modal -->
+    <!-- ========================================
+         MODAL DE DETALLE DEL DÍA
+         ======================================== -->
     <div id="day-modal" class="modal hidden">
         <div class="modal-content">
-            <!-- ID REQUERIDO: close-modal -->
+            <!-- Botón Cerrar -->
             <span id="close-modal" class="close-btn">&times;</span>
             
-            <!-- ID REQUERIDO: modal-date-title -->
+            <!-- Título del Día -->
             <h2 id="modal-date-title">Detalle del Día</h2>
             
+            <!-- Resumen del Balance del Día -->
             <div class="day-balance-summary">
                 <div class="balance-item">
                     <span>Ingresos:</span> 
-                    <!-- ID REQUERIDO: day-income -->
                     <span id="day-income" class="text-green">$0</span>
                 </div>
                 <div class="balance-item">
                     <span>Egresos:</span> 
-                    <!-- ID REQUERIDO: day-expense -->
                     <span id="day-expense" class="text-red">$0</span>
                 </div>
                 <div class="balance-item total">
                     <span>Balance:</span> 
-                    <!-- ID REQUERIDO: day-total -->
                     <strong id="day-total">$0</strong>
                 </div>
             </div>
 
+            <!-- Recomendaciones Financieras -->
             <div class="recommendations-section">
                 <h3>💡 Recomendaciones del día</h3>
-                <!-- ID REQUERIDO: recommendations-list -->
                 <ul id="recommendations-list">
+                    <!-- Se llenan con JS -->
                 </ul>
             </div>
 
+            <!-- Lista de Movimientos del Día -->
             <div class="movements-list-section">
-                <h3>Movimientos</h3>
-                <!-- ID REQUERIDO: movements-list -->
+                <h3>Movimientos Registrados</h3>
                 <ul id="movements-list">
+                    <!-- Se llenan con JS -->
                 </ul>
             </div>
 
+            <!-- Formulario para Agregar Movimiento -->
             <div class="add-movement-form">
-                <h3>Nuevo Movimiento</h3>
-                <!-- ID REQUERIDO: transaction-form -->
+                <h3>➕ Nuevo Movimiento</h3>
                 <form id="transaction-form">
-                    <!-- ID REQUERIDO: trans-type -->
+                    <!-- Tipo de Movimiento -->
                     <select id="trans-type" required>
                         <option value="expense">Egreso (-)</option>
                         <option value="income">Ingreso (+)</option>
                     </select>
                     
-                    <!-- ID REQUERIDO: trans-category -->
-                    <input type="text" id="trans-category" placeholder="Categoría (ej: Comida, Deuda)" required>
+                    <!-- Categoría -->
+                    <input 
+                        type="text" 
+                        id="trans-category" 
+                        placeholder="Categoría (ej: Comida, Transporte, Deuda)" 
+                        required
+                    >
 
-                    <!-- ID REQUERIDO: trans-amount -->
-                    <input type="number" id="trans-amount" placeholder="Monto" step="10.00" required>
+                    <!-- Monto -->
+                    <input 
+                        type="number" 
+                        id="trans-amount" 
+                        placeholder="Monto" 
+                        step="0.01" 
+                        min="0.01"
+                        required
+                    >
                     
-                    <button type="submit" class="btn-add">Agregar</button>
+                    <!-- Botón Agregar -->
+                    <button type="submit" class="btn-add">Agregar Movimiento</button>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
-    
-<!-- ⚠️ CONEXIÓN DEL SCRIPT: Debe apuntar a assets/js/pages/dashboard.js -->
+
+<!-- ========================================
+     SCRIPT CONECTADO AL BACKEND
+     ======================================== -->
 <script type="module" src="../public/js/pages/dashboard.js"></script>
 
 </body>

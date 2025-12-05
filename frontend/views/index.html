@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOO-EASY - Juega Hoy, Triunfa Mañana</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/Imagen1.png">
-    <!-- Asumo que el CSS principal está en esta ruta -->
+    
+    <!-- ✅ RUTAS CORREGIDAS -->
     <link rel="stylesheet" href="../public/css/header.css">
     <link rel="stylesheet" href="../public/css/inicio.css">
 </head>
@@ -16,37 +17,36 @@
         <p>JUEGA HOY, TRIUNFA MAÑANA</p>
     </div>
 
-    <!-- Contenedor para la navegación que se llenará con JS -->
+    <!-- Navegación dinámica -->
     <nav class="nav" id="main-nav-container">
-        <!-- Contenido de navegación se inyecta aquí. -->
+        <!-- Se llena con JavaScript -->
     </nav>
 </header>
 
 <main>
-    <!-- Contenedor Principal: Se muestra por defecto la versión NO logueada -->
+    <!-- Sección Principal -->
     <section class="container pagina-principal">
         <div class="contenido-principal">
             <h2>¡Aprende a dar los primeros pasos de tu vida financiera!</h2>
             
-            <!-- Botones para la versión NO logueada -->
+            <!-- Botones para NO logueados -->
             <div id="auth-buttons">
                 <a href="login.html"><button class="btn-iniciar-sesion">Iniciar Sesión</button></a>
                 <br><br>
                 <a href="registro.html"><button class="btn-crear-cuenta">Crear Cuenta</button></a>
             </div>
             
-            <!-- Botón para la versión SÍ logueada (oculto por defecto) -->
+            <!-- Botón para SÍ logueados (oculto por defecto) -->
             <div id="start-button" style="display:none;">
                  <a href="lecciones.html"><button class="btn-iniciar-sesion">EMPIEZA YA!</button></a>
             </div>
-
         </div>
         <div class="imagen-principal">
             <img src="../assets/img/Imagen2.png" alt="Ilustración de educación financiera">
         </div>
     </section>
 
-    <!-- Otras secciones de información (comunes a ambas vistas) -->
+    <!-- Otras secciones -->
     <section class="container pagina-principal2">
         <div class="texto1">
             <h2>Divertido y útil</h2>
@@ -87,53 +87,51 @@
     </p>
 </footer>
 
-<!-- ⚠️ Script de control de sesión -->
+<!-- ✅ SCRIPT CORREGIDO -->
 <script type="module">
-    // FIX: Intentamos una ruta absoluta para mejorar la resolución del módulo.
-    import { checkSession, logout } from '/assets/js/pages/auth.js'; 
+    // Importaciones con rutas relativas correctas
+    import { checkSession, logout } from '../public/js/modules/auth.js'; 
 
     const navContainer = document.getElementById('main-nav-container');
     const authButtons = document.getElementById('auth-buttons');
     const startButton = document.getElementById('start-button');
 
-    // Navegación para usuario NO logueado
+    // Navegación para NO logueados
     const publicNav = `
         <a href="index.html">INICIO</a>
         <a href="lecciones.html">APRENDE</a>
         <a href="login.html">INICIAR SESIÓN</a>
     `;
 
-    // Navegación para usuario SÍ logueado
+    // Navegación para SÍ logueados
     const privateNav = `
         <a href="dashboard.html">DASHBOARD</a>
         <a href="retos.html">RETOS</a>
         <a href="lecciones.html">LECCIONES</a>
         <a href="perfil.html">PERFIL</a>
-        <a href="login.html" id="logout-btn-index"><img src="../assets/icons/salida.png" alt="Salir"></a>
+        <a href="#" id="logout-btn-index"><img src="../assets/icons/salida.png" alt="Salir"></a>
     `;
 
-    // Función principal que verifica la sesión y actualiza la UI
-    const initializeIndexPage = async () => {
-        const userId = checkSession(); // Revisa si el token existe
+    // Función principal
+    const initializeIndexPage = () => {
+        const userId = checkSession();
         
         if (userId) {
-            // Usuario LOGUEADO: Mostrar navegación completa
+            // Usuario LOGUEADO
             navContainer.innerHTML = privateNav;
             authButtons.style.display = 'none';
             startButton.style.display = 'block';
             
-            // Adjuntar listener de logout al nuevo botón
+            // Event listener para logout
             const logoutBtn = document.getElementById('logout-btn-index');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     logout();
-                    window.location.href = 'index.html'; // Redirigir a sí mismo para refrescar
                 });
             }
-
         } else {
-            // Usuario NO logueado: Mostrar navegación básica
+            // Usuario NO logueado
             navContainer.innerHTML = publicNav;
             authButtons.style.display = 'block';
             startButton.style.display = 'none';

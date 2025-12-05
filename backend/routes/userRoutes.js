@@ -1,20 +1,37 @@
+// backend/routes/userRoutes.js
+
 import { Router } from 'express';
-import { registerUser, getUserProfile, updateUser, deleteUser } from '../controllers/userController.js';
+import { 
+    registerUser, 
+    loginUser, 
+    getUserProfile, 
+    updateUser, 
+    deleteUser 
+} from '../controllers/userController.js';
+
 const router = Router();
 
-// Ruta para crear usuario: POST http://localhost:3000/api/users
+// ========================================
+// RUTAS DE AUTENTICACIÓN
+// ========================================
+
+// POST /api/login - Iniciar sesión
+router.post('/login', loginUser);
+
+// POST /api/users - Crear cuenta (Registro)
 router.post('/users', registerUser);
 
-// Ruta para ver un usuario: GET http://localhost:3000/api/users/1
+// ========================================
+// RUTAS DE GESTIÓN DE USUARIOS
+// ========================================
+
+// GET /api/users/:id - Ver perfil de usuario
 router.get('/users/:id', getUserProfile);
 
-// Ruta para actualizar (PUT)
+// PUT /api/users/:id - Actualizar datos del usuario
 router.put('/users/:id', updateUser);
 
-// Ruta para borrar (DELETE)
+// DELETE /api/users/:id - Borrar usuario (baja lógica)
 router.delete('/users/:id', deleteUser);
-export default router;
 
-import { loginUser } from '../controllers/userController.js'; // Importar arriba
-// ...
-router.post('/login', loginUser); // Agregar ruta
+export default router;
