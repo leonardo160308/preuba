@@ -53,7 +53,7 @@ const checkCompletionCriteria = async (userId, challengeId) => {
 // --- CONTROLADORES EXPORTADOS ---
 
 // 1. GET: Obtener estado de los retos (Cuáles ya completó el usuario)
-export const getChallengesStatus = async (req, res) => {
+export const getChallenges = async (req, res) => {
     try {
         const userId = req.params.userId;
 
@@ -79,7 +79,7 @@ export const getChallengesStatus = async (req, res) => {
 
 
 // 2. POST: Intentar completar un reto y recibir recompensa
-export const completeChallenge = async (req, res) => {
+export const claimChallenge = async (req, res) => {
     const { userId, challengeId } = req.body;
     let connection = null;
 

@@ -17,13 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const COSTO_CASTOR_BASE = 34; // Monedas
 
     const DB_SKINS = {
-        "skin_default": "../assets/img/casadefault.png", // ⚠️ Ajusta la ruta ../assets/
-        "skin_1": "../assets/img/casa1.png",
-        "skin_2": "../assets/img/casa2.png",
-        "skin_3": "../assets/img/casa3.png",
-        "skin_4": "../assets/img/casa4.png",
-        "skin_5": "../assets/img/casa5.png"
+        "skin_default": "../public/img/casaN1.jpg", // ⚠️ Ajusta la ruta ../assets/
+        "skin_1": "../public/img/casaN1.jpg",
+        "skin_2": "../public/img/casaN2.jpg",
+        "skin_3": "../public/img/casaN3.jpg",
+        "skin_4": "../public/img/casaN4.jpg",
+        "skin_5": "../public/img/casaN5.jpg"
     };
+    
 
     const SKIN_NAMES = {
         "skin_default": "Choza Inicial",
@@ -35,12 +36,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const DB_CASTORES = {
-        "castor_default": "../assets/img/castordefault.png",
-        "castor_1": "../assets/img/castor1.png",
-        "castor_2": "../assets/img/castor2.png",
-        "castor_3": "../assets/img/castor3.png",
-        "castor_4": "../assets/img/castor4.png",
-        "castor_5": "../assets/img/castor5.png"
+        "castor_default": "../public/img/mapacheBase.png",
+        "castor_1": "../public/img/mapacheN1.jpg",
+        "castor_2": "../public/img/mapacheN2.jpg",
+        "castor_3": "../public/img/mapacheN3.jpg",
+        "castor_4": "../public/img/mapacheN4.jpg",
+        "castor_5": "../public/img/mapacheN5.jpg"
     };
 
     const CASTOR_NAMES = {

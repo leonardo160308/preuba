@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const preguntas = preguntasPorNivel[nivelActual];
     if (!preguntas) {
         alert("Nivel no encontrado o en construcción.");
-        window.location.href = '/views/lecciones.html';
+        window.location.href = '/lecciones.html';
         return;
     }
 
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h2>${exito ? "🎉 ¡Felicidades!" : "😕 Intenta de nuevo"}</h2>
                 <p>${aciertos}/${preguntas.length} Aciertos</p>
                 <p>${mensaje}</p>
-                <button onclick="window.location.href='/views/lecciones.html'">Volver al Menú</button>
+                <button onclick="window.location.href='/lecciones.html'">Volver al Menú</button>
             </div>
         `;
     }
