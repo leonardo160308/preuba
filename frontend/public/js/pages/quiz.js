@@ -14,9 +14,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Variables de Estado
     const preguntas = preguntasPorNivel[nivelActual];
+<<<<<<< HEAD
     
     if (!preguntas || preguntas.length === 0) {
         alert("Este nivel aún no tiene preguntas disponibles.");
+=======
+    if (!preguntas) {
+        alert("Nivel no encontrado o en construcción.");
+>>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
         window.location.href = '/lecciones.html';
         return;
     }
@@ -169,6 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function mostrarPantallaFinal(exito, mensaje, monedas = 0) {
+<<<<<<< HEAD
         const modal = document.getElementById('modal-final');
         const icono = document.getElementById('modal-icono');
         const titulo = document.getElementById('modal-titulo');
@@ -195,6 +201,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         puntaje.textContent = `${aciertos} / ${preguntas.length} Aciertos (${Math.round((aciertos/preguntas.length)*100)}%)`;
         mensajeEl.textContent = mensaje;
         modal.style.display = 'flex';
+=======
+        const color = exito ? "correcto" : "incorrecto";
+        divResultado.className = `resultado ${color}`;
+        divResultado.style.display = "flex";
+        divResultado.innerHTML = `
+            <div style="text-align:center">
+                <h2>${exito ? "🎉 ¡Felicidades!" : "😕 Intenta de nuevo"}</h2>
+                <p>${aciertos}/${preguntas.length} Aciertos</p>
+                <p>${mensaje}</p>
+                <button onclick="window.location.href='/lecciones.html'">Volver al Menú</button>
+            </div>
+        `;
+>>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
     }
 
     // Iniciar

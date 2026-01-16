@@ -19,6 +19,7 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+<<<<<<< HEAD
 // Middlewares
 app.use(express.json());
 app.use(cors());
@@ -32,6 +33,16 @@ app.use('/public', express.static(path.join(__dirname, 'frontend/public')));
 // ========================================
 // RUTAS API
 // ========================================
+=======
+app.use(express.json());
+app.use(cors());
+
+// ✅ Servir archivos estáticos
+app.use('/public', express.static(path.join(__dirname, 'frontend/public')));
+app.use(express.static(path.join(__dirname, 'frontend/views')));
+
+// ✅ Rutas API
+>>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
 app.use('/api', userRoutes);
 app.use('/api', movementRoutes);
 app.use('/api', skinRoutes);
@@ -39,6 +50,7 @@ app.use('/api', dashboardRoutes);
 app.use('/api', gameRoutes);
 app.use('/api', challengeRoutes);
 
+<<<<<<< HEAD
 // ========================================
 // MANEJO DE 404
 // ========================================
@@ -57,4 +69,18 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor TOO-EASY listo en http://localhost:3000`);
+=======
+// ❌ ELIMINA ESTA PARTE (o déjala comentada)
+// app.use((req, res, next) => {
+//     if (!req.path.startsWith('/api')) {
+//         res.sendFile(path.join(__dirname, 'frontend/views/index.html'));
+//     } else {
+//         next();
+//     }
+// });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor TOO-EASY listo en http://localhost:${PORT}`);
+>>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
 });
