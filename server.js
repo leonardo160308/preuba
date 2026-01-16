@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Importar TODAS las rutas
+// Rutas
 import userRoutes from './backend/routes/userRoutes.js';
 import movementRoutes from './backend/routes/movementRoutes.js';
 import skinRoutes from './backend/routes/skinRoutes.js';
@@ -15,34 +15,25 @@ import challengeRoutes from './backend/routes/challengeRoutes.js';
 dotenv.config();
 const app = express();
 
-// Configurar __dirname para ES Modules
+// __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-<<<<<<< HEAD
-// Middlewares
-app.use(express.json());
+// =====================
+// MIDDLEWARES
+// =====================
 app.use(cors());
+app.use(express.json());
 
-// ========================================
-// SERVIR ARCHIVOS ESTÁTICOS
-// ========================================
-app.use(express.static(path.join(__dirname, 'frontend/views')));
+// =====================
+// ARCHIVOS ESTÁTICOS
+// =====================
 app.use('/public', express.static(path.join(__dirname, 'frontend/public')));
+app.use(express.static(path.join(__dirname, 'frontend/views')));
 
-// ========================================
+// =====================
 // RUTAS API
-// ========================================
-=======
-app.use(express.json());
-app.use(cors());
-
-// ✅ Servir archivos estáticos
-app.use('/public', express.static(path.join(__dirname, 'frontend/public')));
-app.use(express.static(path.join(__dirname, 'frontend/views')));
-
-// ✅ Rutas API
->>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
+// =====================
 app.use('/api', userRoutes);
 app.use('/api', movementRoutes);
 app.use('/api', skinRoutes);
@@ -50,37 +41,11 @@ app.use('/api', dashboardRoutes);
 app.use('/api', gameRoutes);
 app.use('/api', challengeRoutes);
 
-<<<<<<< HEAD
-// ========================================
-// MANEJO DE 404
-// ========================================
-app.use((req, res) => {
-    // Si no es una ruta API, servir index.html
-    if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, 'frontend/views/index.html'));
-    } else {
-        res.status(404).json({ error: 'Ruta no encontrada' });
-    }
-});
-
-// ========================================
-// INICIAR SERVIDOR
-// ========================================
+// =====================
+// 404 / SPA fallback
+// =======
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor TOO-EASY listo en http://localhost:3000`);
-=======
-// ❌ ELIMINA ESTA PARTE (o déjala comentada)
-// app.use((req, res, next) => {
-//     if (!req.path.startsWith('/api')) {
-//         res.sendFile(path.join(__dirname, 'frontend/views/index.html'));
-//     } else {
-//         next();
-//     }
-// });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor TOO-EASY listo en http://localhost:${PORT}`);
->>>>>>> 9e8dfbbdfd536ed98753e1a7218dbec436af0bcc
+  console.log(`🚀 Servidor TOO-EASY listo en http://localhost:${PORT}`);
 });
