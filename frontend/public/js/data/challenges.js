@@ -53,3 +53,5 @@ export const challengesData = [
     { id: 24, title: "Plan de Ahorro 30 días", description: "Ahorra una cantidad diaria durante 30 días.", reward_wood: 100, reward_coins: 20, required_data: "save_30d" },
     { id: 25, title: "Ahorro Nivel Dios", description: "Ahorra el 20% de tu ingreso mensual.", reward_wood: 120, reward_coins: 30, required_data: "20%_saved" }
 ];
+
+// Ejemplo de cómo debería ser tu template string en JS:

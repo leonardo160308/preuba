@@ -1,6 +1,7 @@
 import { updateUserData, getUserData } from '../modules/api.js';
 import { protectRoute, getAuthData } from '../modules/auth.js';
-import { preguntasPorNivel, SKIN_REWARDS } from '../data/preguntas.js';
+import preguntasPorNivel from '../data/preguntas.js'; // ✅ CAMBIO AQUÍ
+import { SKIN_REWARDS } from '../data/preguntas.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Seguridad
@@ -9,13 +10,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Detectar Nivel desde la URL (ej: quiz.html?level=1)
     const urlParams = new URLSearchParams(window.location.search);
-    const nivelActual = parseInt(urlParams.get('level')) || 1; // Por defecto nivel 1
+    const nivelActual = parseInt(urlParams.get('level')) || 1;
 
     // 3. Variables de Estado
     const preguntas = preguntasPorNivel[nivelActual];
-    if (!preguntas) {
-        alert("Nivel no encontrado o en construcción.");
-        window.location.href = '/views/lecciones.html';
+    
+    if (!preguntas || preguntas.length === 0) {
+        alert("Este nivel aún no tiene preguntas disponibles.");
+        window.location.href = '/lecciones.html';
         return;
     }
 
@@ -30,6 +32,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnComprobar = document.getElementById("botonComprobar");
     const barraProgreso = document.querySelector(".progreso");
     const divResultado = document.getElementById("resultado");
+    const nivelLabel = document.getElementById("nivel-actual");
+    const preguntaActualLabel = document.getElementById("pregunta-actual");
+    const totalPreguntasLabel = document.getElementById("total-preguntas");
+
+    // Actualizar labels
+    if (nivelLabel) nivelLabel.textContent = nivelActual;
+    if (totalPreguntasLabel) totalPreguntasLabel.textContent = preguntas.length;
 
     // 5. Funciones del Juego
     function cargarPregunta() {
@@ -39,8 +48,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const p = preguntas[preguntaIndex];
         txtPregunta.textContent = p.texto;
-        if(imgPregunta) imgPregunta.src = p.imagen;
+        if (imgPregunta) imgPregunta.src = p.imagen;
         
+        // Actualizar contador
+        if (preguntaActualLabel) preguntaActualLabel.textContent = preguntaIndex + 1;
+
         divOpciones.innerHTML = "";
         for (let key in p.opciones) {
             const btn = document.createElement("div");
@@ -63,11 +75,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const p = preguntas[preguntaIndex];
         const esCorrecta = seleccionUsuario === p.correcta;
         
-        // Bloquear botones
+        // Bloquear opciones
         document.querySelectorAll(".opcion").forEach(b => b.style.pointerEvents = "none");
         
-        // Mostrar feedback visual (verde/rojo) en los botones...
-        // (Tu lógica visual de colores va aquí)
+        // Marcar correcta en verde
+        document.querySelectorAll(".opcion").forEach(b => {
+            const letra = b.textContent.trim()[0];
+            if (letra === p.correcta) {
+                b.classList.add("correcta");
+            } else if (letra === seleccionUsuario && !esCorrecta) {
+                b.classList.add("incorrecta");
+            }
+        });
 
         if (esCorrecta) {
             aciertos++;
@@ -84,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (esCorrecto) {
             divResultado.innerHTML = `<div>✅ ¡Correcto!</div><button id="btn-next">Siguiente</button>`;
         } else {
-            divResultado.innerHTML = `<div>❌ Incorrecto. Era: ${keyCorrecta}) ${textoCorrecta}</div><button id="btn-next">Siguiente</button>`;
+            divResultado.innerHTML = `<div>❌ Incorrecto. La respuesta correcta era: ${keyCorrecta}) ${textoCorrecta}</div><button id="btn-next">Siguiente</button>`;
         }
 
         document.getElementById("btn-next").onclick = avanzar;
@@ -101,47 +120,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function actualizarBarra() {
         const pct = ((preguntaIndex + 1) / preguntas.length) * 100;
-        if(barraProgreso) barraProgreso.style.width = `${pct}%`;
+        if (barraProgreso) barraProgreso.style.width = `${pct}%`;
     }
 
-    // --- 6. CONEXIÓN CON EL BACKEND (LO IMPORTANTE) ---
+    // --- 6. CONEXIÓN CON EL BACKEND ---
     async function finalizarNivel() {
         divOpciones.innerHTML = "";
         txtPregunta.textContent = "Procesando resultados...";
         
-        if (aciertos < 5) {
-            mostrarPantallaFinal(false, "Necesitas 5/5 para avanzar.");
+        const porcentaje = (aciertos / preguntas.length) * 100;
+        const aprobado = porcentaje >= 80; // 80% para aprobar
+
+        if (!aprobado) {
+            mostrarPantallaFinal(false, `Necesitas al menos ${Math.ceil(preguntas.length * 0.8)} correctas de ${preguntas.length} para avanzar.`);
             return;
         }
 
         try {
-            // A. Obtener datos actuales del usuario desde la BD
             const userData = await getUserData(sessionUser.id);
             
-            // B. Preparar actualización
             let updatePayload = {};
             let mensaje = "¡Nivel Completado!";
             let monedasGanadas = 0;
 
-            // Lógica de Niveles (asumiendo que user.level es el nivel actual del usuario)
-            // Si el usuario está en el nivel 1 y acaba de pasar el quiz del nivel 1:
             if (nivelActual === userData.level) {
                 updatePayload.level = userData.level + 1;
                 updatePayload.coins = userData.coins + 20;
                 monedasGanadas = 20;
                 mensaje += " (+20 Monedas 🪙)";
 
-                // Revisar Skins
                 if (SKIN_REWARDS[updatePayload.level]) {
                     mensaje += " ¡Nueva Skin Desbloqueada!";
-                    // Aquí podrías llamar a una API para desbloquear skin, 
-                    // o dejar que el usuario la compre si esa es la lógica.
                 }
             } else if (nivelActual < userData.level) {
                 mensaje = "Repaso completado (Sin recompensa extra).";
             }
 
-            // C. Guardar en el Servidor
             if (Object.keys(updatePayload).length > 0) {
                 await updateUserData(sessionUser.id, updatePayload);
             }
@@ -155,21 +169,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function mostrarPantallaFinal(exito, mensaje, monedas = 0) {
-        const color = exito ? "correcto" : "incorrecto";
-        divResultado.className = `resultado ${color}`;
-        divResultado.style.display = "flex";
-        divResultado.innerHTML = `
-            <div style="text-align:center">
-                <h2>${exito ? "🎉 ¡Felicidades!" : "😕 Intenta de nuevo"}</h2>
-                <p>${aciertos}/${preguntas.length} Aciertos</p>
-                <p>${mensaje}</p>
-                <button onclick="window.location.href='/views/lecciones.html'">Volver al Menú</button>
-            </div>
-        `;
+        const modal = document.getElementById('modal-final');
+        const icono = document.getElementById('modal-icono');
+        const titulo = document.getElementById('modal-titulo');
+        const puntaje = document.getElementById('modal-puntaje');
+        const recompensa = document.getElementById('modal-recompensa');
+        const mensajeEl = document.getElementById('modal-mensaje');
+        const btnReintentar = document.getElementById('btn-reintentar');
+
+        if (exito) {
+            icono.textContent = "🎉";
+            titulo.textContent = "¡Felicidades!";
+            titulo.style.color = "#27ae60";
+            recompensa.innerHTML = `<strong>+${monedas} Monedas 🪙</strong>`;
+            btnReintentar.style.display = 'none';
+        } else {
+            icono.textContent = "😕";
+            titulo.textContent = "Intenta de nuevo";
+            titulo.style.color = "#c62828";
+            recompensa.style.display = 'none';
+            btnReintentar.style.display = 'inline-block';
+            btnReintentar.onclick = () => window.location.reload();
+        }
+
+        puntaje.textContent = `${aciertos} / ${preguntas.length} Aciertos (${Math.round((aciertos/preguntas.length)*100)}%)`;
+        mensajeEl.textContent = mensaje;
+        modal.style.display = 'flex';
     }
 
     // Iniciar
     cargarPregunta();
 });
-
-import { preguntasPorNivel, SKIN_REWARDS } from '../data/preguntas.js';

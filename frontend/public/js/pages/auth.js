@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveAuthData(result.user);
                     
                     // Redirigir al dashboard
-                    window.location.href = '/views/dashboard.html';
+                    window.location.href = '/dashboard.html';
                 } else {
                     messageEl.textContent = result.message || 'Credenciales incorrectas.';
                     messageEl.style.color = 'red';
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (result.success) {
                     alert('¡Cuenta creada exitosamente! Ahora inicia sesión.');
-                    window.location.href = '/views/login.html';
+                    window.location.href = '/login.html';
                 } else {
                     messageEl.textContent = result.message || 'Error al crear cuenta.';
                     messageEl.style.color = 'red';

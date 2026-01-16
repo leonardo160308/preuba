@@ -1,7 +1,5 @@
-/* assets/js/pages/challenges.js */
-
 import { protectRoute, getAuthData } from '../modules/auth.js';
-import { getChallengesStatus, completeChallenge } from '../modules/api.js'; // Necesitas agregar estas funciones en api.js
+import { getChallengesStatus, completeChallenge } from '../modules/api.js'; 
 import { challengesData } from '../data/challenges.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,24 +9,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sessionUser = getAuthData();
     const userId = sessionUser.id;
 
-    const challengesContainer = document.getElementById('challenges-container'); // Asegúrate de tener este ID en challenges.html
+    const challengesContainer = document.getElementById('challenges-container');
 
-    // 2. Obtener estado de retos del usuario (Completados)
+    // 2. Obtener estado de retos (IDs completados)
     let completedChallengesIds = [];
 
     async function fetchChallengesStatus() {
         try {
-            // El backend retorna una lista de IDs de retos que el usuario ya completó
             const response = await getChallengesStatus(userId);
             completedChallengesIds = response.completedIds || [];
-            console.log("Retos completados:", completedChallengesIds);
+            // Opcional: Si tu API devuelve el progreso actual (ej: 5/10), guárdalo aquí también.
         } catch (error) {
             console.error("Error al cargar el estado de retos:", error);
-            // Si falla, asumimos que no hay retos completados
         }
     }
 
-    // 3. Renderizar los Retos
+    // 3. Renderizar los Retos (AQUÍ ESTÁ EL CAMBIO VISUAL)
     function renderChallenges() {
         if (!challengesContainer) return;
         challengesContainer.innerHTML = '';
@@ -36,67 +32,101 @@ document.addEventListener('DOMContentLoaded', async () => {
         challengesData.forEach(challenge => {
             const isCompleted = completedChallengesIds.includes(challenge.id);
             
+            // --- Lógica de Progreso ---
+            // Si tu backend aún no envía el progreso numérico (ej: "llevas 3 de 5"),
+            // simularemos: 100% si está completado, 0% (o un valor fijo) si no.
+            // En el futuro, cambia esto por: let currentProgress = challenge.userProgress || 0;
+            let percentage = isCompleted ? 100 : (challenge.initialProgress || 0); 
+
+            // Determinar texto y estado del botón
+            let btnText = isCompleted ? 'Reclamado' : 'Reclamar';
+            let btnClass = isCompleted ? 'btn-claim claimed' : 'btn-claim';
+            let disabledAttr = isCompleted ? 'disabled' : '';
+
             const card = document.createElement('div');
             card.classList.add('challenge-card');
-            card.classList.add(isCompleted ? 'completed' : 'available');
+            if(isCompleted) card.classList.add('completed');
 
+            // --- HTML NUEVO (Ajustado al CSS del diseño) ---
             card.innerHTML = `
-                <h3>${challenge.title}</h3>
-                <p>${challenge.description}</p>
-                <div class="challenge-footer">
-                    <span class="reward">
-                        🪵 ${challenge.reward_wood} Madera | 🪙 ${challenge.reward_coins} Monedas
-                    </span>
+                <div class="card-top-row">
+                    <h3>${challenge.title}</h3>
                     <button 
-                        class="btn-complete-challenge" 
-                        data-challenge-id="${challenge.id}"
-                        ${isCompleted ? 'disabled' : ''}
+                        class="${btnClass}" 
+                        data-challenge-id="${challenge.id}" 
+                        ${disabledAttr}
                     >
-                        ${isCompleted ? '✅ Completado' : 'Completar Reto'}
+                        ${btnText}
                     </button>
                 </div>
+
+                <p class="card-desc">${challenge.description}</p>
+                
+                <div class="progress-row">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <span class="progress-text" style="color: #333; font-weight:bold;">${percentage}%</span>
+                    
+                    <div class="reward-pill">
+                        🪵 ${challenge.reward_wood}
+                    </div>
+                </div>
             `;
+            
             challengesContainer.appendChild(card);
         });
         
-        // 4. Asignar Eventos a los Botones
-        document.querySelectorAll('.btn-complete-challenge[data-challenge-id]').forEach(button => {
+        // 4. Asignar Eventos (Usando la nueva clase .btn-claim)
+        document.querySelectorAll('.btn-claim[data-challenge-id]').forEach(button => {
             if (!button.disabled) {
                 button.addEventListener('click', handleCompleteChallenge);
             }
         });
     }
     
-    // 5. Manejar la Acción de Completar (Conexión API)
+    // 5. Manejar la Acción de Completar
     async function handleCompleteChallenge(event) {
-        const challengeId = parseInt(event.target.dataset.challengeId);
         const button = event.target;
+        const challengeId = parseInt(button.dataset.challengeId);
         
+        // UI Feedback inmediato
+        const originalText = button.textContent;
         button.disabled = true;
-        button.textContent = "Procesando...";
+        button.textContent = "...";
 
         try {
-            // Llamamos al Backend para que valide si el usuario cumplió el reto 
-            // y aplique la recompensa (madera y monedas).
             const result = await completeChallenge(userId, challengeId); 
             
             if (result.success) {
-                alert(result.message);
+                // Éxito visual
+                button.textContent = "¡Reclamado!";
+                button.style.borderColor = "#27ae60";
+                button.style.color = "#27ae60";
                 
-                // Actualizar UI
-                await fetchChallengesStatus(); // Obtener el nuevo estado
-                renderChallenges();
+                // Actualizar contadores globales (si tienes funciones para eso)
+                // updateResourcesUI(result.newWood, result.newCoins);
+
+                // Recargar estado para asegurar sincronía
+                await fetchChallengesStatus(); 
                 
+                // Opcional: animar la barra de progreso al 100% manualmente antes de re-renderizar
+                const card = button.closest('.challenge-card');
+                const progressBar = card.querySelector('.progress-fill');
+                const progressText = card.querySelector('.progress-text');
+                if(progressBar) progressBar.style.width = '100%';
+                if(progressText) progressText.textContent = '100%';
+
             } else {
                 alert(`❌ ${result.message}`);
                 button.disabled = false;
-                button.textContent = "Completar Reto";
+                button.textContent = originalText;
             }
         } catch (error) {
-            console.error("Error al completar reto:", error);
-            alert("Error de conexión al intentar completar el reto.");
+            console.error("Error:", error);
+            alert("Error de conexión.");
             button.disabled = false;
-            button.textContent = "Completar Reto";
+            button.textContent = originalText;
         }
     }
 

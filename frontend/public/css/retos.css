@@ -1,145 +1,132 @@
+/* ====== RESET BÁSICO ====== */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+/* IMPORTANTE: Forzamos al body a ocupar el 100% de la pantalla sin scroll general */
 body {
-    background-color: #f4f4f4;
+    background-color: #1f2d3d;
     color: #333;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh; /* Altura total de la ventana */
+    display: flex;
+    flex-direction: column; /* Organiza Header arriba y Contenido abajo */
+    overflow: hidden; /* Evita que se mueva toda la página */
 }
 
-/* Cabecera */
-.challenges-header {
+/* ====== HEADER (No lo tocamos, solo aseguramos que no crezca) ====== */
+.header {
+    flex-shrink: 0; /* Evita que el header se aplaste */
+    /* Aquí tus estilos del header existentes... */
+    background: #fff; /* Ejemplo */
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+}
+/* (Asegúrate que tu header.css no tenga alturas raras) */
+
+/* ====== CONTENEDOR PRINCIPAL (Ocupa el resto del espacio) ====== */
+.split-layout {
+    display: flex; /* Usamos Flex en vez de Grid para mejor control de altura */
+    flex: 1;       /* Ocupa todo el espacio sobrante debajo del header */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px; /* Un poco de margen interno */
+    gap: 30px;     /* Separación entre izquierda y derecha */
+    overflow: hidden; /* Clave para que el scroll sea interno */
+}
+
+/* ====== PANEL IZQUIERDO (UI) ====== */
+.left-panel {
+    width: 450px; /* Ancho fijo */
+    display: flex;
+    flex-direction: column; /* Elementos uno debajo del otro */
+    gap: 20px;
+    height: 100%; /* Ocupa toda la altura disponible */
+    min-width: 400px; /* Para que no se haga muy pequeño */
+}
+
+/* Tarjeta superior (Título) */
+.top-stats-card {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #2c3e50, #4ca1af);
-    color: white;
-    padding: 30px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    flex-shrink: 0; /* No dejes que esto se encoja */
 }
 
-.header-text h1 { font-size: 2rem; margin-bottom: 5px; }
-.header-text p { font-size: 1rem; opacity: 0.9; }
-
-.coin-display {
-    background: rgba(255,255,255,0.2);
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.coin-display i { color: #f1c40f; }
-
-/* Grid de Tarjetas */
-.challenges-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-/* Tarjeta de Reto */
-.challenge-card {
-    background: white;
-    border-radius: 12px;
+/* Contenedor GRANDE de la lista */
+.challenges-list-container {
+    background-color: #dbe4ef;
+    border-radius: 25px;
     padding: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    
+    /* MAGIA PARA EL SCROLL: */
+    flex: 1; /* Crece para ocupar todo el espacio vertical sobrante */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s;
-    border-left: 5px solid #ccc; /* Default borde gris */
+    overflow: hidden; /* Contiene el scroll hijo */
 }
 
-.challenge-card:hover {
-    transform: translateY(-5px);
-}
-
-.card-header {
+/* Área donde van las tarjetas (El que hace scroll) */
+#challenges-container {
+    flex: 1;          /* Ocupa el espacio dentro del contenedor azul */
+    overflow-y: auto; /* AQUÍ está el scroll */
+    padding-right: 10px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 15px;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.icon-box {
-    width: 50px; height: 50px;
-    background: #eef2f3;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; color: #2c3e50;
-}
+/* Scrollbar bonita */
+#challenges-container::-webkit-scrollbar { width: 8px; }
+#challenges-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
 
-.reward-badge {
-    background: #fff3cd;
-    color: #856404;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.card-body h3 { margin-bottom: 5px; font-size: 1.1rem; }
-.card-body p { color: #666; font-size: 0.9rem; margin-bottom: 15px; }
-
-/* Barra de Progreso */
-.progress-container {
-    background: #eee;
-    height: 8px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    overflow: hidden;
-}
-
-.progress-fill {
+/* ====== PANEL DERECHO (IMAGEN) ====== */
+.right-panel-image {
+    flex: 1; /* Ocupa todo el ancho restante a la derecha */
     height: 100%;
-    background: #3498db;
-    width: 0%;
-    transition: width 0.5s;
+    border-radius: 20px;
+    
+    /* IMAGEN DE FONDO */
+    /* Asegúrate que la ruta sea correcta desde donde está el CSS */
+    background-image: url("../img/mapacheEscalando.png"); /* Ajusta los ../ según tu carpeta */
+    background-size: contain; /* Ajusta la imagen sin cortarla */
+    background-repeat: no-repeat;
+    background-position: bottom right; /* Pegada abajo a la derecha */
 }
 
-/* Botón de Acción */
+/* ====== ESTILOS DE TARJETA (Los mismos de antes) ====== */
+.challenge-card {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 10px 0;
+}
+.challenge-card:last-child { border: none; }
+
+.card-top-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.card-top-row h3 { font-size: 1rem; color: #2c3e50; }
+
 .btn-claim {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
+    background: white; border: 1px solid #bdc3c7; 
+    border-radius: 6px; padding: 4px 12px; cursor: pointer;
 }
 
-/* ESTADOS */
+.progress-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.progress-track { flex: 1; height: 12px; background: #bdc3c7; border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2c3e50; width: 0%; }
+.reward-pill { background: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
 
-/* 1. Pendiente */
-.challenge-card.pending { border-left-color: #3498db; }
-.challenge-card.pending .btn-claim {
-    background: #e0e0e0; color: #888; cursor: not-allowed;
+/* Responsive */
+@media (max-width: 900px) {
+    .split-layout { flex-direction: column; overflow-y: auto; }
+    .left-panel { width: 100%; min-width: 0; height: auto; }
+    .right-panel-image { display: none; } /* Ocultar imagen en móvil para dar espacio */
+    body { overflow: auto; height: auto; }
 }
-
-/* 2. Completado (Listo para reclamar) */
-.challenge-card.completed { border-left-color: #27ae60; }
-.challenge-card.completed .btn-claim {
-    background: #27ae60; color: white; cursor: pointer;
-    animation: pulse 2s infinite;
-}
-
-/* 3. Reclamado */
-.challenge-card.claimed { border-left-color: #95a5a6; opacity: 0.7; }
-.challenge-card.claimed .btn-claim {
-    background: transparent; color: #27ae60; border: 1px solid #27ae60;
-    cursor: default;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
-}
-

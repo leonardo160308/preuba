@@ -66,13 +66,15 @@ export function getCurrentUserName() {
 /**
  * Cierra la sesión del usuario
  */
+/**
+ * Cierra la sesión del usuario
+ */
 export function logout() {
     localStorage.removeItem(USER_KEY);
     console.log('🚪 Sesión cerrada');
-    // Redirige a la pantalla de login
-    window.location.href = '/views/login.html';
+    // ✅ CAMBIO AQUÍ: Usar ruta absoluta
+    window.location.href = '/index.html';
 }
-
 /**
  * Protección de rutas - Redirige si no hay sesión
  * Usar al inicio de cada página privada
@@ -81,7 +83,7 @@ export function logout() {
 export function protectRoute() {
     if (!isAuthenticated()) {
         alert("⚠️ Acceso denegado. Debes iniciar sesión.");
-        window.location.href = '/views/login.html';
+        window.location.href = '/login.html';
         return false;
     }
     return true;

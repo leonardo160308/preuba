@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 levelDiv.style.cursor = 'pointer';
                 levelDiv.onclick = () => {
                     // Redirige al quiz de ese nivel
-                    window.location.href = `/views/quiz.html?level=${i}`;
+                    window.location.href = `/quiz.html?level=${i}`;
                 };
             } else {
                 levelDiv.title = `Desbloquea el Nivel ${i - 1} para acceder.`;

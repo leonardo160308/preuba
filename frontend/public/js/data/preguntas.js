@@ -905,9 +905,11 @@ const preguntasPorNivel = {
   }
 ]};
 
+// ... (todo tu código de preguntas) ...
+
+// ✅ AL FINAL DEL ARCHIVO, ASEGÚRATE DE TENER:
 export const SKIN_REWARDS = {
     2: "skin_1", 4: "skin_2", 6: "skin_3", 8: "skin_4", 10: "skin_5"
 };
 
-export default preguntasPorNivel;
-
+export default preguntasPorNivel; // ✅ ESTO ES CRÍTICO
