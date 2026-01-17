@@ -7,26 +7,29 @@
     background-color: #d2b48c;
     border-radius: 10px;
     display: flex;
-    flex-direction: row; /* <--- ESTO LOS PONE UNO AL LADO DEL OTRO */
-    gap: 20px; /* Espacio entre la casa y el castor */
-    justify-content: center;
-    align-items: stretch; /* Ambos visores tendrán la misma altura */
+    flex-direction: column; /* Cambiado a columna para apilar verticalmente */
+    gap: 20px;
+    justify-content: flex-start;
+    align-items: center;
     padding: 20px;
-    overflow-x: auto; /* Por si la pantalla es muy chica */
+    overflow-y: auto; /* Scroll vertical si es necesario */
 }
 
 /* Cada Visor Individual */
 .skin-viewer-container {
-    flex: 1; /* <--- ESTO HACE QUE SE REPARTAN EL ESPACIO 50% y 50% */
-    background: rgba(255, 255, 255, 0.2); /* Fondo sutil para distinguir */
+    width: 100%; /* Ocupan todo el ancho disponible */
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
-    padding: 10px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    min-width: 0; /* Evita desbordes en flexbox */
+    min-height: 300px; /* Altura mínima para cada visor */
 }
+
+/* Cada Visor Individual */
+
 
 .skin-viewer-container h3 {
     margin-bottom: 10px;
@@ -50,7 +53,6 @@
     max-width: 100%;
     max-height: 250px; /* Reducido un poco para que quepan ambos */
     object-fit: contain;
-    drop-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
 /* Controles abajo */
@@ -76,12 +78,6 @@ body {
     color: #333;
 }
 
-.skin-viewer-container {
-    margin-bottom: 20px; /* Espacio entre los dos visores */
-}
-.right-column {
-    overflow-y: auto; /* Scroll si la pantalla es muy pequeña */
-}
 
 
 
@@ -198,22 +194,44 @@ body {
 }
 
 /* Caja Azul Vacía */
+/* Caja Azul Placeholder */
 .blue-card {
-    background-color: #0044cc;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
-    flex: 1; /* Ocupa el resto del espacio vertical */
+    flex: 1;
     min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botón Eliminar Cuenta */
+.btn-delete-account {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 0 #c0392b;
+}
+
+.btn-delete-account:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #a93226;
+}
+
+.btn-delete-account:active {
+    transform: translateY(4px);
+    box-shadow: none;
 }
 
 /* Derecha */
-.right-column {
-    background-color: #d2b48c;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
+
 
 .skin-viewer-container {
     width: 100%;
@@ -237,7 +255,6 @@ body {
     max-width: 90%;
     max-height: 400px;
     object-fit: contain;
-    drop-shadow: 0 10px 15px rgba(0,0,0,0.2);
 }
 
 .skin-status {

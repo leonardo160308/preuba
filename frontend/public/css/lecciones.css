@@ -261,3 +261,20 @@
 .tarjeta-bodyD a{
   text-decoration: none;
 }
+
+.level-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Efecto especial para nivel activo */
+.level-card.active:hover {
+    box-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Sin efecto hover en niveles bloqueados */
+.level-card.locked:hover {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}

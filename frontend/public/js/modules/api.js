@@ -106,6 +106,52 @@ export async function updateUserData(userId, updateData) {
     }
 }
 
+/**
+ * Actualiza el avatar del usuario
+ * NOTA: Internamente usa equipSkin del backend con type='avatar'
+ * @param {number} userId - ID del usuario
+ * @param {string} avatar - Nombre del avatar (ej: "avatar1", "avatar2")
+ * @returns {Promise<Object>}
+ */
+export async function updateAvatar(userId, avatar) {
+    try {
+        // Usamos la misma ruta de equipSkin pero la llamamos desde aquí
+        const response = await fetch(`${API_BASE_URL}/equip`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userId: userId, 
+                skinId: avatar, 
+                type: 'avatar' 
+            })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error actualizando avatar:', error);
+        throw error;
+    }
+}
+
+/**
+ * Elimina (baja lógica) la cuenta de un usuario
+ * @param {number} userId - ID del usuario
+ * @returns {Promise<Object>}
+ */
+export async function deleteUser(userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error eliminando usuario:', error);
+        throw error;
+    }
+}
+
+
+
 // ========================================
 // 3. DASHBOARD Y MOVIMIENTOS
 // ========================================

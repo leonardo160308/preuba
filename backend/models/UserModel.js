@@ -37,32 +37,57 @@ class User {
     }
     
     // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
+   // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
     static async update(id, updateData) {
-        // Genera la parte 'SET campo = ?' dinámicamente
-        const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-        const values = Object.values(updateData);
+        // Lista de campos permitidos para actualizar (SEGURIDAD)
+        const allowedFields = [
+            'nombre', 'password_hash', 'edad', 'genero', 'foto',
+            'level', 'coins', 'wood', 
+            'house_level', 'beaver_level',
+            'current_appearance', 'current_beaver'
+        ];
         
-        if (fields.length === 0) return null; // No hay nada que actualizar
+        // Filtrar solo campos permitidos
+        const filteredData = {};
+        Object.keys(updateData).forEach(key => {
+            if (allowedFields.includes(key)) {
+                filteredData[key] = updateData[key];
+            }
+        });
+        
+        // Genera la parte 'SET campo = ?' dinámicamente
+        const fields = Object.keys(filteredData).map(key => `${key} = ?`).join(', ');
+        const values = Object.values(filteredData);
+        
+        if (fields.length === 0) {
+            console.warn('No hay campos válidos para actualizar');
+            return null;
+        }
 
         // La consulta final incluye el ID al final del SET
         const query = `UPDATE users SET ${fields} WHERE id = ?`;
         
         try {
-            // Agregamos el ID al final del array de valores para que coincida con el último '?' de la consulta
+            console.log('Ejecutando UPDATE:', query, [...values, id]);
             const [result] = await db.execute(query, [...values, id]);
-            return result; // Contiene la propiedad affectedRows (filas afectadas)
+            return result;
         } catch (error) {
+            console.error('Error en User.update:', error);
             throw error;
         }
     }
 
     // 4. BORRAR (Delete Lógico): Cambiar is_active a false
+// 4. BORRAR (Delete Lógico): Cambiar is_active a false
     static async deleteLogical(id) {
-        const query = 'UPDATE users SET is_active = FALSE WHERE id = ?';
+        const query = 'UPDATE users SET is_active = 0 WHERE id = ?';
         try {
+            console.log('Ejecutando baja lógica para usuario:', id); // Debug
             const [result] = await db.execute(query, [id]);
+            console.log('Resultado:', result); // Debug
             return result;
         } catch (error) {
+            console.error('Error en deleteLogical:', error);
             throw error;
         }
     }

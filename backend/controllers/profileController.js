@@ -45,21 +45,56 @@ export const upgradeItem = async (req, res) => {
 };
 
 // PUT: Equipar una skin (Cambiar apariencia)
+// PUT: Equipar una skin (Cambiar apariencia)
 export const equipSkin = async (req, res) => {
     try {
-        const { userId, skinId, type } = req.body; // type: 'house' o 'beaver'
+        const { userId, skinId, type } = req.body;
         
-        // Aquí podrías validar si el usuario realmente TIENE esa skin en user_skins
-        // Por brevedad, actualizamos directo:
+        console.log('Equipando skin:', { userId, skinId, type }); // Debug
+        
+        if (!userId || !skinId || !type) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Faltan parámetros: userId, skinId o type' 
+            });
+        }
         
         let updateData = {};
-        if (type === 'house') updateData.current_appearance = skinId;
-        if (type === 'beaver') updateData.current_beaver = skinId;
+        
+        if (type === 'house') {
+            updateData.current_appearance = skinId;
+        } else if (type === 'beaver') {
+            updateData.current_beaver = skinId;
+        } else if (type === 'avatar') {
+            updateData.foto = skinId; // Guardamos solo el nombre: "avatar1", "avatar2", etc.
+        } else {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Tipo inválido. Usa: house, beaver o avatar' 
+            });
+        }
 
-        await User.update(userId, updateData);
+        console.log('Actualizando con:', updateData); // Debug
+        
+        const result = await User.update(userId, updateData);
+        
+        if (!result || result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Usuario no encontrado o sin cambios' 
+            });
+        }
 
-        res.json({ success: true, message: 'Apariencia actualizada' });
+        res.json({ 
+            success: true, 
+            message: 'Apariencia actualizada correctamente' 
+        });
+        
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error en equipSkin:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error del servidor: ' + error.message 
+        });
     }
 };

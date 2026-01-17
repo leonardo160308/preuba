@@ -191,15 +191,37 @@ export const updateUser = async (req, res) => {
 // ========================================
 // BORRAR USUARIO (Baja lógica)
 // ========================================
+// ========================================
+// BORRAR USUARIO (Baja lógica)
+// ========================================
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
+        
+        console.log('Intentando eliminar usuario:', id); // Debug
+        
+        if (!id) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'ID de usuario requerido' 
+            });
+        }
+        
+        // Verificar que el usuario existe antes de intentar borrar
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Usuario no encontrado' 
+            });
+        }
+        
         const result = await User.deleteLogical(id);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false,
-                message: 'Usuario no encontrado' 
+                message: 'No se pudo eliminar el usuario' 
             });
         }
 
@@ -207,11 +229,14 @@ export const deleteUser = async (req, res) => {
             success: true,
             message: 'Usuario dado de baja exitosamente' 
         });
+        
     } catch (error) {
         console.error('Error en deleteUser:', error);
         res.status(500).json({ 
             success: false,
-            message: error.message 
+            message: 'Error del servidor: ' + error.message 
         });
     }
+    
 };
+

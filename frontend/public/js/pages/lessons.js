@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert("No se pudo cargar tu progreso. Intenta recargar.");
     }
 
-    // 4. Renderizar los Niveles
+  // 4. Renderizar los Niveles
     function renderizarNiveles() {
         if (!levelsContainer) return;
         levelsContainer.innerHTML = ''; // Limpiar el contenedor antes de dibujar
@@ -46,21 +46,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 levelDiv.classList.add('locked');
             }
             
-            // Contenido del nivel
+            // ✅ CONTENIDO VISIBLE DE LA TARJETA
             levelDiv.innerHTML = `
                 <div class="level-number">Nivel ${i}</div>
                 <div class="level-icon">
                     ${isUnlocked ? '🔓' : '🔒'}
                 </div>
-                <div class="level-title">Tema: ${getNombreNivel(i)}</div>
+                <div class="level-title">${getNombreNivel(i)}</div>
+                ${isUnlocked ? '<div class="level-action">👉 Estudiar</div>' : '<div class="level-locked-msg">Bloqueado</div>'}
             `;
             
             // 5. Asignar Evento de Clic
             if (isUnlocked) {
                 levelDiv.style.cursor = 'pointer';
                 levelDiv.onclick = () => {
-                    // Redirige al quiz de ese nivel
-                    window.location.href = `/quiz.html?level=${i}`;
+                    // ✅ CORRECCIÓN: Redirige primero a las flashcards (nivel.html)
+                    window.location.href = `/nivel.html?level=${i}`;
                 };
             } else {
                 levelDiv.title = `Desbloquea el Nivel ${i - 1} para acceder.`;
