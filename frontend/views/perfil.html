@@ -4,19 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil - TOO-EASY</title>
-    
-    <!-- ✅ CSS CORREGIDOS -->
+    <link rel="icon" type="image/x-icon" href="../public/img/favicon.png">
     <link rel="stylesheet" href="../public/css/perfil.css">
     <link rel="stylesheet" href="../public/css/header.css">
     
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<!-- ========================================
-     ENCABEZADO CON NAVEGACIÓN
-     ======================================== -->
 <header class="header">
     <div class="logo">
         <h1>TOO-EASY</h1>
@@ -29,7 +24,7 @@
         <a href="/lecciones.html">LECCIONES</a>
         <a href="/perfil.html">PERFIL</a>
         <a href="#" id="logout-btn" title="Cerrar Sesión">
-            <img src="/public/icons/salida.png" alt="Salir">
+            <img src="../public/img/Salida.png" alt="Salir">
         </a>
     </nav>
 </header>
@@ -63,7 +58,6 @@
             <h2 id="welcome-msg">Cargando...</h2>
         </div>
 
-        <!-- Tarjeta de Información del Usuario -->
        <!-- Tarjeta de Información del Usuario -->
 <div class="info-card">
     <div class="avatar-container">
@@ -135,40 +129,9 @@
     </div>
 </div>
             
-            <div class="user-details">
-                <div class="detail-row">
-                    <span class="label">Nombre:</span>
-                    <span class="value" id="user-name">...</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Nivel Educativo:</span>
-                    <span class="value" id="user-level">1</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Nivel Casa:</span>
-                    <span class="value" id="lbl-house-level">1</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Nivel Castor:</span>
-                    <span class="value" id="lbl-beaver-level">1</span>
-                </div>
-            </div>
-        </div>
+            
 
-        <!-- Barra de Recursos -->
-        <div class="stats-bar">
-            <div class="stat-item">
-                <i class="fas fa-coins coin-icon"></i>
-                <span id="coin-count">0</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-tree wood-icon"></i>
-                <span id="wood-count">0</span>
-            </div>
-        </div>
-
-        <!-- Botones de Mejora -->
-        <div class="upgrade-actions">
+            <div class="upgrade-actions">
             
             <!-- Botón Mejorar Casa -->
             <button id="btn-upgrade-house" class="btn-upgrade btn-wood">
@@ -189,22 +152,32 @@
             </button>
 
         </div>
-
-        <!-- Caja Azul (Placeholder para futuras funciones) -->
-      <div class="blue-card">
-            <p style="color: white; text-align: center; padding: 20px;">
-                🚧 Próximamente: Estadísticas avanzadas
-            </p>
+            <div class="stats-bar">
+            <div class="stat-item">
+                <i class="fas fa-coins coin-icon"></i>
+                <span id="coin-count">0</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-tree wood-icon"></i>
+                <span id="wood-count">0</span>
+            </div>
+        </div>
+        <button id="btn-delete-account" class="btn-delete-account">
+            Eliminar Cuenta
+        </button>
         </div>
 
+        <!-- Barra de Recursos -->
+        
+
+        <!-- Botones de Mejora -->
+        
+
+        <!-- Caja Azul (Placeholder para futuras funciones) -->
+   
+
         <!-- Botón Eliminar Cuenta -->
-        <button id="btn-delete-account" class="btn-delete-account">
-            🗑️ Eliminar Cuenta
-        </button>
-
-    </div>
-
-    </div>
+        
 
     <!-- ========================================
          COLUMNA DERECHA: VISORES DE SKINS
@@ -215,7 +188,7 @@
              VISOR DE LA CASA
              ======================================== -->
         <div class="skin-viewer-container">
-            <h3>🏠 Tu Hogar</h3>
+            <h3>Tu Hogar</h3>
             
             <!-- Imagen de la Casa -->
             <div class="skin-display">
@@ -247,7 +220,7 @@
              VISOR DEL CASTOR
              ======================================== -->
         <div class="skin-viewer-container">
-            <h3>🦫 Tu Castor</h3>
+            <h3>Tu Castor</h3>
             
             <!-- Imagen del Castor -->
             <div class="skin-display">
@@ -276,12 +249,14 @@
         </div>
 
     </div>
+    </div>
+
+    </div>
+
 
 </div>
 
-<!-- ========================================
-     SCRIPT CONECTADO AL BACKEND
-     ======================================== -->
+
 <script type="module" src="../public/js/pages/profile.js"></script>
 
 </body>
