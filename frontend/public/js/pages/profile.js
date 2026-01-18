@@ -2,6 +2,7 @@
 
 import { getUserData, upgradeItem, equipSkin, deleteUser } from '../modules/api.js';
 import { protectRoute, getAuthData, logout } from '../modules/auth.js';
+import { alertaConfirmacion, alertaExito, alertaError } from '../modules/alerts.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -329,31 +330,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- ELIMINAR CUENTA ---
-    if (btnDeleteAccount) {
-        btnDeleteAccount.onclick = async () => {
-            if (!confirm('⚠️ ¿Eliminar tu cuenta permanentemente?')) return;
-            if (!confirm('🛑 ÚLTIMA ADVERTENCIA - ¿Estás seguro?')) return;
+// FRAGMENTO PARA ACTUALIZAR EN profile.js
+// Reemplaza la sección de eliminación de cuenta
 
-            try {
-                btnDeleteAccount.disabled = true;
-                btnDeleteAccount.textContent = 'Eliminando...';
-                const result = await deleteUser(userId);
-                if (result.success) {
-                    alert('Cuenta eliminada');
-                    logout();
-                } else {
-                    alert('Error: ' + result.message);
-                    btnDeleteAccount.disabled = false;
-                    btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Error de conexión');
+
+// --- ELIMINAR CUENTA (CON ALERTA DE CONFIRMACIÓN) ---
+if (btnDeleteAccount) {
+    btnDeleteAccount.onclick = async () => {
+        // ✅ Primera confirmación con alerta visual
+        const confirmado1 = await alertaConfirmacion(
+            '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
+            '⚠️ Eliminar Cuenta'
+        );
+        
+        if (!confirmado1) return;
+        
+        // ✅ Segunda confirmación para mayor seguridad
+        const confirmado2 = await alertaConfirmacion(
+            '🛑 ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
+            'Confirmación Final'
+        );
+        
+        if (!confirmado2) return;
+
+        try {
+            btnDeleteAccount.disabled = true;
+            btnDeleteAccount.textContent = 'Eliminando...';
+            
+            const result = await deleteUser(userId);
+            
+            if (result.success) {
+                // ✅ Éxito con redirección
+                alertaExito('Cuenta eliminada exitosamente. Redirigiendo...', {
+                    duration: 2000,
+                    onClose: () => logout()
+                });
+                
+                setTimeout(() => logout(), 2000);
+                
+            } else {
+                alertaError('Error: ' + result.message); // ✅ Error del servidor
                 btnDeleteAccount.disabled = false;
                 btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
             }
-        };
-    }
+        } catch (error) {
+            console.error(error);
+            alertaError('Error de conexión al intentar eliminar la cuenta.'); // ✅ Error de red
+            btnDeleteAccount.disabled = false;
+            btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
+        }
+    };
+}
 
     // --- AVATAR ---
     if (btnChangeAvatar) {
