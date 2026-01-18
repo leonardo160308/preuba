@@ -9,7 +9,7 @@
 /* =================== RESET =================== */
 * {
   box-sizing: border-box;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Arial', sans-serif; 
 }
 
 body {
