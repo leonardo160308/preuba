@@ -1,8 +1,8 @@
-/* assets/js/pages/profile.js */
+/* assets/js/pages/profile.js - CON ALERTAS VISUALES COMPLETAS */
 
 import { getUserData, upgradeItem, equipSkin, deleteUser } from '../modules/api.js';
 import { protectRoute, getAuthData, logout } from '../modules/auth.js';
-import { alertaConfirmacion, alertaExito, alertaError } from '../modules/alerts.js';
+import { alertaExito, alertaError, alertaInfo, alertaAdvertencia, alertaConfirmacion } from '../modules/alerts.js'; // ✅ NUEVO
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -82,11 +82,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 4. CARGAR DATOS DEL SERVIDOR ---
     async function init() {
-        console.log('🚀 Iniciando perfil... UserID:', userId);
-        
         try {
+            // ✅ Alerta de carga
+            const loadingAlert = alertaInfo('Cargando tu perfil...', { 
+                duration: 0, 
+                closable: false 
+            });
+            
             currentUserData = await getUserData(userId);
-            console.log('✅ Datos cargados:', currentUserData);
+            
+            // ✅ Cerrar alerta de carga
+            loadingAlert.close();
             
             if(welcomeMsg) welcomeMsg.textContent = `Hola, ${currentUserData.nombre}!`;
             if(userNameLbl) userNameLbl.textContent = currentUserData.nombre;
@@ -105,15 +111,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error("💥 Error:", error);
-            alert("Error al cargar datos del servidor.");
+            alertaError('Error al cargar datos del servidor. Recarga la página.'); // ✅ CAMBIO
         }
     }
 
     // --- 5. ACTUALIZAR UI ---
     function actualizarUI() {
-        console.log('🎨 Actualizando UI...');
-        console.log('💰 Coins:', currentUserData.coins, '🪵 Wood:', currentUserData.wood);
-        
         domMonedas.textContent = currentUserData.coins || 0;
         domMadera.textContent = currentUserData.wood || 0;
         lblHouseLevel.textContent = currentUserData.house_level || 1;
@@ -122,21 +125,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // BOTÓN CASA
         if (txtCostHouse) txtCostHouse.textContent = COSTO_CASA_BASE;
         
-        console.log('🏠 Casa:', {
-            nivel: currentUserData.house_level,
-            madera: currentUserData.wood,
-            necesita: COSTO_CASA_BASE
-        });
-        
         if (currentUserData.house_level >= MAX_LEVEL) {
             btnHouse.textContent = "¡Casa al Máximo! 🏠";
             btnHouse.disabled = true;
         } else if (currentUserData.wood < COSTO_CASA_BASE) {
-            console.log('❌ NO HAY SUFICIENTE MADERA');
             btnHouse.disabled = true;
             btnHouse.title = `Necesitas ${COSTO_CASA_BASE} madera (tienes ${currentUserData.wood})`;
         } else {
-            console.log('✅ BOTÓN CASA HABILITADO');
             btnHouse.disabled = false;
             btnHouse.title = "";
         }
@@ -144,68 +139,80 @@ document.addEventListener('DOMContentLoaded', async () => {
         // BOTÓN CASTOR
         if (txtCostBeaver) txtCostBeaver.textContent = COSTO_CASTOR_BASE;
         
-        console.log('🦫 Castor:', {
-            nivel: currentUserData.beaver_level,
-            monedas: currentUserData.coins,
-            necesita: COSTO_CASTOR_BASE
-        });
-        
         if (currentUserData.beaver_level >= MAX_LEVEL) {
             btnBeaver.textContent = "¡Castor al Máximo! 🦫";
             btnBeaver.disabled = true;
         } else if (currentUserData.coins < COSTO_CASTOR_BASE) {
-            console.log('❌ NO HAY SUFICIENTES MONEDAS');
             btnBeaver.disabled = true;
             btnBeaver.title = `Necesitas ${COSTO_CASTOR_BASE} monedas (tienes ${currentUserData.coins})`;
         } else {
-            console.log('✅ BOTÓN CASTOR HABILITADO');
             btnBeaver.disabled = false;
             btnBeaver.title = "";
         }
     }
 
-    // --- 6. MEJORAS ---
+    // --- 6. MEJORAS CON ALERTAS ---
     btnHouse.addEventListener('click', async () => {
         if (btnHouse.disabled) {
-            alert(`Necesitas ${COSTO_CASA_BASE} madera. Tienes: ${currentUserData.wood}`);
+            alertaError(`Necesitas ${COSTO_CASA_BASE} madera. Actualmente tienes: ${currentUserData.wood} 🪵`); // ✅ CAMBIO
             return;
         }
         
         try {
+            // ✅ Alerta de proceso
+            alertaInfo('Mejorando tu hogar...', { duration: 2000 });
+            
             const result = await upgradeItem(userId, 'house');
+            
             if (result.success) {
                 currentUserData.wood = result.new_stats.wood;
                 currentUserData.house_level = result.new_stats.house_level;
-                alert(result.message);
+                
+                // ✅ Alerta de éxito con detalles
+                alertaExito(`¡Casa mejorada a nivel ${result.new_stats.house_level}! 🏠`, {
+                    title: '¡Mejora completada!',
+                    duration: 4000
+                });
+                
                 actualizarUI();
             } else {
-                alert(`❌ ${result.message}`);
+                alertaError(result.message); // ✅ CAMBIO
             }
         } catch (error) {
             console.error(error);
-            alert("Error de conexión al mejorar casa.");
+            alertaError('Error de conexión al mejorar casa.'); // ✅ CAMBIO
         }
     });
 
     btnBeaver.addEventListener('click', async () => {
         if (btnBeaver.disabled) {
-            alert(`Necesitas ${COSTO_CASTOR_BASE} monedas. Tienes: ${currentUserData.coins}`);
+            alertaError(`Necesitas ${COSTO_CASTOR_BASE} monedas. Actualmente tienes: ${currentUserData.coins} 🪙`); // ✅ CAMBIO
             return;
         }
         
         try {
+            // ✅ Alerta de proceso
+            alertaInfo('Entrenando a tu castor...', { duration: 2000 });
+            
             const result = await upgradeItem(userId, 'beaver');
+            
             if (result.success) {
                 currentUserData.coins = result.new_stats.coins;
                 currentUserData.beaver_level = result.new_stats.beaver_level;
-                alert(result.message);
+                
+                // ✅ Alerta de éxito con detalles
+                alertaExito(`¡Castor entrenado a nivel ${result.new_stats.beaver_level}! 🦫`, {
+                    title: '¡Entrenamiento exitoso!',
+                    duration: 4000
+                });
+                
                 actualizarUI();
             } else {
-                alert(`❌ ${result.message}`);
+                alertaError(result.message); // ✅ CAMBIO
             }
         } catch (error) {
             console.error(error);
-            alert("Error de conexión al entrenar castor.");
+            alertaError('Error de conexión al entrenar castor.'); // ✅ CAMBIO
         }
     });
 
@@ -296,17 +303,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function equiparSkinAPI(skinId, type) {
         try {
+            // ✅ Alerta de proceso
+            const tipoTexto = type === 'house' ? 'apariencia del hogar' : 'apariencia del castor';
+            alertaInfo(`Actualizando ${tipoTexto}...`, { duration: 1500 });
+            
             const result = await equipSkin(userId, skinId, type);
+            
             if (result.success) {
                 if (type === 'house') currentUserData.current_appearance = skinId;
                 if (type === 'beaver') currentUserData.current_beaver = skinId;
-                alert("Apariencia actualizada.");
+                
+                // ✅ Alerta de éxito
+                const nombreSkin = type === 'house' ? SKIN_NAMES[skinId] : CASTOR_NAMES[skinId];
+                alertaExito(`¡${nombreSkin} equipado correctamente!`, {
+                    title: 'Apariencia actualizada',
+                    duration: 3000
+                });
+                
                 renderizarCasa();
                 renderizarCastor();
             }
         } catch (error) {
             console.error(error);
-            alert("Error al equipar skin.");
+            alertaError('Error al equipar apariencia.'); // ✅ CAMBIO
         }
     }
 
@@ -329,60 +348,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(idxCastor < UNLOCKS_CASTOR_LIST.length - 1) idxCastor++; renderizarCastor(); 
     };
 
-    // --- ELIMINAR CUENTA ---
-// FRAGMENTO PARA ACTUALIZAR EN profile.js
-// Reemplaza la sección de eliminación de cuenta
-
-
-// --- ELIMINAR CUENTA (CON ALERTA DE CONFIRMACIÓN) ---
-if (btnDeleteAccount) {
-    btnDeleteAccount.onclick = async () => {
-        // ✅ Primera confirmación con alerta visual
-        const confirmado1 = await alertaConfirmacion(
-            '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
-            '⚠️ Eliminar Cuenta'
-        );
-        
-        if (!confirmado1) return;
-        
-        // ✅ Segunda confirmación para mayor seguridad
-        const confirmado2 = await alertaConfirmacion(
-            '🛑 ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
-            'Confirmación Final'
-        );
-        
-        if (!confirmado2) return;
-
-        try {
-            btnDeleteAccount.disabled = true;
-            btnDeleteAccount.textContent = 'Eliminando...';
+    // --- ELIMINAR CUENTA CON ALERTAS ---
+    if (btnDeleteAccount) {
+        btnDeleteAccount.onclick = async () => {
+            // ✅ Primera confirmación
+            const confirmado1 = await alertaConfirmacion(
+                '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
+                '⚠️ Eliminar Cuenta'
+            );
             
-            const result = await deleteUser(userId);
+            if (!confirmado1) return;
             
-            if (result.success) {
-                // ✅ Éxito con redirección
-                alertaExito('Cuenta eliminada exitosamente. Redirigiendo...', {
-                    duration: 2000,
-                    onClose: () => logout()
-                });
+            // ✅ Segunda confirmación final
+            const confirmado2 = await alertaConfirmacion(
+                '🛑 ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
+                'Confirmación Final'
+            );
+            
+            if (!confirmado2) return;
+
+            try {
+                btnDeleteAccount.disabled = true;
+                btnDeleteAccount.textContent = 'Eliminando...';
                 
-                setTimeout(() => logout(), 2000);
+                // ✅ Alerta de proceso
+                alertaInfo('Eliminando cuenta...', { duration: 0, closable: false });
                 
-            } else {
-                alertaError('Error: ' + result.message); // ✅ Error del servidor
+                const result = await deleteUser(userId);
+                
+                if (result.success) {
+                    // ✅ Éxito con redirección
+                    alertaExito('Cuenta eliminada exitosamente. Redirigiendo...', {
+                        duration: 2000,
+                        onClose: () => logout()
+                    });
+                    
+                    setTimeout(() => logout(), 2000);
+                    
+                } else {
+                    alertaError('Error: ' + result.message); // ✅ CAMBIO
+                    btnDeleteAccount.disabled = false;
+                    btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
+                }
+            } catch (error) {
+                console.error(error);
+                alertaError('Error de conexión al intentar eliminar la cuenta.'); // ✅ CAMBIO
                 btnDeleteAccount.disabled = false;
                 btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
             }
-        } catch (error) {
-            console.error(error);
-            alertaError('Error de conexión al intentar eliminar la cuenta.'); // ✅ Error de red
-            btnDeleteAccount.disabled = false;
-            btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
-        }
-    };
-}
+        };
+    }
 
-    // --- AVATAR ---
+    // --- AVATAR CON ALERTAS ---
     if (btnChangeAvatar) {
         btnChangeAvatar.onclick = () => avatarModal.style.display = 'flex';
     }
@@ -400,24 +417,37 @@ if (btnDeleteAccount) {
 
     if(btnConfirmAvatar) {
         btnConfirmAvatar.onclick = async () => {
-            if(!selectedAvatar) return alert('Selecciona un avatar primero');
+            // ✅ Validación con alerta
+            if(!selectedAvatar) {
+                alertaAdvertencia('Por favor, selecciona un avatar primero'); // ✅ CAMBIO
+                return;
+            }
 
             try {
                 btnConfirmAvatar.disabled = true;
                 btnConfirmAvatar.textContent = 'Guardando...';
+                
+                // ✅ Alerta de proceso
+                alertaInfo('Actualizando avatar...', { duration: 1500 });
+                
                 const result = await equipSkin(userId, selectedAvatar, 'avatar');
                 
                 if(result.success) {
                     currentUserData.foto = selectedAvatar;
                     userAvatar.src = `/public/img/avatars/${selectedAvatar}.png`;
                     avatarModal.style.display = 'none';
-                    alert('¡Avatar actualizado!');
+                    
+                    // ✅ Alerta de éxito
+                    alertaExito('¡Avatar actualizado correctamente!', {
+                        title: '¡Genial!',
+                        duration: 3000
+                    });
                 } else {
-                    alert('Error: ' + result.message);
+                    alertaError('Error: ' + result.message); // ✅ CAMBIO
                 }
             } catch (error) {
                 console.error(error);
-                alert('Error de conexión');
+                alertaError('Error de conexión al actualizar avatar.'); // ✅ CAMBIO
             } finally {
                 btnConfirmAvatar.disabled = false;
                 btnConfirmAvatar.textContent = 'Guardar Avatar';

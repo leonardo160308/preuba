@@ -27,20 +27,35 @@
         <a href="/retos.html">RETOS</a>
         <a href="/lecciones.html">LECCIONES</a>
         <a href="/perfil.html">PERFIL</a>
-        <a href="#" id="logout-btn" title="Cerrar Sesión">
+        <!-- ✅ BOTÓN DE SALIR CON ID ESPECÍFICO -->
+        <a href="#" id="logout-btn-perfil" title="Cerrar Sesión">
             <img src="../public/img/Salida.png" alt="Salir">
         </a>
     </nav>
 </header>
 
+<!-- ========================================
+     SCRIPT PARA EL BOTÓN DE SALIR
+     Añade esto DESPUÉS de tu <script type="module" src="...profile.js">
+     ======================================== -->
+
 <script type="module">
     import { logout } from '/public/js/modules/auth.js';
+    import { alertaConfirmacion } from '/public/js/modules/alerts.js'; // ✅ NUEVO
     
-    const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtn = document.getElementById('logout-btn-perfil');
+    
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (confirm('¿Seguro que quieres cerrar sesión?')) {
+            
+            // ✅ Alerta de confirmación visual
+            const confirmar = await alertaConfirmacion(
+                '¿Estás seguro de que deseas cerrar sesión?',
+                '👋 Salir de TOO-EASY'
+            );
+            
+            if (confirmar) {
                 logout();
             }
         });

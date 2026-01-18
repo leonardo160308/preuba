@@ -17,13 +17,46 @@
         <h1>TOO-EASY</h1>
         <p>JUEGA HOY, TRIUNFA MAÑANA</p>
     </div>
+
     <nav class="nav">
         <a href="/dashboard.html">DASHBOARD</a>
-        <a href="/retos.html" class="active">RETOS</a> <a href="/lecciones.html">LECCIONES</a>
+        <a href="/retos.html">RETOS</a>
+        <a href="/lecciones.html">LECCIONES</a>
         <a href="/perfil.html">PERFIL</a>
-        <a href="#" id="logout-btn"><img src="../public/img/Salida.png" alt="Salir"></a>
+        <!-- ✅ BOTÓN DE SALIR CON ID ESPECÍFICO -->
+        <a href="#" id="logout-btn-perfil" title="Cerrar Sesión">
+            <img src="../public/img/Salida.png" alt="Salir">
+        </a>
     </nav>
 </header>
+
+<!-- ========================================
+     SCRIPT PARA EL BOTÓN DE SALIR
+     Añade esto DESPUÉS de tu <script type="module" src="...profile.js">
+     ======================================== -->
+
+<script type="module">
+    import { logout } from '/public/js/modules/auth.js';
+    import { alertaConfirmacion } from '/public/js/modules/alerts.js'; // ✅ NUEVO
+    
+    const logoutBtn = document.getElementById('logout-btn-perfil');
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // ✅ Alerta de confirmación visual
+            const confirmar = await alertaConfirmacion(
+                '¿Estás seguro de que deseas cerrar sesión?',
+                '👋 Salir de TOO-EASY'
+            );
+            
+            if (confirmar) {
+                logout();
+            }
+        });
+    }
+</script>
 
 <div class="split-layout">
     
@@ -50,11 +83,6 @@
 
 <script type="module" src="../public/js/pages/challenges.js"></script>
 
-<script type="module">
-    import { logout } from '/public/js/modules/auth.js';
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) logoutBtn.addEventListener('click', (e) => { e.preventDefault(); if(confirm('¿Salir?')) logout(); });
-</script>
 
 </body>
 </html>
