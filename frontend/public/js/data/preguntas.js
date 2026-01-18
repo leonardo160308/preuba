@@ -1,7 +1,7 @@
 const preguntasPorNivel = {
   1:[{
     texto: "Un ingreso es todo el dinero que entra a tu bolsillo o cuenta bancaria, sin importar de dónde provenga.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO.",
       B: "VERDADERO."
@@ -10,7 +10,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "¿Cuál de los siguientes es un ingreso fijo?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "Venta ocasional de productos usados.",
       B: "Propina por servicio.",
@@ -21,7 +21,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Laura recibe un salario mensual de $8,000 y gasta $3,000 en renta, $1,000 en transporte y $2,000 en comida. ¿Cuál es su excedente mensual, si además gana $600 por ventas ocasionales?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "$1,000.",
       B: "$1,600.",
@@ -32,7 +32,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Los gastos fijos se repiten cada mes con la misma cantidad o frecuencia, como la renta o la colegiatura.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO.",
       B: "VERDADERO."
@@ -43,7 +43,7 @@ const preguntasPorNivel = {
 2:[
   {
     texto: "El ahorro es la parte del ingreso que decides no gastar hoy para usar en el futuro.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO.",
       B: "VERDADERO."
@@ -52,7 +52,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Ahorrar significa dejar de disfrutar y no gastar nunca en gustos o entretenimiento.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO",
       B: "VERDADERO"
@@ -61,7 +61,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "¿Cuál de las siguientes afirmaciones describe mejor la importancia del ahorro?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "Permite gastar más en entretenimiento.",
       B: "Ayuda a mantener estabilidad financiera y cumplir metas.",
@@ -72,7 +72,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Según la regla 50/30/20, qué porcentaje del ingreso se recomienda destinar al ahorro (si es posible):",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "10 %",
       B: "30 %",
@@ -83,7 +83,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Juan gana $10,000 al mes y aplica la regla 50/30/20. ¿Cuánto debería destinar a su ahorro mensual?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "$1,000",
       B: "$3,000",
@@ -97,7 +97,7 @@ const preguntasPorNivel = {
 3:[
   {
     texto: "La seguridad financiera significa tener mucho dinero ahorrado para poder gastar sin preocuparte.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO.",
       B: "VERDADERO."
@@ -106,7 +106,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "El fondo de emergencia sirve para cubrir gastos imprevistos, como una reparación o una emergencia médica.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO",
       B: "VERDADERO"
@@ -115,7 +115,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "Según BBVA, ¿cuántos meses de gastos fijos debería cubrir idealmente un fondo de emergencia?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "3 a 6 meses.",
       B: "1 a 2 meses.",
@@ -126,7 +126,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "El fondo de emergencia debe guardarse junto con el dinero del día a día, para poder usarlo fácilmente cuando se necesite.",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "FALSO",
       B: "VERDADERO"
@@ -135,7 +135,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "María gasta $8,000 pesos al mes en necesidades básicas. Si quiere tener un fondo que cubra tres meses, ¿cuánto dinero debería reunir?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "$16,000",
       B: "$20,000",
@@ -146,7 +146,7 @@ const preguntasPorNivel = {
   },
   {
     texto: "¿Cuál de las siguientes opciones es la más segura para guardar un fondo de emergencia?",
-    imagen: "/img/Imagen1.1.png",
+    imagen: "../public/img/tarjetas.jpg",
     opciones: {
       A: "En efectivo debajo del colchón.",
       B: "En una cuenta de nómina donde recibes tu salario.",

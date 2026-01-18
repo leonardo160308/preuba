@@ -1,7 +1,7 @@
 import { protectRoute, getAuthData } from '../modules/auth.js';
 import { getChallengesStatus, completeChallenge } from '../modules/api.js'; 
 import { challengesData } from '../data/challenges.js';
-
+import { alertaExito, alertaError, alertaInfo } from '../modules/alerts.js';
 document.addEventListener('DOMContentLoaded', async () => {
     
     // 1. Seguridad
@@ -86,51 +86,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // 5. Manejar la Acción de Completar
-    async function handleCompleteChallenge(event) {
-        const button = event.target;
-        const challengeId = parseInt(button.dataset.challengeId);
+async function handleCompleteChallenge(event) {
+    const button = event.target;
+    const challengeId = parseInt(button.dataset.challengeId);
+    
+    // UI Feedback inmediato
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "⏳";
+
+    // ✅ Alerta de verificación
+    alertaInfo('Verificando progreso del reto...', { duration: 2000 });
+
+    try {
+        const result = await completeChallenge(userId, challengeId); 
         
-        // UI Feedback inmediato
-        const originalText = button.textContent;
-        button.disabled = true;
-        button.textContent = "...";
-
-        try {
-            const result = await completeChallenge(userId, challengeId); 
+        if (result.success) {
+            // ✅ Éxito con animación
+            button.textContent = "✓";
+            button.style.borderColor = "#27ae60";
+            button.style.color = "#27ae60";
             
-            if (result.success) {
-                // Éxito visual
-                button.textContent = "¡Reclamado!";
-                button.style.borderColor = "#27ae60";
-                button.style.color = "#27ae60";
-                
-                // Actualizar contadores globales (si tienes funciones para eso)
-                // updateResourcesUI(result.newWood, result.newCoins);
+            // ✅ Alerta de recompensa ganada
+            const mensaje = result.message || '¡Reto completado!';
+            alertaExito(mensaje, {
+                title: '🎉 ¡Felicidades!',
+                duration: 4000
+            });
 
-                // Recargar estado para asegurar sincronía
-                await fetchChallengesStatus(); 
-                
-                // Opcional: animar la barra de progreso al 100% manualmente antes de re-renderizar
-                const card = button.closest('.challenge-card');
-                const progressBar = card.querySelector('.progress-fill');
-                const progressText = card.querySelector('.progress-text');
-                if(progressBar) progressBar.style.width = '100%';
-                if(progressText) progressText.textContent = '100%';
-
-            } else {
-                alert(`❌ ${result.message}`);
-                button.disabled = false;
-                button.textContent = originalText;
+            // Recargar estado
+            await fetchChallengesStatus(); 
+            
+            // Animar barra de progreso
+            const card = button.closest('.challenge-card');
+            const progressBar = card.querySelector('.progress-fill');
+            const progressText = card.querySelector('.progress-text');
+            if(progressBar) {
+                progressBar.style.transition = 'width 0.8s ease';
+                progressBar.style.width = '100%';
             }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Error de conexión.");
+            if(progressText) progressText.textContent = '100%';
+
+        } else {
+            // ✅ Mostrar requisito faltante
+            alertaError(result.message || 'No cumples los requisitos del reto.', {
+                title: 'Reto incompleto',
+                duration: 5000
+            });
+            
             button.disabled = false;
             button.textContent = originalText;
         }
+    } catch (error) {
+        console.error("Error:", error);
+        alertaError('Error de conexión. Intenta nuevamente.'); // ✅ Error de red
+        button.disabled = false;
+        button.textContent = originalText;
     }
+}
 
-    // Inicialización
+    // Inicializar
     await fetchChallengesStatus();
     renderChallenges();
 });
