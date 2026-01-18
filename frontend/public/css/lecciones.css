@@ -14,6 +14,27 @@
   flex-wrap: wrap;
 }
 
+/* IMPORTANTE: Forzamos al body a ocupar el 100% de la pantalla sin scroll general */
+body {
+    color: #333;
+    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
+    height: 100vh; /* Altura total de la ventana */
+    display: flex;
+    flex-direction: column; /* Organiza Header arriba y Contenido abajo */
+}
+
+.logo h1 {
+  font-family: 'Arial', sans-serif; 
+  font-weight: 700;
+  font-size: 48px; 
+}
+
+
+.contenido-principal p {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+}
+
 .container img {
   width: 320px;
   max-width: 100%;
@@ -34,6 +55,9 @@
 
 .pagina-principal h2 {
   margin-bottom: 20px;
+  font-size: 40px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
 }
 
 /* ======== RESPONSIVO ======== */
@@ -60,10 +84,22 @@
   display: flex;
   flex-wrap: wrap;         
   justify-content: center; 
+  align-items: flex-start;
   gap: 30px;               
   padding: 20px; /* Fondo claro opcional */
   text-align: center;
 }
+
+.tarjeta-bodyA,
+.tarjeta-bodyD {
+  min-height: 190px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, height 0.3s ease;
+}
+
+.levels-container.hidden {
+  display: none;
+}
+
 
 /* ======== TARJETA ======== */
 .tarjetaA {
@@ -86,8 +122,6 @@
 }
 
 /* ======== ENCABEZADO ======== */
-
-
 
 .tarjeta-headerD {
   background-color: #2C405B; /* Azul oscuro */
@@ -116,6 +150,10 @@
 
 /* ======== CUERPO ======== */
 .tarjeta-bodyD {
+    font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
   padding: 18px;
   color: #333;
   display: flex;
@@ -131,6 +169,7 @@
   margin: 0;
   text-align: left;
 }
+
 
 /* ======== BOTÓN IZQUIERDA ======== */
 .tarjeta-bodyD button {
@@ -198,6 +237,10 @@
 }
 /* ======== CUERPO ======== */
 .tarjeta-bodyA {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
   padding: 18px;
   color: #333;
   display: flex;
@@ -277,4 +320,77 @@
 .level-card.locked:hover {
     transform: none;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/*Ocultar niveles por defectos*/
+.levels-container {
+  margin-top: 15px;
+  padding: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+/*Niveles individuales*/
+.level-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  font-size: 14px;
+}
+
+.level-item.unlocked {
+  background: #eaf4ff;
+}
+
+.level-item.locked {
+  opacity: 0.6;
+}
+
+/*Barra de progreso*/
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #2C405B;
+  transition: width 0.3s ease;
+}
+
+/* ======== BOTONES ======== */
+
+button {
+  margin-top: 5px;
+  padding: 5px 8px;
+
+  background-color: transparent;      /* NORMAL */
+  border: 2px solid #9bb0d0;
+  border-radius: 10px;
+
+  color: #9bb0d0;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  background-color: #9bb0d0;  /* HOVER */
+  color: #ffffff;
 }

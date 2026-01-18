@@ -131,7 +131,7 @@ h2 {
 
 .result-item strong {
     font-size: 1.5rem;
-    color: var(--secondary-color); /* Dorado para los números importantes */
+    color: #ffffff; /* Dorado para los números importantes */
     margin-top: 5px;
 }
 

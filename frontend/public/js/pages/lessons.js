@@ -4,98 +4,120 @@ import { getUserData } from '../modules/api.js';
 import { protectRoute, getAuthData } from '../modules/auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Seguridad y Autenticación
+    // 1. Seguridad
     if (!protectRoute()) return;
     const sessionUser = getAuthData();
     const userId = sessionUser.id;
 
-    // 2. Definición del Contenedor de Niveles
-    const levelsContainer = document.getElementById('levels-container'); // Asegúrate de que este ID exista en tu lecciones.html
-    const totalNiveles = 17;
+    // 2. MAPEO GLOBAL DE LECCIONES → NIVELES
+    const lessonsConfig = {
+        fundamentos: { start: 1, end: 3 },
+        'cuentas-bancarias': { start: 4, end: 6 },
+        tarjetas: { start: 7, end: 10 },
+        administracion: { start: 11, end: 13 },
+        'deudas-creditos': { start: 14, end: 17 }
+    };
 
-    // 3. Obtener el Progreso del Usuario
-    let userLevel = 1; // Nivel por defecto si hay error
+    // 3. Progreso global
+    let userLevel = 1;
 
     try {
         const userData = await getUserData(userId);
-        // Usamos el campo 'level' que almacena el progreso educativo/quiz
-        userLevel = userData.level || 1; 
-        
-        console.log(`Progreso cargado: Nivel actual: ${userLevel}`);
+        userLevel = userData.level || 1;
+        console.log('Nivel global actual:', userLevel);
+
+        // ✅ QUITAR LOADING REAL
+        const loading = document.querySelector('.loading-levels');
+        if (loading) loading.remove();
+
     } catch (error) {
-        console.error("Error al cargar el progreso del usuario:", error);
-        alert("No se pudo cargar tu progreso. Intenta recargar.");
+        console.error('Error cargando progreso:', error);
     }
 
-  // 4. Renderizar los Niveles
-    function renderizarNiveles() {
-        if (!levelsContainer) return;
-        levelsContainer.innerHTML = ''; // Limpiar el contenedor antes de dibujar
+    // 4. Renderizar niveles de una lección
+    function renderizarLeccion(card) {
+        const category = card.dataset.category;
+        const config = lessonsConfig[category];
+        if (!config) return;
 
-        for (let i = 1; i <= totalNiveles; i++) {
-            const isUnlocked = i <= userLevel; // El nivel está desbloqueado si el índice es menor o igual al nivel del usuario
+        const levelsContainer = card.querySelector('.levels-container');
+
+        // 🔴 IMPORTANTE: conservar la barra
+        const progressBar = levelsContainer.querySelector('.progress-bar');
+
+        levelsContainer.innerHTML = '';
+        if (progressBar) levelsContainer.appendChild(progressBar);
+
+        const totalLevels = config.end - config.start + 1;
+        let completedInLesson = 0;
+
+        for (let globalLevel = config.start; globalLevel <= config.end; globalLevel++) {
+            const localLevel = globalLevel - config.start + 1;
+
+            const isCompleted = globalLevel < userLevel;
+            const isActive = globalLevel === userLevel;
+
+            if (isCompleted) completedInLesson++;
+
             const levelDiv = document.createElement('div');
-            levelDiv.classList.add('level-card');
-            
-            // Asigna una clase para estilizar el nivel (activo, completado o bloqueado)
-            if (i < userLevel) {
-                levelDiv.classList.add('completed');
-            } else if (i === userLevel) {
-                levelDiv.classList.add('active');
-            } else {
-                levelDiv.classList.add('locked');
-            }
-            
-            // ✅ CONTENIDO VISIBLE DE LA TARJETA
+            levelDiv.classList.add('level-item');
+
+            if (isCompleted) levelDiv.classList.add('completed');
+            else if (isActive) levelDiv.classList.add('active');
+            else levelDiv.classList.add('locked');
+
+            // ✅ BOTÓN EN COMPLETADOS Y ACTIVO
             levelDiv.innerHTML = `
-                <div class="level-number">Nivel ${i}</div>
-                <div class="level-icon">
-                    ${isUnlocked ? '🔓' : '🔒'}
-                </div>
-                <div class="level-title">${getNombreNivel(i)}</div>
-                ${isUnlocked ? '<div class="level-action">👉 Estudiar</div>' : '<div class="level-locked-msg">Bloqueado</div>'}
+                <span>Nivel ${localLevel}</span>
+                ${
+                    (isActive || isCompleted)
+                        ? `<button>Estudiar</button>`
+                        : `<i class="fa-solid fa-lock"></i>`
+                }
             `;
-            
-            // 5. Asignar Evento de Clic
-            if (isUnlocked) {
-                levelDiv.style.cursor = 'pointer';
-                levelDiv.onclick = () => {
-                    // ✅ CORRECCIÓN: Redirige primero a las flashcards (nivel.html)
-                    window.location.href = `/nivel.html?level=${i}`;
-                };
-            } else {
-                levelDiv.title = `Desbloquea el Nivel ${i - 1} para acceder.`;
+
+            // 👉 Click en estudiar
+            if (isActive || isCompleted) {
+                levelDiv.querySelector('button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.location.href = `/nivel.html?level=${globalLevel}`;
+                });
             }
 
-            levelsContainer.appendChild(levelDiv);
+            // Insertar antes de la barra
+            levelsContainer.insertBefore(levelDiv, progressBar);
+        }
+
+        // 5. Barra de progreso por lección
+        const progressFill = progressBar?.querySelector('.progress-fill');
+        if (progressFill) {
+            const percent = (completedInLesson / totalLevels) * 100;
+            progressFill.style.width = `${percent}%`;
         }
     }
 
-    // Función auxiliar para los nombres de los niveles
-    function getNombreNivel(level) {
-        // Puedes cambiar estos nombres por los temas reales de tu juego
-        const names = {
-            1: "Conociendo el dinero",
-            2: "Guardar o Gastar",
-            3: "Seguridad Financiera",
-            4: "Tu primera cuenta",
-            5: "La cuenta del trabajo(nomina)",
-            6: "Lo que el banco cobra",
-            7: "Debito",
-            8: "Credito",
-            9: "Tipos de credito",
-            10: "Subiendo de nivel(tarjetas oro y platino)",
-            11:"Organizando el sueldo",
-            12:"Regla 50/30/20",
-            13:"Presupuesto inteligente",
-            14:"Como aprueban o niegan un prestamo",
-            15:"Historial crediticio y su importancia",
-            16:"¿Que es una deuda y para que sirve? ",
-            17:"Tipos de deudas buenas y malas"
-        };
-        return names[level] || `Tema Genérico ${level}`;
-    }
+    // 6. Click en tarjeta
+        document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', () => {
 
-    // 6. Inicialización
-    renderizarNiveles();
+            document.querySelectorAll('.category-card').forEach(otherCard => {
+                if (otherCard !== card) {
+                    const otherLevels = otherCard.querySelector('.levels-container');
+                    otherLevels.classList.add('hidden');
+                }
+            });
+
+            const levels = card.querySelector('.levels-container');
+            const isHidden = levels.classList.contains('hidden');
+
+            // Toggle SOLO de la tarjeta clickeada
+            levels.classList.toggle('hidden');
+
+            // Renderizar solo si se acaba de abrir
+            if (isHidden) {
+                renderizarLeccion(card);
+            }
+        });
+    });
+
 });

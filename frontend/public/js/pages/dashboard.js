@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Personalizar saludo
     const titulo = document.querySelector('.main-header h1');
-    if(titulo) titulo.textContent = `Hola, ${usuarioLogueado.nombre} 🦫`;
+    if(titulo) titulo.textContent = `Hola, ${usuarioLogueado.nombre}`;
 
     // --- 1. ESTADO DE LA APLICACIÓN ---
     const fechaActual = new Date(); 
@@ -292,12 +292,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         txtRestante.textContent = `$${faltaParaMeta.toFixed(2)}`;
         
         if (ahorroMensual < 0) {
-            txtAhorro.style.color = 'var(--color-red)';
+            txtAhorro.style.color = '#E57373';
             txtEstado.textContent = "Déficit";
         } else {
-            txtAhorro.style.color = 'var(--color-green)';
+            txtAhorro.style.color = '#81C784';
             if (faltaParaMeta === 0 && datosFijos.metaCantidad > 0) {
-                txtEstado.textContent = "¡Meta Alcanzada! 🎉";
+                txtEstado.textContent = "¡Meta Alcanzada!";
             } else {
                 txtEstado.textContent = "En progreso";
             }
@@ -315,8 +315,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     label: 'Finanzas ($)',
                     data: [0, 0, 0],
-                    backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(239, 68, 68, 0.6)', 'rgba(59, 130, 246, 0.6)'],
-                    borderColor: ['rgba(16, 185, 129, 1)', 'rgba(239, 68, 68, 1)', 'rgba(59, 130, 246, 1)'],
+                    backgroundColor: ['#A5D6A7', '#EF9A9A', '#B6C4DA'],
+                    borderColor: ['#1B5E20', '#B71C1C', '#2C405B'],
                     borderWidth: 1
                 }]
             },
