@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="progress-track">
                         <div class="progress-fill" style="width: ${percentage}%"></div>
                     </div>
-                    <span class="progress-text" style="color: #333; font-weight:bold;">${percentage}%</span>
+                    <span class="progress-text" style="color: #fff; font-weight:bold;">${percentage}%</span>
                     
                     <div class="reward-pill">
                         🪵 ${challenge.reward_wood}
