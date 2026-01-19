@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="../public/css/lecciones.css">
     <link rel="stylesheet" href="../public/css/header.css">
     <link rel="stylesheet" href="../public/css/alerts.css">
+    
+    <!-- Font Awesome y Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap" rel="stylesheet">
+
 </head>
 <body>
 
@@ -68,7 +74,7 @@
     <!-- Sección Hero -->
     <section class="container pagina-principal">
         <div class="contenido-principal">
-            <h2>🎓 Tu Camino hacia la Libertad Financiera</h2>
+            <h2>Tu Camino hacia la Libertad Financiera</h2>
             <p>
                 Selecciona un nivel para comenzar tu aprendizaje. Cada lección desbloqueada 
                 te acerca más a dominar tus finanzas personales.
@@ -98,13 +104,13 @@
          SECCIÓN DE CATEGORÍAS (OPCIONAL - Para mostrar estructura)
          ======================================== -->
     <section class="container categorias-info" style="margin-top: 4rem;">
-        <h2 style="text-align: center; margin-bottom: 2rem; color: #2C405B;">
-            📖 Categorías de Aprendizaje
+        <h2 style="text-align: center; font-family: 'Baloo 2', cursive; font-size: 32px; margin-bottom: 1rem; color: #2C405B;">
+            Categorías de Aprendizaje
         </h2>
         
         <div class="tarjetas">
             <!-- Fundamentos -->
-            <div class="tarjetaD">
+            <div class="tarjetaD category-card" data-category="fundamentos">
                 <div class="tarjeta-headerD">
                     <h3>Fundamentos</h3>
                 </div>
@@ -116,10 +122,33 @@
                     </p>
                     <span class="category-badge">Niveles 1-3</span>
                 </div>
+
+                <!-- 👇 CONTENEDOR DE NIVELES -->
+                    <div class="levels-container hidden">
+                        <div class="level-item unlocked">
+                        <span>Nivel 1</span>
+                        <button>Estudiar</button>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 2</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 3</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
             </div>
 
             <!-- Cuentas Bancarias -->
-            <div class="tarjetaA">
+            <div class="tarjetaA category-card" data-category="cuentas-bancarias">
                 <div class="tarjeta-headerA">
                     <h3>Cuentas Bancarias</h3>
                 </div>
@@ -130,10 +159,33 @@
                     </p>
                     <span class="category-badge">Niveles 4-6</span>
                 </div>
+
+                                <!-- 👇 CONTENEDOR DE NIVELES -->
+                    <div class="levels-container hidden">
+                        <div class="level-item unlocked">
+                        <span>Nivel 1</span>
+                        <button>Estudiar</button>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 2</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 3</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
             </div>
 
             <!-- Tarjetas -->
-            <div class="tarjetaD">
+            <div class="tarjetaD category-card" data-category="tarjetas">
                 <div class="tarjeta-headerD">
                     <h3>Tarjetas</h3>
                 </div>
@@ -144,10 +196,33 @@
                     </p>
                     <span class="category-badge">Niveles 7-10</span>
                 </div>
+
+                                <!-- 👇 CONTENEDOR DE NIVELES -->
+                    <div class="levels-container hidden">
+                        <div class="level-item unlocked">
+                        <span>Nivel 1</span>
+                        <button>Estudiar</button>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 2</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 3</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
             </div>
 
             <!-- Administración -->
-            <div class="tarjetaA">
+            <div class="tarjetaA category-card" data-category="administracion">
                 <div class="tarjeta-headerA">
                     <h3>Administración de Dinero</h3>
                 </div>
@@ -158,10 +233,33 @@
                     </p>
                     <span class="category-badge">Niveles 11-13</span>
                 </div>
+
+                                <!-- 👇 CONTENEDOR DE NIVELES -->
+                    <div class="levels-container hidden">
+                        <div class="level-item unlocked">
+                        <span>Nivel 1</span>
+                        <button>Estudiar</button>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 2</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 3</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
             </div>
 
             <!-- Deudas y Créditos -->
-            <div class="tarjetaD">
+            <div class="tarjetaD category-card" data-category="deudas-creditos">
                 <div class="tarjeta-headerD">
                     <h3>Deudas y Créditos</h3>
                 </div>
@@ -172,6 +270,29 @@
                     </p>
                     <span class="category-badge">Niveles 14-17</span>
                 </div>
+
+                                <!-- 👇 CONTENEDOR DE NIVELES -->
+                    <div class="levels-container hidden">
+                        <div class="level-item unlocked">
+                        <span>Nivel 1</span>
+                        <button>Estudiar</button>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 2</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div class="level-item locked">
+                        <span>Nivel 3</span>
+                        <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
             </div>
         </div>
     </section>

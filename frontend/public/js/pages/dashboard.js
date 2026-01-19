@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Personalizar saludo
     const titulo = document.querySelector('.main-header h1');
-    if(titulo) titulo.textContent = `Hola, ${usuarioLogueado.nombre} 🦫`;
+    if(titulo) titulo.textContent = `Hola, ${usuarioLogueado.nombre}`;
 
     // --- 1. ESTADO DE LA APLICACIÓN ---
     const fechaActual = new Date(); 
@@ -173,12 +173,56 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error al guardar datos fijos:", error);
         }
     }
+// --- VALIDACIÓN FINANCIERA SEGURA ---
+// maxEnteros = dígitos antes del punto
+// maxDecimales = dígitos después del punto
+function limitarNumero(input, maxEnteros, maxDecimales = 2) {
+    input.addEventListener('input', () => {
+        let valor = input.value;
+
+        // Quitar todo excepto números y punto
+        valor = valor.replace(/[^\d.]/g, '');
+
+        // Evitar más de un punto
+        const partes = valor.split('.');
+        if (partes.length > 2) {
+            valor = partes[0] + '.' + partes.slice(1).join('');
+        }
+
+        let [enteros, decimales] = valor.split('.');
+
+        // ❗ Evitar punto como primer carácter
+        if (enteros === '' && valor.startsWith('.')) {
+            enteros = '0';
+        }
+
+        // Limitar enteros
+        if (enteros.length > maxEnteros) {
+            enteros = enteros.slice(0, maxEnteros);
+        }
+
+        // Limitar decimales
+        if (decimales !== undefined) {
+            decimales = decimales.slice(0, maxDecimales);
+            valor = `${enteros}.${decimales}`;
+        } else {
+            valor = enteros;
+        }
+
+        input.value = valor;
+    });
+}
+
 
     // --- 5. INICIALIZACIÓN ---
 
     async function init() {
         inicializarGrafica(); // Crear instancia vacía
         await cargarDatosDelServidor(); // Llenarla con datos reales
+        // Limitar números financieros
+limitarNumero(inpIngreso, 8, 2);   // Ingreso fijo
+limitarNumero(inpEgreso, 8, 2);    // Egreso fijo
+limitarNumero(inpMetaMonto, 9, 2); // Meta de ahorro
 
         // Eventos para Datos Fijos
         // Usamos 'change' en lugar de 'input' para no saturar al servidor con cada tecla
@@ -292,12 +336,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         txtRestante.textContent = `$${faltaParaMeta.toFixed(2)}`;
         
         if (ahorroMensual < 0) {
-            txtAhorro.style.color = 'var(--color-red)';
+            txtAhorro.style.color = '#E57373';
             txtEstado.textContent = "Déficit";
         } else {
-            txtAhorro.style.color = 'var(--color-green)';
+            txtAhorro.style.color = '#81C784';
             if (faltaParaMeta === 0 && datosFijos.metaCantidad > 0) {
-                txtEstado.textContent = "¡Meta Alcanzada! 🎉";
+                txtEstado.textContent = "¡Meta Alcanzada!";
             } else {
                 txtEstado.textContent = "En progreso";
             }
@@ -315,8 +359,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{
                     label: 'Finanzas ($)',
                     data: [0, 0, 0],
-                    backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(239, 68, 68, 0.6)', 'rgba(59, 130, 246, 0.6)'],
-                    borderColor: ['rgba(16, 185, 129, 1)', 'rgba(239, 68, 68, 1)', 'rgba(59, 130, 246, 1)'],
+                    backgroundColor: ['#A5D6A7', '#EF9A9A', '#B6C4DA'],
+                    borderColor: ['#1B5E20', '#B71C1C', '#2C405B'],
                     borderWidth: 1
                 }]
             },

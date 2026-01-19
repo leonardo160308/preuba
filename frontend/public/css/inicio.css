@@ -6,10 +6,11 @@
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
   line-height: 1.6;
   background-color: white;
   color: black;
+  
 }
 
 /* ======== ENCABEZADO ======== */
@@ -73,7 +74,7 @@ body {
 }
 
 .header nav a {
-  color: black;
+  color: rgb(255, 255, 255);
   text-decoration: none;
   font-weight: bold;
 }
@@ -230,7 +231,9 @@ body {
 .footer a:hover {
   text-decoration: underline;
 }
-
+.footer span:hover {
+  text-decoration: underline;
+}
 /* ======== RESPONSIVO ======== */
 @media (max-width: 768px) {
   .container {

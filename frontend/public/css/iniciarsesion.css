@@ -10,6 +10,8 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+      font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
+
 }
 
 .container {

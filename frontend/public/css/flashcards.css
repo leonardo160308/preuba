@@ -16,6 +16,8 @@ body {
   background-color: var(--muted-bg);
   min-height: 100vh;
   margin: 0;
+      font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
+
 }
 
 /* =================== CONTAINER =================== */
