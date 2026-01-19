@@ -3,67 +3,104 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+body {
+    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
+}
+
+.logo h1 {
+  font-family: 'Arial', sans-serif; 
+  font-weight: 700;
+  font-size: 48px; 
+}
+
+h2, h3 {
+    font-weight: 700;
+}
+
+
 .right-column {
     background-color: #d2b48c;
-    border-radius: 10px;
+    border-radius: 16px;
     padding: 20px;
-
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-    gap: 20px;
-
-    overflow-y: auto;
-}
-
-
-/* Cada Visor Individual */
-.skin-viewer-container {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 18px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    justify-content: space-between;
+    margin: 0 auto;
+    align-self: center;
+
+    width: 100%; /* ocupa todo el 65% asignado */ 
+    height: 100%; /* se mantiene fija dentro del grid */ 
+    box-sizing: border-box; 
 }
 
-/* Cada Visor Individual */
-
-
-.skin-viewer-container h3 {
-    margin-bottom: 10px;
-    color: #4a3b2a;
-    font-size: 1.2rem;
-    text-align: center;
-}
-
-.skin-display {
+.scene {
+    position: relative;
     width: 100%;
-    height: 260px;
+    height: 360px;
+    border-radius: 16px;
+    overflow: hidden; /* 🔑 CLAVE */
+    margin-bottom: 20px;
+    flex-grow: 1;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background: #f4f6f8;
-    border-radius: 14px;
-    overflow: hidden;
+    justify-content: center;
 }
 
-.skin-display img {
-    max-width: 100%;
-    max-height: 100%;
+.profile-visual-zone {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.house-img {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 800px;
+    height: 450px;
     object-fit: contain;
+    z-index: 1;
+    pointer-events: none;
+    margin: 0 auto;
+}
+
+/* CASTOR ENFRENTE */
+.beaver-img {
+    position: absolute;
+    bottom: 10px;
+    right: 22%;
+    width: 25%;          /* 🔽 tamaño reducido */
+    max-height: 70%;
+    object-fit: contain;
+    z-index: 2;
 }
 
 /* Controles abajo */
+.skin-controls-container {
+   display: flex;
+    width: 100%;
+    gap: 12px;
+}
+
 .skin-controls {
+    width: 50%;
+    background: #f5f5f5;
+    border-radius: 14px;
+    padding: 10px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    background: rgba(255,255,255,0.8); /* Un poco más sólido */
-    padding: 8px;
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
+    justify-content: space-between; /* 🔑 */
+    gap: 8px;
+}
+
+.skin-status {
+    font-size: 0.75rem;
+    color: #27ae60;
+    font-weight: bold;
 }
 
 .skin-info-center span {
@@ -79,24 +116,19 @@ body {
 
 }
 
-
-
-
 .main-container {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
-    height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 30px;
+  width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
 }
+
 
 /* Izquierda */
 .left-column {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    gap: 25px;
 }
 
 .header-card {
@@ -107,12 +139,8 @@ body {
 }
 
 .info-card {
-    background-color: #e0e5ec;
-    padding: 20px;
-    border-radius: 10px;
-    display: flex;
-    gap: 15px;
-    align-items: center;
+    background: #eef2f6;
+    border-radius: 14px;
 }
 
 .avatar-container {
@@ -212,6 +240,7 @@ body {
     color: white;
     border: none;
     padding: 12px 20px;
+    margin: 10px 0 0 0;
     border-radius: 10px;
     font-size: 0.95rem;
     font-weight: bold;
@@ -232,32 +261,6 @@ body {
 }
 
 /* Derecha */
-
-
-
-
-
-.skin-status {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #4CAF50;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-}
-
-.skin-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #f8f9fb;
-    padding: 10px 14px;
-    border-radius: 30px;
-    box-shadow: inset 0 0 0 1px #e0e0e0;
-}
-
 
 .nav-btn {
     width: 42px;
@@ -297,7 +300,7 @@ body {
 .upgrade-actions {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 /* Estilo Base de los Botones Nuevos */
@@ -426,6 +429,9 @@ body {
 /* ========================================
    MODAL DE AVATARES
    ======================================== */
+.avatar-container{
+    padding: 10px;
+}
 
 .avatar-modal {
     position: fixed;

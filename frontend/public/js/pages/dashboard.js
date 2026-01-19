@@ -22,10 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const usuarioLogueado = getAuthData();
     const userId = usuarioLogueado.id;
 
-    // Personalizar saludo
-    const titulo = document.querySelector('.main-header h1');
-    if(titulo) titulo.textContent = `Hola, ${usuarioLogueado.nombre}`;
-
     // --- 1. ESTADO DE LA APLICACIÓN ---
     const fechaActual = new Date(); 
     let mesVisualizado = fechaActual.getMonth(); 

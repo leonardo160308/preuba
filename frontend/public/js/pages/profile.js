@@ -97,9 +97,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(welcomeMsg) welcomeMsg.textContent = `Hola, ${currentUserData.nombre}!`;
             if(userNameLbl) userNameLbl.textContent = currentUserData.nombre;
             
-            if(userAvatar && currentUserData.foto) {
-                userAvatar.src = `/public/img/avatars/${currentUserData.foto}.png`;
+            if (userAvatar) {
+                const avatarGuardado = currentUserData.foto || localStorage.getItem('userAvatar');
+                if (avatarGuardado) {
+                    userAvatar.src = `/public/img/avatars/perfil${avatarGuardado.replace('avatar','')}.png`;
+                }
             }
+
 
             actualizarUI();
             
@@ -313,6 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (type === 'house') currentUserData.current_appearance = skinId;
                 if (type === 'beaver') currentUserData.current_beaver = skinId;
                 
+                
                 // ✅ Alerta de éxito
                 const nombreSkin = type === 'house' ? SKIN_NAMES[skinId] : CASTOR_NAMES[skinId];
                 alertaExito(`¡${nombreSkin} equipado correctamente!`, {
@@ -434,7 +439,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 if(result.success) {
                     currentUserData.foto = selectedAvatar;
-                    userAvatar.src = `/public/img/avatars/${selectedAvatar}.png`;
+                    userAvatar.src = `/public/img/avatars/perfil${selectedAvatar.replace('avatar','')}.png`;
+                    localStorage.setItem('userAvatar', selectedAvatar);
                     avatarModal.style.display = 'none';
                     
                     // ✅ Alerta de éxito

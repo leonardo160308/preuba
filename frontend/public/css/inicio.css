@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
+  font-family: 'Arial', sans-serif;
   line-height: 1.6;
   background-color: white;
   color: black;
@@ -34,15 +34,21 @@ body {
 }
 
 .logo h1 {
-  margin: 0;
-  font-size: 32px;
-  letter-spacing: 2px;
+  font-family: 'Arial', sans-serif; 
+  font-weight: 700;
+  font-size: 48px; 
+}
+
+.contenido-principal h2{
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 40px;
 }
 
 .logo p {
   margin: 0;
   font-size: 14px;
 }
+
 
 /* ======== NAVEGACIÓN ======== */
 .nav {
@@ -120,12 +126,13 @@ body {
 
 .btn-iniciar-sesion,
 .btn-crear-cuenta {
-  padding: 10px 20px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: bold;
+  font-size: 24px;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
   border-radius: 8px;
-  margin-top: 10px;
+  padding: 10px 30px;
 }
 
 .btn-iniciar-sesion {
@@ -172,6 +179,7 @@ body {
 
 .texto p {
   text-align: justify;
+  
 }
 
 /* ======== SECCIONES ALTERNADAS ======== */

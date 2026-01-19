@@ -124,24 +124,20 @@
         
         <div class="avatar-grid">
             <div class="avatar-option" data-avatar="avatar1">
-                <img src="/public/img/avatars/avatar1.png" alt="Avatar 1" 
+                <img src="/public/img/avatars/perfil1.png" alt="Avatar 1" 
                      onerror="this.src='https://via.placeholder.com/100/FF6B6B/fff?text=1'">
             </div>
             <div class="avatar-option" data-avatar="avatar2">
-                <img src="/public/img/avatars/avatar2.png" alt="Avatar 2"
+                <img src="/public/img/avatars/perfil2.png" alt="Avatar 2"
                      onerror="this.src='https://via.placeholder.com/100/4ECDC4/fff?text=2'">
             </div>
             <div class="avatar-option" data-avatar="avatar3">
-                <img src="/public/img/avatars/avatar3.png" alt="Avatar 3"
+                <img src="/public/img/avatars/perfil3.png" alt="Avatar 3"
                      onerror="this.src='https://via.placeholder.com/100/45B7D1/fff?text=3'">
             </div>
             <div class="avatar-option" data-avatar="avatar4">
-                <img src="/public/img/avatars/avatar4.png" alt="Avatar 4"
+                <img src="/public/img/avatars/perfil4.png" alt="Avatar 4"
                      onerror="this.src='https://via.placeholder.com/100/FFA07A/fff?text=4'">
-            </div>
-            <div class="avatar-option" data-avatar="avatar5">
-                <img src="/public/img/avatars/avatar5.png" alt="Avatar 5"
-                     onerror="this.src='https://via.placeholder.com/100/98D8C8/fff?text=5'">
             </div>
         </div>
         
@@ -204,81 +200,77 @@
     <!-- ========================================
          COLUMNA DERECHA: VISORES DE SKINS
          ======================================== -->
-    <div class="right-column"> 
-        
-        <!-- ========================================
-             VISOR DE LA CASA
-             ======================================== -->
-        <div class="skin-viewer-container">
-            <h3>Tu Hogar</h3>
+        <div class="right-column"> 
+
+            <div class="profile-visual-zone">          
             
-            <!-- Imagen de la Casa -->
-            <div class="skin-display">
-                <img id="house-img" src="../public/img/casaN1.jpg" alt="Casa">
-                <!-- Badge de "Equipado" (se oculta si no está activo) -->
-                <div class="skin-status" id="house-status" style="display: none;">
-                    ✅ Equipado
-                </div>
-            </div>
-            
-            <!-- Controles del Carrusel -->
-            <div class="skin-controls">
-                <button id="btn-prev-house" class="nav-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                
-                <div class="skin-info-center">
-                    <span id="house-name-lbl">Choza Inicial</span>
-                    <button id="btn-equip-house" class="btn-equip">Equipar</button>
-                </div>
-                
-                <button id="btn-next-house" class="nav-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
+                <div class="scene">
+
+                    <img 
+                        id="house-img"
+                        class="house-img"
+                        src="../public/img/casaN1.jpg"
+                        alt="Casa"
+                    >      
+                    <img 
+                        id="beaver-img"
+                        class="beaver-img"
+                        src="../public/img/mapacheBase.jpg"
+                        alt="Castor"
+                    >
+                </div>  
+                <!-- ========================================
+                    CONTROLES
+                    ======================================== -->
+
+                    <div class="skin-controls-container">
+                        
+                        <!-- CASA -->
+
+                        <div class="skin-controls house-controls">           
+                         <button id="btn-prev-house" class="nav-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            
+                            <div class="skin-info-center">
+                                <span id="house-name-lbl">Choza Inicial</span>
+                                <button id="btn-equip-house" class="btn-equip">Equipar</button>
+                            </div>
+
+                            <div class="skin-status" id="house-status" style="display: none;">
+                                ✅ Equipado
+                             </div>
+                            
+                            <button id="btn-next-house" class="nav-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                 
+                            
+                        <!-- CASTOR -->
+                    <div class="skin-controls beaver-controls">
+                        <button id="btn-prev-beaver" class="nav-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="skin-info-center">
+                            <span id="beaver-name-lbl">Castor Bebé</span>
+                            <button id="btn-equip-beaver" class="btn-equip">Equipar</button>
+                        </div>
+
+                        <div class="skin-status" id="beaver-status" style="display: none;">
+                        ✅ Equipado
+                    </div>
+                        
+                        <button id="btn-next-beaver" class="nav-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                </div>        
+                               
+             </div>   
         </div>
-
-        <!-- ========================================
-             VISOR DEL CASTOR
-             ======================================== -->
-        <div class="skin-viewer-container">
-            <h3>Tu Castor</h3>
-            
-            <!-- Imagen del Castor -->
-            <div class="skin-display">
-                <img id="beaver-img" src="../public/img/mapacheBase.jpg" alt="Castor">
-                <!-- Badge de "Equipado" -->
-                <div class="skin-status" id="beaver-status" style="display: none;">
-                    ✅ Equipado
-                </div>
-            </div>
-            
-            <!-- Controles del Carrusel -->
-            <div class="skin-controls">
-                <button id="btn-prev-beaver" class="nav-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                
-                <div class="skin-info-center">
-                    <span id="beaver-name-lbl">Castor Bebé</span>
-                    <button id="btn-equip-beaver" class="btn-equip">Equipar</button>
-                </div>
-                
-                <button id="btn-next-beaver" class="nav-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-
-    </div>
-    </div>
-
-    </div>
-
-
+    </div> 
 </div>
-
-
 <script type="module" src="../public/js/pages/profile.js"></script>
 
 </body>
