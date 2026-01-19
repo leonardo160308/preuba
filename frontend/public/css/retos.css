@@ -9,11 +9,19 @@
 body {
     background-color: #1f2d3d;
     color: #333;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
     height: 100vh; /* Altura total de la ventana */
     display: flex;
     flex-direction: column; /* Organiza Header arriba y Contenido abajo */
     overflow: hidden; /* Evita que se mueva toda la página */
+}
+
+
+
+.logo h1 {
+  font-family: 'Arial', sans-serif; 
+  font-weight: 700;
+  font-size: 48px; 
 }
 
 /* ====== HEADER (No lo tocamos, solo aseguramos que no crezca) ====== */

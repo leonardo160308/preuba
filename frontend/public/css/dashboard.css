@@ -36,8 +36,14 @@
 body {
     background-color: var(--bg-color);
     color: var(--text-dark);
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
     line-height: 1.6;
+}
+
+.logo h1 {
+  font-family: 'Arial', sans-serif; 
+  font-weight: 700;
+  font-size: 48px; 
 }
 
 .app-container {
