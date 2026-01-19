@@ -23,6 +23,7 @@ class User {
         }
     }
 
+    
     // 2. LEER (Read): Buscar usuario por ID (útil para el perfil)
     static async findById(id) {
         const query = 'SELECT * FROM users WHERE id = ?';
@@ -38,44 +39,55 @@ class User {
     
     // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
    // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
-    static async update(id, updateData) {
-        // Lista de campos permitidos para actualizar (SEGURIDAD)
-        const allowedFields = [
-            'nombre', 'password_hash', 'edad', 'genero', 'foto',
-            'level', 'coins', 'wood', 
-            'house_level', 'beaver_level',
-            'current_appearance', 'current_beaver'
-        ];
-        
-        // Filtrar solo campos permitidos
-        const filteredData = {};
-        Object.keys(updateData).forEach(key => {
-            if (allowedFields.includes(key)) {
-                filteredData[key] = updateData[key];
-            }
-        });
-        
-        // Genera la parte 'SET campo = ?' dinámicamente
-        const fields = Object.keys(filteredData).map(key => `${key} = ?`).join(', ');
-        const values = Object.values(filteredData);
-        
-        if (fields.length === 0) {
-            console.warn('No hay campos válidos para actualizar');
-            return null;
+static async update(id, updateData) {
+    // Lista de campos permitidos para actualizar (SEGURIDAD)
+    const allowedFields = [
+        'nombre',
+        'password_hash',
+        'edad',
+        'genero',
+        'foto',
+        'level',
+        'coins',
+        'wood',
+        'dashboard_balance', // 🔥 AQUÍ VA
+        'house_level',
+        'beaver_level',
+        'current_appearance',
+        'current_beaver'
+    ];
+    
+    // Filtrar solo campos permitidos
+    const filteredData = {};
+    Object.keys(updateData).forEach(key => {
+        if (allowedFields.includes(key)) {
+            filteredData[key] = updateData[key];
         }
+    });
+    
+    const fields = Object.keys(filteredData)
+        .map(key => `${key} = ?`)
+        .join(', ');
 
-        // La consulta final incluye el ID al final del SET
-        const query = `UPDATE users SET ${fields} WHERE id = ?`;
-        
-        try {
-            console.log('Ejecutando UPDATE:', query, [...values, id]);
-            const [result] = await db.execute(query, [...values, id]);
-            return result;
-        } catch (error) {
-            console.error('Error en User.update:', error);
-            throw error;
-        }
+    const values = Object.values(filteredData);
+
+    if (fields.length === 0) {
+        console.warn('No hay campos válidos para actualizar');
+        return null;
     }
+
+    const query = `UPDATE users SET ${fields} WHERE id = ?`;
+
+    try {
+        console.log('Ejecutando UPDATE:', query, [...values, id]);
+        const [result] = await db.execute(query, [...values, id]);
+        return result;
+    } catch (error) {
+        console.error('Error en User.update:', error);
+        throw error;
+    }
+}
+
 
     // 4. BORRAR (Delete Lógico): Cambiar is_active a false
 // 4. BORRAR (Delete Lógico): Cambiar is_active a false
