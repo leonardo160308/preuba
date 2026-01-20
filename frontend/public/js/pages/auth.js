@@ -1,11 +1,50 @@
-// frontend/public/js/pages/auth.js - ACTUALIZADO CON ALERTAS
-
+// frontend/public/js/pages/auth.js - VERSIÓN FINAL CON BLOQUEO DE TECLAS
 import { login, register } from '../modules/api.js'; 
 import { saveAuthData } from '../modules/auth.js'; 
-import { alertaExito, alertaError, alertaInfo } from '../modules/alerts.js'; // ✅ NUEVO
+import { alertaExito, alertaError, alertaInfo } from '../modules/alerts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ========== LÓGICA DE LOGIN ==========
+
+    // =========================================================
+    // 1. VALIDACIONES EN TIEMPO REAL (LO QUE NO DEJA ESCRIBIR)
+    // =========================================================
+    const inputEdad = document.getElementById('registerEdad');
+    
+    if (inputEdad) {
+        // Bloquear teclas: punto, coma, 'e' (exponente), signos menos/mas
+        inputEdad.addEventListener('keydown', (e) => {
+            const teclasProhibidas = ['.', ',', 'e', 'E', '-', '+'];
+            if (teclasProhibidas.includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        // Limpieza extra: Si pegan texto o escriben muy rápido
+        inputEdad.addEventListener('input', () => {
+            // Borra cualquier cosa que no sea número
+            inputEdad.value = inputEdad.value.replace(/[^0-9]/g, '');
+            
+            // Si escriben más de 2 dígitos (ej: 100), corta el string
+            if (inputEdad.value.length > 2) {
+                inputEdad.value = inputEdad.value.slice(0, 2);
+            }
+        });
+    }
+
+    // Opcional: Evitar espacios en el Nombre de Usuario (si quieres)
+    const inputNombre = document.getElementById('registerNombre');
+    if (inputNombre) {
+        inputNombre.addEventListener('keydown', (e) => {
+            // Si presionan espacio, no hace nada
+            if (e.key === ' ') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // =========================================================
+    // 2. LÓGICA DE LOGIN
+    // =========================================================
     const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
@@ -16,11 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('contraseña').value;
             
             if (!nombre || !password) {
-                alertaError('Por favor, completa todos los campos.'); // ✅ CAMBIO
+                alertaError('Por favor, completa todos los campos.');
                 return;
             }
             
-            // ✅ Mostrar indicador de carga
             alertaInfo('Verificando credenciales...', { duration: 2000 });
             
             try {
@@ -28,12 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (result.success) {
                     saveAuthData(result.user);
-                    
-                    // ✅ Alerta de éxito y redirección con delay
                     alertaExito('¡Bienvenido! Redirigiendo...', {
-                        onClose: () => {
-                            window.location.href = '/dashboard.html';
-                        }
+                        onClose: () => { window.location.href = '/dashboard.html'; }
                     });
                     
                     setTimeout(() => {
@@ -41,17 +75,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 1500);
                     
                 } else {
-                    // ✅ Mostrar error específico del servidor
                     alertaError(result.message || 'Credenciales incorrectas.');
                 }
             } catch (error) {
                 console.error('Error en login:', error);
-                alertaError('Error de conexión. Verifica que el servidor esté activo.'); // ✅ CAMBIO
+                alertaError('Error de conexión. Verifica el servidor.');
             }
         });
     }
     
-    // ========== LÓGICA DE REGISTRO ==========
+    // =========================================================
+    // 3. LÓGICA DE REGISTRO
+    // =========================================================
     const registerForm = document.getElementById('registerForm');
     
     if (registerForm) {
@@ -61,47 +96,52 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombre = document.getElementById('registerNombre').value.trim();
             const email = document.getElementById('registerEmail')?.value.trim();
             const password = document.getElementById('registerContraseña').value;
-            const edad = parseInt(document.getElementById('registerEdad').value);
+            const edadRaw = document.getElementById('registerEdad').value;
             const genero = document.getElementById('registerGenero').value;
             const terminos = document.getElementById('terminos').checked;
-            
-            // Validaciones con alertas visuales
-            if (!nombre || !password || !edad || !genero) {
-                alertaError('Por favor, completa todos los campos obligatorios.'); // ✅ CAMBIO
+
+            // Validaciones al enviar (Submit)
+            if (!nombre || !email || !password || !edadRaw || !genero) {
+                alertaError('Por favor, completa todos los campos obligatorios.');
                 return;
             }
             
             if (!terminos) {
-                alertaError('Debes aceptar los Términos y Condiciones.'); // ✅ CAMBIO
+                alertaError('Debes aceptar los Términos y Condiciones.');
                 return;
             }
-            
-            if (edad < 15) {
-                alertaError('Debes tener al menos 15 años para registrarte.'); // ✅ CAMBIO
+
+            if (nombre.length < 3 || nombre.length > 16) {
+                alertaError('El nombre de usuario debe tener entre 3 y 16 caracteres.');
                 return;
             }
-            
-            // ✅ Indicador de proceso
+
+            if (password.length < 6 || password.length > 16) {
+                alertaError('La contraseña debe tener entre 6 y 16 caracteres.');
+                return;
+            }
+
+            if (email.length < 6 || email.length > 254) {
+                alertaError('El correo debe tener entre 6 y 254 caracteres.');
+                return;
+            }
+
+            const edad = Number(edadRaw);
+            if (edad < 15 || edad > 99) {
+                alertaError('Debes tener entre 15 y 99 años para registrarte.');
+                return;
+            }
+
             alertaInfo('Creando tu cuenta...', { duration: 3000 });
             
             try {
-                const userData = {
-                    nombre,
-                    password,
-                    edad,
-                    genero,
-                    email: email || null
-                };
-                
+                const userData = { nombre, email, password, edad, genero };
                 const result = await register(userData);
                 
                 if (result.success) {
-                    // ✅ Éxito con redirección automática
-                    alertaExito('¡Cuenta creada exitosamente! Redirigiendo al login...', {
+                    alertaExito('¡Cuenta creada con éxito! Redirigiendo...', {
                         duration: 2500,
-                        onClose: () => {
-                            window.location.href = '/login.html';
-                        }
+                        onClose: () => { window.location.href = '/login.html'; }
                     });
                     
                     setTimeout(() => {
@@ -109,12 +149,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2500);
                     
                 } else {
-                    alertaError(result.message || 'Error al crear cuenta.'); // ✅ CAMBIO
+                    alertaError(result.message || 'El nombre de usuario ya está en uso.');
                 }
             } catch (error) {
                 console.error('Error en registro:', error);
-                alertaError('Error de conexión. Verifica que el servidor esté activo.'); // ✅ CAMBIO
+                alertaError('Error de conexión. Verifica el servidor.');
             }
         });
     }
+
+    // =========================================================
+    // 4. OBSERVER (Para detectar cambios en el DOM si usas SPA)
+    // =========================================================
+    const observer = new MutationObserver((mutations) => {
+        // Tu lógica de observer original
+    });
+
+    document.querySelectorAll('#registerForm input, #registerForm select')
+      .forEach(el => {
+        observer.observe(el, {
+          attributes: true,
+          attributeFilter: ['type', 'required', 'value']
+        });
+      });
 });

@@ -4,16 +4,16 @@ class User {
     // 1. CREAR (Create): Registra un nuevo usuario
     static async create(userData) {
         // Desestructurar datos para asegurar el orden de los parámetros en la consulta
-        const { nombre, password_hash, edad, genero, foto } = userData;
+        const { nombre,email, password_hash, edad, genero, foto } = userData;
         
         const query = `
-            INSERT INTO users (nombre, password_hash, edad, genero, foto) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO users (nombre, email, password_hash, edad, genero, foto) 
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
 
         try {
             // Ejecutamos la consulta. 'result' contiene metadatos como insertId.
-            const [result] = await db.execute(query, [nombre, password_hash, edad, genero, foto]);
+            const [result] = await db.execute(query, [nombre, email, password_hash, edad, genero, foto]);
             
             // Devolvemos el ID generado y el resto de los datos
             return { id: result.insertId, ...userData };

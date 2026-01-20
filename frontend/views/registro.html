@@ -15,13 +15,13 @@
             <p>¡Completa tu perfil para empezar tu aventura financiera!</p>
             
             <!-- Nombre de Usuario -->
-            <input type="text" id="registerNombre" placeholder="Nombre de Usuario" required> 
+            <input type="text" id="registerNombre" minlength="3" maxlength="16" placeholder="Nombre de Usuario" required> 
             
             <!-- Correo Electrónico -->
-            <input type="email" id="registerEmail" placeholder="Correo Electrónico" required>
+            <input type="email" id="registerEmail" minlength="6" maxlength="254" placeholder="Correo Electrónico" required>
             
             <!-- Contraseña -->
-            <input type="password" id="registerContraseña" placeholder="Contraseña" required>
+            <input type="password" id="registerContraseña" minlength="6" maxlength="16" placeholder="Contraseña" required>
 
             <!-- Edad -->
             <input type="number" id="registerEdad" placeholder="Edad" min="15" max="99" required>

@@ -21,7 +21,15 @@ export async function login(nombre, password) {
             body: JSON.stringify({ nombre, password })
         });
 
-        const data = await response.json();
+let data;
+const text = await res.text();
+
+try {
+    data = JSON.parse(text);
+} catch (e) {
+    console.error('Respuesta NO es JSON:', text);
+    throw new Error('Respuesta inválida del servidor');
+}
         
         if (response.ok) {
             return { 
@@ -51,18 +59,42 @@ export async function login(nombre, password) {
  */
 export async function register(userData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users`, {
+        const res = await fetch('http://localhost:3000/api/users', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(userData)
         });
 
-        return await response.json();
+        const text = await res.text(); // 👈 LEER COMO TEXTO PRIMERO
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('❌ Respuesta NO es JSON:', text);
+            return {
+                success: false,
+                message: 'Error interno del servidor (respuesta inválida)'
+            };
+        }
+
+        if (!res.ok) {
+            console.warn('⚠️ Error backend:', data.message);
+            return {
+                success: false,
+                message: data.message || 'Error al crear usuario.'
+            };
+        }
+
+        return data;
+
     } catch (error) {
-        console.error('Error en register:', error);
-        return { 
-            success: false, 
-            message: 'Error al crear usuario.' 
+        console.error('❌ Error en register:', error);
+        return {
+            success: false,
+            message: 'No se pudo conectar con el servidor.'
         };
     }
 }
