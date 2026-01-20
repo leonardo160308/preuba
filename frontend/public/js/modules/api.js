@@ -1,7 +1,7 @@
 // frontend/public/js/modules/api.js
 // Funciones para comunicarse con el Backend
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api'; // Asegúrate que este puerto sea el correcto
 
 // ========================================
 // 1. AUTENTICACIÓN
@@ -21,15 +21,19 @@ export async function login(nombre, password) {
             body: JSON.stringify({ nombre, password })
         });
 
-let data;
-const text = await res.text();
+        // ✅ CORREGIDO: Antes decías 'res.text()', ahora es 'response.text()'
+        const text = await response.text();
+        let data;
 
-try {
-    data = JSON.parse(text);
-} catch (e) {
-    console.error('Respuesta NO es JSON:', text);
-    throw new Error('Respuesta inválida del servidor');
-}
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Respuesta NO es JSON:', text);
+            return {
+                success: false,
+                message: 'Error del servidor: Respuesta inválida'
+            };
+        }
         
         if (response.ok) {
             return { 
@@ -59,7 +63,7 @@ try {
  */
 export async function register(userData) {
     try {
-        const res = await fetch('http://localhost:3000/api/users', {
+        const response = await fetch(`${API_BASE_URL}/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -67,7 +71,7 @@ export async function register(userData) {
             body: JSON.stringify(userData)
         });
 
-        const text = await res.text(); // 👈 LEER COMO TEXTO PRIMERO
+        const text = await response.text(); 
         let data;
 
         try {
@@ -80,7 +84,7 @@ export async function register(userData) {
             };
         }
 
-        if (!res.ok) {
+        if (!response.ok) {
             console.warn('⚠️ Error backend:', data.message);
             return {
                 success: false,
@@ -181,8 +185,6 @@ export async function deleteUser(userId) {
         throw error;
     }
 }
-
-
 
 // ========================================
 // 3. DASHBOARD Y MOVIMIENTOS
