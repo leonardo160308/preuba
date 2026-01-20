@@ -22,6 +22,7 @@ export const createMovement = async (req, res) => {
 
         // 2. 🔥 Validación FUERTE del monto
         const montoNumerico = parseFloat(monto);
+        
 
         if (isNaN(montoNumerico)) {
             return res.status(400).json({
@@ -38,10 +39,10 @@ export const createMovement = async (req, res) => {
         }
 
         // Límite compatible con DECIMAL(12,2)
-        if (montoNumerico > 9999999999.99) {
+        if (montoNumerico > 999999.99) {
             return res.status(400).json({
                 success: false,
-                message: 'El monto es demasiado grande. Máximo permitido: $9,999,999,999.99'
+                message: 'El monto es demasiado grande. Máximo permitido: $99,999,999.99'
             });
         }
 
@@ -171,6 +172,7 @@ export const deleteMovement = async (req, res) => {
 };
 // --- R: GET MOVEMENTS + TOTALS BY USER ---
 // backend/controllers/movementController.js
+
 
 export const getMovementData = async (req, res) => {
     try {

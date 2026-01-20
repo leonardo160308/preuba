@@ -101,3 +101,9 @@ export function updateLocalUserData(updates) {
     localStorage.setItem(USER_KEY, JSON.stringify(updatedData));
     console.log('🔄 Datos locales actualizados:', updatedData);
 }
+export async function deleteMovement(movementId, userId) {
+    const response = await fetch(`${API_URL}/movements/${movementId}?user_id=${userId}`, {
+        method: 'DELETE'
+    });
+    return await response.json();
+}
