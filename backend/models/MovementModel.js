@@ -31,6 +31,25 @@ class Movement {
         }
     }
 
+    // backend/models/MovementModel.js
+
+// ✅ AÑADE ESTE MÉTODO (línea ~50, después de create)
+static async findByUserId(userId) {
+    const query = `
+        SELECT * FROM movements 
+        WHERE user_id = ? 
+        ORDER BY fecha DESC, created_at DESC
+    `;
+    
+    try {
+        const [rows] = await db.execute(query, [userId]);
+        return rows;
+    } catch (error) {
+        console.error('Error en Movement.findByUserId:', error);
+        throw error;
+    }
+}
+
     // ========================================
     // 2. LEER (Read): Obtener historial de un usuario
     // ========================================

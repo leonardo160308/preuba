@@ -170,6 +170,8 @@ export const deleteMovement = async (req, res) => {
     }
 };
 // --- R: GET MOVEMENTS + TOTALS BY USER ---
+// backend/controllers/movementController.js
+
 export const getMovementData = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -181,7 +183,7 @@ export const getMovementData = async (req, res) => {
             });
         }
 
-        // 1. Obtener movimientos del usuario
+        // ✅ CAMBIO AQUÍ: usar el método correcto
         const movements = await Movement.findByUserId(userId);
 
         // 2. Calcular totales
@@ -198,10 +200,9 @@ export const getMovementData = async (req, res) => {
             }
         }
 
-        // 3. Balance
         const balance = totalIncome - totalExpense;
 
-        // 4. Respuesta
+        // ✅ AÑADIR history al response
         res.json({
             success: true,
             data: {
@@ -211,7 +212,8 @@ export const getMovementData = async (req, res) => {
                     expense: totalExpense,
                     balance
                 }
-            }
+            },
+            history: movements // ✅ Esto es lo que espera el frontend
         });
 
     } catch (error) {

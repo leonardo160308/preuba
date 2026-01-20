@@ -389,36 +389,190 @@ limitarNumero(inpMetaMonto, 9, 2); // Meta de ahorro
         diaSeleccionado = null;
     }
 
-    function actualizarContenidoModal() {
-        const datos = obtenerDatosDia(diaSeleccionado);
+// frontend/public/js/pages/dashboard.js
+
+function actualizarContenidoModal() {
+    const datos = obtenerDatosDia(diaSeleccionado);
+    
+    // 1. Actualizar resumen de balance
+    modalIncome.textContent = `+$${datos.totalIngresos.toFixed(2)}`;
+    modalExpense.textContent = `-$${datos.totalEgresos.toFixed(2)}`;
+    modalTotal.textContent = `$${datos.balance.toFixed(2)}`;
+    modalTotal.className = datos.balance > 0 ? "text-green" : (datos.balance < 0 ? "text-red" : "");
+
+    // 2. ✅ GENERAR RECOMENDACIONES (ESTO FALTABA)
+    generarRecomendaciones(datos);
+
+    // 3. Actualizar lista de movimientos
+    listMovimientos.innerHTML = '';
+    const todosMovs = [
+        ...datos.movimientos.ingresos.map(m => ({...m, tipo: 'ingreso'})),
+        ...datos.movimientos.egresos.map(m => ({...m, tipo: 'egreso'}))
+    ];
+
+    if (todosMovs.length === 0) {
+        listMovimientos.innerHTML = '<li><em style="color:#999">Sin movimientos.</em></li>';
+    } else {
+        todosMovs.forEach(m => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${m.categoria}</span>
+                <span class="${m.tipo === 'ingreso' ? 'text-green' : 'text-red'}">
+                    ${m.tipo === 'ingreso' ? '+' : '-'}$${m.monto.toFixed(2)}
+                </span>
+            `;
+            listMovimientos.appendChild(li);
+        });
+    }
+}
+
+// ✅ NUEVA FUNCIÓN: Generar recomendaciones inteligentes
+function generarRecomendaciones(datos) {
+    const recomendaciones = [];
+    
+    // 🟢 Recomendación 1: Balance positivo
+    if (datos.balance > 0) {
+        recomendaciones.push({
+            icono: '✅',
+            texto: `¡Excelente! Hoy ahorraste $${datos.balance.toFixed(2)}. Considera destinarlo a tu fondo de emergencia.`,
+            tipo: 'success'
+        });
+    }
+    
+    // 🔴 Recomendación 2: Balance negativo
+    if (datos.balance < 0) {
+        const deficit = Math.abs(datos.balance);
+        recomendaciones.push({
+            icono: '⚠️',
+            texto: `Atención: Tus gastos superan tus ingresos en $${deficit.toFixed(2)}. Revisa tus gastos variables.`,
+            tipo: 'warning'
+        });
+    }
+    
+    // 🟡 Recomendación 3: Sin movimientos
+    if (datos.totalIngresos === 0 && datos.totalEgresos === 0) {
+        recomendaciones.push({
+            icono: '📝',
+            texto: 'No hay movimientos registrados. ¡Empieza a llevar control de tus finanzas hoy!',
+            tipo: 'info'
+        });
+    }
+    
+    // 🟢 Recomendación 4: Análisis de gastos por categoría
+    const categoriasMasGasto = analizarCategorias(datos.movimientos.egresos);
+    if (categoriasMasGasto.length > 0) {
+        const top = categoriasMasGasto[0];
+        const porcentaje = ((top.monto / datos.totalEgresos) * 100).toFixed(1);
         
-        modalIncome.textContent = `+$${datos.totalIngresos}`;
-        modalExpense.textContent = `-$${datos.totalEgresos}`;
-        modalTotal.textContent = `$${datos.balance}`;
-        modalTotal.className = datos.balance > 0 ? "text-green" : (datos.balance < 0 ? "text-red" : "");
-
-        listMovimientos.innerHTML = '';
-        const todosMovs = [
-            ...datos.movimientos.ingresos.map(m => ({...m, tipo: 'ingreso'})),
-            ...datos.movimientos.egresos.map(m => ({...m, tipo: 'egreso'}))
-        ];
-
-        if (todosMovs.length === 0) {
-            listMovimientos.innerHTML = '<li><em style="color:#999">Sin movimientos.</em></li>';
-        } else {
-            todosMovs.forEach(m => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${m.categoria}</span>
-                    <span class="${m.tipo === 'ingreso' ? 'text-green' : 'text-red'}">
-                        ${m.tipo === 'ingreso' ? '+' : '-'}$${m.monto}
-                    </span>
-                `;
-                listMovimientos.appendChild(li);
+        recomendaciones.push({
+            icono: '📊',
+            texto: `Tu mayor gasto es en "${top.categoria}" ($${top.monto.toFixed(2)} - ${porcentaje}%). ${
+                porcentaje > 40 ? 'Considera reducir este rubro.' : 'Mantén este control.'
+            }`,
+            tipo: 'info'
+        });
+    }
+    
+    // 🟡 Recomendación 5: Comparación con ingreso fijo
+    if (datosFijos.ingresoFijo > 0 && datos.totalEgresos > 0) {
+        const porcentajeGasto = (datos.totalEgresos / datosFijos.ingresoFijo) * 100;
+        
+        if (porcentajeGasto > 80) {
+            recomendaciones.push({
+                icono: '🚨',
+                texto: `Alerta: Estás gastando ${porcentajeGasto.toFixed(1)}% de tu ingreso mensual. Aplica la regla 50/30/20.`,
+                tipo: 'danger'
+            });
+        } else if (porcentajeGasto < 30) {
+            recomendaciones.push({
+                icono: '🎯',
+                texto: `¡Increíble control! Solo gastas ${porcentajeGasto.toFixed(1)}% de tu ingreso. Sigue así.`,
+                tipo: 'success'
             });
         }
-        // (Tu lógica de recomendaciones iría aquí, la omití por brevedad pero puedes pegarla)
     }
+    
+    // 🟢 Recomendación 6: Meta de ahorro
+    if (datosFijos.metaCantidad > 0 && datos.balance > 0) {
+        const progresoMeta = (datos.balance / datosFijos.metaCantidad) * 100;
+        
+        recomendaciones.push({
+            icono: '🎯',
+            texto: `Este día aportaste ${progresoMeta.toFixed(1)}% a tu meta "${datosFijos.metaNombre}". ${
+                progresoMeta >= 100 ? '¡Meta del día alcanzada!' : '¡Sigue así!'
+            }`,
+            tipo: 'info'
+        });
+    }
+    
+    // ✅ RENDERIZAR RECOMENDACIONES
+    renderizarRecomendaciones(recomendaciones);
+}
+
+// ✅ FUNCIÓN AUXILIAR: Analizar categorías de gasto
+function analizarCategorias(egresos) {
+    const categorias = {};
+    
+    egresos.forEach(egreso => {
+        const cat = egreso.categoria || 'Sin categoría';
+        if (!categorias[cat]) {
+            categorias[cat] = 0;
+        }
+        categorias[cat] += egreso.monto;
+    });
+    
+    // Convertir a array y ordenar de mayor a menor
+    return Object.entries(categorias)
+        .map(([categoria, monto]) => ({ categoria, monto }))
+        .sort((a, b) => b.monto - a.monto);
+}
+
+// ✅ FUNCIÓN DE RENDERIZADO
+function renderizarRecomendaciones(recomendaciones) {
+    listRecomendaciones.innerHTML = '';
+    
+    if (recomendaciones.length === 0) {
+        listRecomendaciones.innerHTML = '<li style="color:#999; font-style:italic;">No hay recomendaciones para este día.</li>';
+        return;
+    }
+    
+    recomendaciones.forEach(rec => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '12px';
+        li.style.padding = '10px';
+        li.style.borderRadius = '8px';
+        li.style.backgroundColor = obtenerColorFondo(rec.tipo);
+        li.style.borderLeft = `4px solid ${obtenerColorBorde(rec.tipo)}`;
+        
+        li.innerHTML = `
+            <span style="font-size:1.2rem; margin-right:8px;">${rec.icono}</span>
+            <span>${rec.texto}</span>
+        `;
+        
+        listRecomendaciones.appendChild(li);
+    });
+}
+
+// ✅ COLORES PARA RECOMENDACIONES
+function obtenerColorFondo(tipo) {
+    const colores = {
+        success: '#e8f5e9',
+        warning: '#fff3e0',
+        danger: '#ffebee',
+        info: '#e3f2fd'
+    };
+    return colores[tipo] || '#f5f5f5';
+}
+
+function obtenerColorBorde(tipo) {
+    const colores = {
+        success: '#4caf50',
+        warning: '#ff9800',
+        danger: '#f44336',
+        info: '#2196f3'
+    };
+    return colores[tipo] || '#9e9e9e';
+}
 
     async function agregarMovimiento(e) {
         e.preventDefault();

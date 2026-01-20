@@ -197,37 +197,63 @@
             </div>
 
             <!-- Formulario para Agregar Movimiento -->
-            <div class="add-movement-form">
-                <h3>➕ Nuevo Movimiento</h3>
-                <form id="transaction-form">
-                    <!-- Tipo de Movimiento -->
-                    <select id="trans-type" required>
-                        <option value="expense">Egreso (-)</option>
-                        <option value="income">Ingreso (+)</option>
-                    </select>
-                    
-                    <!-- Categoría -->
-                    <input 
-                        type="text" 
-                        id="trans-category" 
-                        placeholder="Categoría (ej: Comida, Transporte, Deuda)" 
-                        required
-                    >
+            <!-- frontend/views/dashboard.html -->
 
-                    <!-- Monto -->
-                    <input 
-                        type="number" 
-                        id="trans-amount" 
-                        placeholder="Monto" 
-                        step="0.01" 
-                        min="0.01"
-                        required
-                    >
-                    
-                    <!-- Botón Agregar -->
-                    <button type="submit" class="btn-add">Agregar Movimiento</button>
-                </form>
-            </div>
+<!-- Busca esta sección (línea ~180 aprox): -->
+<div class="add-movement-form">
+    <h3>➕ Nuevo Movimiento</h3>
+    <form id="transaction-form">
+        <!-- Tipo de Movimiento -->
+        <select id="trans-type" required>
+            <option value="expense">Egreso (-)</option>
+            <option value="income">Ingreso (+)</option>
+        </select>
+        
+        <!-- ✅ REEMPLAZA EL INPUT POR ESTE SELECT -->
+        <select id="trans-category" required>
+            <option value="">-- Selecciona una categoría --</option>
+            
+            <!-- Categorías de Ingresos -->
+            <optgroup label="">
+                <option value="Salario">Salario</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Ventas">Ventas</option>
+                <option value="Regalo">Regalo</option>
+                <option value="Inversiones">Inversiones</option>
+                <option value="Reembolso">Reembolso</option>
+                <option value="Beca">Beca</option>
+                <option value="Aguinaldo">Aguinaldo</option>
+                <option value="Vivienda">Vivienda/Renta</option>
+                <option value="Servicios">Servicios (Luz, Agua, Internet)</option>
+                <option value="Alimentación">Alimentación</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Salud">Salud</option>
+                <option value="Educación">Educación</option>
+                <option value="Entretenimiento">Entretenimiento</option>
+                <option value="Ropa">Ropa y Calzado</option>
+                <option value="Deuda">Deuda/Préstamo</option>
+                <option value="Ahorro">Ahorro</option>
+                <option value="Donación">Donación</option>
+                <option value="Impuestos">Impuestos</option>
+                <option value="Subscripciones">Subscripciones</option>
+                <option value="Mascotas">Mascotas</option>
+                <option value="Otro">Otro</option>
+            </optgroup>
+        </select>
+
+        <!-- Monto -->
+        <input 
+            type="number" 
+            id="trans-amount" 
+            placeholder="Monto" 
+            step="0.01" 
+            min="0.01"
+            required
+        >
+        
+        <button type="submit" class="btn-add">Agregar Movimiento</button>
+    </form>
+</div>
         </div>
     </div>
 </div>
