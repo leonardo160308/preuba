@@ -35,6 +35,20 @@ export async function checkAdmin(req, res, next) {
 }
 
 // ========================================
+// GESTIÓN DE CATEGORÍAS (Solo lectura)
+// ========================================
+
+export async function getCategories(req, res) {
+    try {
+        const categories = await AdminModel.getAllCategories();
+        res.json({ success: true, data: categories });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error al obtener categorías' });
+    }
+}
+
+// ========================================
 // GESTIÓN DE NIVELES
 // ========================================
 
@@ -48,27 +62,38 @@ export async function getLevels(req, res) {
     }
 }
 
+export async function getLevelsByCategory(req, res) {
+    try {
+        const { categoryId } = req.params;
+        const levels = await AdminModel.getLevelsByCategory(categoryId);
+        res.json({ success: true, data: levels });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error al obtener niveles' });
+    }
+}
+
 export async function createLevel(req, res) {
     try {
-        const { nombre, descripcion } = req.body;
+        const { nombre, descripcion, categoryId } = req.body;
         
-        if (!nombre || !descripcion) {
+        if (!nombre || !descripcion || !categoryId) {
             return res.status(400).json({
                 success: false,
-                message: 'Nombre y descripción son obligatorios'
+                message: 'Nombre, descripción y categoría son obligatorios'
             });
         }
         
         // Verificar límite
-        const canCreate = await AdminModel.checkLevelsLimit();
+        const canCreate = await AdminModel.checkLevelsLimit(categoryId);
         if (!canCreate) {
             return res.status(400).json({
                 success: false,
-                message: 'Has alcanzado el límite de 20 niveles. Elimina uno antes de crear más.'
+                message: 'Esta categoría ya tiene todos sus niveles completos.'
             });
         }
         
-        const newLevel = await AdminModel.createLevel(nombre, descripcion);
+        const newLevel = await AdminModel.createLevel(nombre, descripcion, categoryId);
         res.status(201).json({ success: true, data: newLevel });
     } catch (error) {
         console.error(error);
@@ -80,7 +105,7 @@ export async function createLevel(req, res) {
             });
         }
         
-        res.status(500).json({ success: false, message: 'Error al crear nivel' });
+        res.status(500).json({ success: false, message: error.message || 'Error al crear nivel' });
     }
 }
 
@@ -122,7 +147,7 @@ export async function deleteLevel(req, res) {
 }
 
 // ========================================
-// GESTIÓN DE FLASHCARDS
+// GESTIÓN DE FLASHCARDS (Sin cambios)
 // ========================================
 
 export async function getFlashcards(req, res) {
@@ -147,7 +172,6 @@ export async function createFlashcard(req, res) {
             });
         }
         
-        // Verificar límites
         const canCreatePerLevel = await AdminModel.checkFlashcardsLimit(levelId);
         const canCreateTotal = await AdminModel.checkFlashcardsLimit();
         
@@ -215,7 +239,6 @@ export async function moveFlashcard(req, res) {
         const { id } = req.params;
         const { newLevelId } = req.body;
         
-        // Verificar límite del nivel destino
         const canMove = await AdminModel.checkFlashcardsLimit(newLevelId);
         if (!canMove) {
             return res.status(400).json({
@@ -233,7 +256,7 @@ export async function moveFlashcard(req, res) {
 }
 
 // ========================================
-// GESTIÓN DE PREGUNTAS
+// GESTIÓN DE PREGUNTAS (Sin cambios)
 // ========================================
 
 export async function getQuestions(req, res) {
@@ -251,7 +274,6 @@ export async function createQuestion(req, res) {
     try {
         const { levelId, pregunta, opciones, correcta, dificultad, imagen } = req.body;
         
-        // Validar datos
         if (!levelId || !pregunta || !opciones || !correcta) {
             return res.status(400).json({
                 success: false,
@@ -259,7 +281,6 @@ export async function createQuestion(req, res) {
             });
         }
         
-        // Validar opciones (mínimo 3, máximo 5)
         const numOpciones = Object.keys(opciones).length;
         if (numOpciones < 3 || numOpciones > 5) {
             return res.status(400).json({
@@ -268,7 +289,6 @@ export async function createQuestion(req, res) {
             });
         }
         
-        // Validar que la correcta exista
         if (!opciones[correcta]) {
             return res.status(400).json({
                 success: false,
@@ -276,7 +296,6 @@ export async function createQuestion(req, res) {
             });
         }
         
-        // Verificar límites
         const canCreatePerLevel = await AdminModel.checkQuestionsLimit(levelId);
         const canCreateTotal = await AdminModel.checkQuestionsLimit();
         
@@ -322,7 +341,6 @@ export async function updateQuestion(req, res) {
             });
         }
         
-        // Validar opciones
         const numOpciones = Object.keys(opciones).length;
         if (numOpciones < 3 || numOpciones > 5) {
             return res.status(400).json({

@@ -2,7 +2,9 @@
 import { Router } from 'express';
 import {
     checkAdmin,
+    getCategories,
     getLevels,
+    getLevelsByCategory,
     createLevel,
     updateLevel,
     deleteLevel,
@@ -20,9 +22,15 @@ import {
 const router = Router();
 
 // ========================================
-// NIVELES (Todos requieren ser admin)
+// CATEGORÍAS (Solo lectura)
+// ========================================
+router.get('/admin/categories', getCategories);
+
+// ========================================
+// NIVELES
 // ========================================
 router.get('/admin/levels', getLevels);
+router.get('/admin/levels/category/:categoryId', getLevelsByCategory);
 router.post('/admin/levels', checkAdmin, createLevel);
 router.put('/admin/levels/:id', checkAdmin, updateLevel);
 router.delete('/admin/levels/:id', checkAdmin, deleteLevel);

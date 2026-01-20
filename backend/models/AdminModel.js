@@ -2,25 +2,54 @@
 import db from '../config/db.js';
 
 class AdminModel {
+    
+    // ========================================
+    // CATEGORÍAS (Solo lectura)
+    // ========================================
+    
+    static async getAllCategories() {
+        const [rows] = await db.execute(
+            'SELECT * FROM learning_categories ORDER BY orden ASC'
+        );
+        return rows;
+    }
+    
+    static async getCategoryById(categoryId) {
+        const [rows] = await db.execute(
+            'SELECT * FROM learning_categories WHERE id = ?',
+            [categoryId]
+        );
+        return rows[0];
+    }
+    
     // ========================================
     // VALIDACIONES DE LÍMITES
     // ========================================
     
-    static async checkLevelsLimit() {
-        const [rows] = await db.execute('SELECT COUNT(*) as total FROM educational_levels');
-        return rows[0].total < 20; // Máximo 20 niveles
+    static async checkLevelsLimit(categoryId) {
+        // Obtener el rango de niveles de la categoría
+        const category = await this.getCategoryById(categoryId);
+        if (!category) return false;
+        
+        const totalAllowed = category.nivel_fin - category.nivel_inicio + 1;
+        
+        // Contar niveles existentes en esa categoría
+        const [rows] = await db.execute(
+            'SELECT COUNT(*) as total FROM educational_levels WHERE category_id = ?',
+            [categoryId]
+        );
+        
+        return rows[0].total < totalAllowed;
     }
     
     static async checkFlashcardsLimit(levelId = null) {
         if (levelId) {
-            // Por nivel: máximo 30
             const [rows] = await db.execute(
                 'SELECT COUNT(*) as total FROM flashcards WHERE level_id = ?',
                 [levelId]
             );
             return rows[0].total < 30;
         } else {
-            // Total: máximo 300
             const [rows] = await db.execute('SELECT COUNT(*) as total FROM flashcards');
             return rows[0].total < 300;
         }
@@ -28,14 +57,12 @@ class AdminModel {
     
     static async checkQuestionsLimit(levelId = null) {
         if (levelId) {
-            // Por nivel: máximo 15
             const [rows] = await db.execute(
                 'SELECT COUNT(*) as total FROM quiz_questions WHERE level_id = ?',
                 [levelId]
             );
             return rows[0].total < 15;
         } else {
-            // Total: máximo 200
             const [rows] = await db.execute('SELECT COUNT(*) as total FROM quiz_questions');
             return rows[0].total < 200;
         }
@@ -46,30 +73,55 @@ class AdminModel {
     // ========================================
     
     static async getAllLevels() {
+        const [rows] = await db.execute(`
+            SELECT el.*, lc.nombre as categoria_nombre 
+            FROM educational_levels el
+            LEFT JOIN learning_categories lc ON el.category_id = lc.id
+            ORDER BY el.category_id ASC, el.orden ASC
+        `);
+        return rows;
+    }
+    
+    static async getLevelsByCategory(categoryId) {
         const [rows] = await db.execute(
-            'SELECT * FROM educational_levels ORDER BY orden ASC'
+            'SELECT * FROM educational_levels WHERE category_id = ? ORDER BY orden ASC',
+            [categoryId]
         );
         return rows;
     }
     
-    static async createLevel(nombre, descripcion) {
-        // Obtener el siguiente orden
+    static async createLevel(nombre, descripcion, categoryId) {
+        // Verificar límite
+        const canCreate = await this.checkLevelsLimit(categoryId);
+        if (!canCreate) {
+            throw new Error('Esta categoría ya tiene todos sus niveles completos');
+        }
+        
+        // Obtener el siguiente orden dentro de la categoría
         const [maxOrden] = await db.execute(
-            'SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM educational_levels'
+            'SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM educational_levels WHERE category_id = ?',
+            [categoryId]
         );
         
         const query = `
-            INSERT INTO educational_levels (nombre, descripcion, orden) 
-            VALUES (?, ?, ?)
+            INSERT INTO educational_levels (nombre, descripcion, orden, category_id) 
+            VALUES (?, ?, ?, ?)
         `;
         
         const [result] = await db.execute(query, [
             nombre, 
             descripcion, 
-            maxOrden[0].next_orden
+            maxOrden[0].next_orden,
+            categoryId
         ]);
         
-        return { id: result.insertId, nombre, descripcion, orden: maxOrden[0].next_orden };
+        return { 
+            id: result.insertId, 
+            nombre, 
+            descripcion, 
+            orden: maxOrden[0].next_orden,
+            category_id: categoryId
+        };
     }
     
     static async updateLevel(id, nombre, descripcion) {
@@ -111,7 +163,7 @@ class AdminModel {
     }
 
     // ========================================
-    // GESTIÓN DE FLASHCARDS
+    // GESTIÓN DE FLASHCARDS (Sin cambios)
     // ========================================
     
     static async getFlashcardsByLevel(levelId) {
@@ -123,7 +175,6 @@ class AdminModel {
     }
     
     static async createFlashcard(levelId, titulo, contenido, imagen) {
-        // Obtener siguiente orden dentro del nivel
         const [maxOrden] = await db.execute(
             'SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM flashcards WHERE level_id = ?',
             [levelId]
@@ -177,7 +228,7 @@ class AdminModel {
     }
 
     // ========================================
-    // GESTIÓN DE PREGUNTAS DE QUIZ
+    // GESTIÓN DE PREGUNTAS (Sin cambios)
     // ========================================
     
     static async getQuestionsByLevel(levelId) {
@@ -186,7 +237,6 @@ class AdminModel {
             [levelId]
         );
         
-        // Parsear JSON de opciones
         return rows.map(q => ({
             ...q,
             opciones: JSON.parse(q.opciones)
@@ -202,7 +252,7 @@ class AdminModel {
         const [result] = await db.execute(query, [
             levelId,
             pregunta,
-            JSON.stringify(opciones), // Convertir objeto a JSON
+            JSON.stringify(opciones),
             correcta,
             dificultad || 'media',
             imagen || null
