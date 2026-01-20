@@ -48,27 +48,33 @@
      ======================================== -->
 
 <script type="module">
-    import { logout } from '/public/js/modules/auth.js';
-    import { alertaConfirmacion } from '/public/js/modules/alerts.js'; // ✅ NUEVO
+    import { logout, isAdmin } from '/public/js/modules/auth.js';
+    import { alertaConfirmacion } from '/public/js/modules/alerts.js';
+    
+    // ✅ MOSTRAR ENLACE ADMIN SI ES ADMIN
+    if (isAdmin()) {
+        const nav = document.querySelector('.nav');
+        const adminLink = document.createElement('a');
+        adminLink.href = '/admin.html';
+        adminLink.textContent = 'ADMIN';
+        adminLink.style.color = '#f39c12'; // Color diferente para destacar
+        nav.insertBefore(adminLink, nav.children[nav.children.length - 1]);
+    }
     
     const logoutBtn = document.getElementById('logout-btn-perfil');
     
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            // ✅ Alerta de confirmación visual
             const confirmar = await alertaConfirmacion(
                 '¿Estás seguro de que deseas cerrar sesión?',
                 '👋 Salir de TOO-EASY'
             );
-            
-            if (confirmar) {
-                logout();
-            }
+            if (confirmar) logout();
         });
     }
 </script>
+
 
 <!-- ========================================
      CONTENEDOR PRINCIPAL

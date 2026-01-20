@@ -1,32 +1,41 @@
 import { updateUserData, getUserData } from '../modules/api.js';
 import { protectRoute, getAuthData } from '../modules/auth.js';
-import preguntasPorNivel, { SKIN_REWARDS } from '../data/preguntas.js';
+import { SKIN_REWARDS } from '../data/preguntas.js'; // Mantener para recompensas
+
+const API_URL = 'http://localhost:3000/api';
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-    /* ================= SEGURIDAD ================= */
     if (!protectRoute()) return;
     const sessionUser = getAuthData();
 
-    /* ================= NIVEL ================= */
     const urlParams = new URLSearchParams(window.location.search);
     const nivelActual = parseInt(urlParams.get('level')) || 1;
 
-    /* ================= PREGUNTAS ================= */
-    const preguntas = preguntasPorNivel[nivelActual];
+    let preguntas = [];
 
-    if (!preguntas || preguntas.length === 0) {
-        alert("Este nivel aún no tiene preguntas disponibles.");
-        window.location.href = '/lecciones.html';
+    // ✅ CARGAR PREGUNTAS DESDE LA BD
+    try {
+        const response = await fetch(`${API_URL}/admin/questions/${nivelActual}`);
+        const data = await response.json();
+        
+        if (!data.success || data.data.length === 0) {
+            alert("Este nivel no tiene preguntas. Volviendo...");
+            window.location.href = '/lecciones.html';
+            return;
+        }
+        
+        preguntas = data.data;
+    } catch (error) {
+        console.error('Error cargando preguntas:', error);
+        alert('Error de conexión. Intenta de nuevo.');
         return;
     }
 
-    /* ================= ESTADO ================= */
     let preguntaIndex = 0;
     let aciertos = 0;
     let seleccionUsuario = null;
 
-    /* ================= DOM ================= */
+    // Referencias DOM
     const txtPregunta = document.getElementById("textoPregunta");
     const imgPregunta = document.getElementById("imagenPregunta");
     const divOpciones = document.getElementById("opcionesContainer");
@@ -40,17 +49,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (nivelLabel) nivelLabel.textContent = nivelActual;
     if (totalPreguntasLabel) totalPreguntasLabel.textContent = preguntas.length;
 
-    /* ================= FUNCIONES ================= */
-
     function cargarPregunta() {
         divResultado.style.display = "none";
         btnComprobar.style.display = "none";
         seleccionUsuario = null;
 
         const p = preguntas[preguntaIndex];
-        txtPregunta.textContent = p.texto;
+        txtPregunta.textContent = p.pregunta;
 
-        // Imagen segura
         if (imgPregunta && p.imagen) {
             imgPregunta.src = p.imagen;
             imgPregunta.style.display = "block";
@@ -133,8 +139,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         barraProgreso.style.width = `${pct}%`;
     }
 
-    /* ================= FINALIZAR ================= */
-
     async function finalizarNivel() {
         divOpciones.innerHTML = "";
         txtPregunta.textContent = "Procesando resultados...";
@@ -195,6 +199,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    /* ================= INICIO ================= */
     cargarPregunta();
 });

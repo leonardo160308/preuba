@@ -138,7 +138,8 @@ export const loginUser = async (req, res) => {
                 level: user.level,
                 coins: user.coins,
                 wood: user.wood,
-                foto: user.foto
+                foto: user.foto,
+                role: user.role || 'user'
             }
         });
 

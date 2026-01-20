@@ -1,5 +1,5 @@
 // frontend/public/js/pages/admin.js
-import { protectRoute, getAuthData, logout } from '../modules/auth.js';
+import { protectRoute, getAuthData, logout, isAdmin } from '../modules/auth.js';
 import { alertaExito, alertaError, alertaAdvertencia, alertaConfirmacion } from '../modules/alerts.js';
 
 const API_URL = 'http://localhost:3000/api';
@@ -9,7 +9,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!protectRoute()) return;
     const sessionUser = getAuthData();
     const userId = sessionUser.id;
-
+    if (!isAdmin()) {
+        alertaError('Acceso denegado. Solo administradores.', {
+            duration: 3000,
+            onClose: () => { window.location.href = '/dashboard.html'; }
+        });
+        return;
+    }
     // NAVEGACIÓN ENTRE TABS
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
