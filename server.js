@@ -11,6 +11,7 @@ import skinRoutes from './backend/routes/skinRoutes.js';
 import dashboardRoutes from './backend/routes/dashboardRoutes.js';
 import gameRoutes from './backend/routes/gameRoutes.js';
 import challengeRoutes from './backend/routes/challengeRoutes.js';
+import adminRoutes from './backend/routes/adminRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api', skinRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api', gameRoutes);
 app.use('/api', challengeRoutes);
+app.use('/api', adminRoutes);
 
 // =====================
 // 404 / SPA fallback
