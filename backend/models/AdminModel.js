@@ -251,17 +251,33 @@ static async createLevel(nombre, descripcion, categoryId) {
     // GESTIÓN DE PREGUNTAS (Sin cambios)
     // ========================================
     
-    static async getQuestionsByLevel(levelId) {
-        const [rows] = await db.execute(
-            'SELECT * FROM quiz_questions WHERE level_id = ? ORDER BY id ASC',
-            [levelId]
-        );
+// ✅ DESPUÉS (CORREGIDO)
+static async getQuestionsByLevel(levelId) {
+    const [rows] = await db.execute(
+        'SELECT * FROM quiz_questions WHERE level_id = ? ORDER BY id ASC',
+        [levelId]
+    );
+    
+    return rows.map(q => {
+        // ✅ DETECTAR SI YA ES OBJETO O SI ES STRING
+        let opciones = q.opciones;
         
-        return rows.map(q => ({
+        // Si es string, parsearlo
+        if (typeof opciones === 'string') {
+            try {
+                opciones = JSON.parse(opciones);
+            } catch (e) {
+                console.error('Error parseando opciones:', e);
+                opciones = {}; // Fallback seguro
+            }
+        }
+        
+        return {
             ...q,
-            opciones: JSON.parse(q.opciones)
-        }));
-    }
+            opciones: opciones
+        };
+    });
+}
     
     static async createQuestion(levelId, pregunta, opciones, correcta, dificultad, imagen) {
         const query = `
@@ -289,24 +305,24 @@ static async createLevel(nombre, descripcion, categoryId) {
         };
     }
     
-    static async updateQuestion(id, pregunta, opciones, correcta, dificultad, imagen) {
-        const query = `
-            UPDATE quiz_questions 
-            SET pregunta = ?, opciones = ?, correcta = ?, dificultad = ?, imagen = ? 
-            WHERE id = ?
-        `;
-        
-        await db.execute(query, [
-            pregunta,
-            JSON.stringify(opciones),
-            correcta,
-            dificultad,
-            imagen || null,
-            id
-        ]);
-        
-        return { id, pregunta, opciones, correcta, dificultad, imagen };
-    }
+static async updateQuestion(id, pregunta, opciones, correcta, dificultad, imagen) {
+    const query = `
+        UPDATE quiz_questions 
+        SET pregunta = ?, opciones = ?, correcta = ?, dificultad = ?, imagen = ? 
+        WHERE id = ?
+    `;
+    
+    await db.execute(query, [
+        pregunta,
+        JSON.stringify(opciones), // ✅ Convertir a string al guardar
+        correcta,
+        dificultad,
+        imagen || null,
+        id
+    ]);
+    
+    return { id, pregunta, opciones, correcta, dificultad, imagen };
+}
     
     static async deleteQuestion(id) {
         await db.execute('DELETE FROM quiz_questions WHERE id = ?', [id]);

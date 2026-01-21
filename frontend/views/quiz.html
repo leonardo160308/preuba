@@ -61,17 +61,23 @@
         <!-- ========================================
              HEADER DEL QUIZ: NIVEL Y PROGRESO
              ======================================== -->
-        <div class="quiz-header" style="margin-bottom: 20px;">
-            <!-- Tema y Nivel -->
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h2 id="quiz-title" style="margin: 0; color: #2C405B;">
-                        📚 Nivel <span id="nivel-actual">1</span>
-                    </h2>
-                    <p id="quiz-subtitle" style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">
-                        Tema: <span id="tema-nombre">Fundamentos</span>
-                    </p>
-                </div>
+<!-- quiz.html -->
+<div class="quiz-header">
+    <div>
+        <h2 id="quiz-title">
+            📚 Nivel <span id="nivel-actual">1</span>
+        </h2>
+        <p id="quiz-subtitle">
+            Tema: <span id="tema-nombre">Fundamentos</span>
+        </p>
+    </div>
+    
+    <div>
+        <span>
+            <span id="pregunta-actual">1</span> / <span id="total-preguntas">5</span>
+        </span>
+    </div>
+</div>
                 
                 <!-- Contador de Preguntas -->
                 <div style="text-align: right;">

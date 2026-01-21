@@ -258,17 +258,28 @@ export async function moveFlashcard(req, res) {
 // GESTIÓN DE PREGUNTAS
 // ========================================
 
+// backend/controllers/adminController.js (línea ~180)
+
 export async function getQuestions(req, res) {
     try {
-        const { levelId } = req.params;
+        const { levelId } = req.params; // ✅ ASEGÚRATE QUE ESTO ESTÉ BIEN
+        
+        console.log('📋 Obteniendo preguntas para nivel:', levelId); // DEBUG
+        
         const questions = await AdminModel.getQuestionsByLevel(levelId);
+        
+        console.log('✅ Preguntas encontradas:', questions.length); // DEBUG
+        
         res.json({ success: true, data: questions });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error al obtener preguntas' });
+        console.error('❌ Error en getQuestions:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al obtener preguntas',
+            error: error.message 
+        });
     }
 }
-
 export async function createQuestion(req, res) {
     try {
         const { levelId, pregunta, opciones, correcta, dificultad, imagen } = req.body;

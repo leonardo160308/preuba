@@ -199,5 +199,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
+    // frontend/public/js/pages/quiz.js
+
+// ✅ CARGAR PREGUNTAS DESDE LA BD
+try {
+    const response = await fetch(`${API_URL}/admin/questions/${nivelActual}`);
+    
+    if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    console.log('📋 Respuesta del servidor:', data); // DEBUG
+    
+    if (!data.success || data.data.length === 0) {
+        alert("Este nivel no tiene preguntas. Volviendo...");
+        window.location.href = '/lecciones.html';
+        return;
+    }
+    
+    preguntas = data.data;
+    console.log('✅ Preguntas cargadas:', preguntas.length);
+    
+} catch (error) {
+    console.error('❌ Error cargando preguntas:', error);
+    alert('Error de conexión. Intenta de nuevo.');
+    return;
+}
     cargarPregunta();
 });
