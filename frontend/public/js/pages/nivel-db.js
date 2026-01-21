@@ -3,6 +3,9 @@ import { alertaError } from '../modules/alerts.js';
 
 const API_URL = 'http://localhost:3000/api';
 
+let flashcards = [];
+let currentIndex = 0;
+
 document.addEventListener('DOMContentLoaded', async () => {
     if (!protectRoute()) return;
 
@@ -11,14 +14,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Obtener nivel desde URL
     const urlParams = new URLSearchParams(window.location.search);
-    const nivelId = parseInt(urlParams.get('level')); // ✅ CAMBIADO: ahora es el ID real
-     if (!nivelId) {
+    const nivelId = parseInt(urlParams.get('level'));
+
+    if (!nivelId) {
         alertaError('Nivel no especificado');
         setTimeout(() => window.location.href = 'lecciones.html', 2000);
         return;
     }
-
-    
 
     // ========================================
     // CARGAR FLASHCARDS DESDE LA BD
@@ -26,35 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelId}`);
         const data = await response.json();
-        
-        if (data.success && data.data.length > 0) {
-            flashcards = data.data;
-        } else {
-            alertaError('Este nivel no tiene flashcards aún. Volviendo...', {
-                duration: 3000,
-                onClose: () => { window.location.href = 'lecciones.html'; }
-            });
-            return;
-        }
-    } catch (error) {
-        console.error('Error cargando flashcards:', error);
-        alertaError('Error de conexión. Intenta de nuevo.');
-        return;
-    }
-    let flashcards = [];
-    let currentIndex = 0;
 
-    // ✅ CARGAR FLASHCARDS DESDE LA BD
-    try {
-// ✅ LÍNEA 26 APROXIMADAMENTE - DEBE SER ASÍ:
-const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`);
-        
         if (data.success && data.data.length > 0) {
             flashcards = data.data;
         } else {
             alertaError('Este nivel no tiene flashcards aún. Volviendo...', {
                 duration: 3000,
-                onClose: () => { window.location.href = 'lecciones.html'; }
+                onClose: () => window.location.href = 'lecciones.html'
             });
             return;
         }
@@ -65,7 +45,7 @@ const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`)
     }
 
     // Referencias DOM
-  const card = document.getElementById('flashcard');
+    const card = document.getElementById('flashcard');
     const cardInner = card.querySelector('.card-inner');
     const titleFront = document.getElementById('card-title-front');
     const titleBack = document.getElementById('card-title-back');
@@ -77,10 +57,8 @@ const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`)
     const btnQuiz = document.getElementById('btn-ir-quiz');
     const lessonTitle = document.getElementById('lesson-title');
     const lessonSubtitle = document.getElementById('lesson-subtitle');
-       lessonTitle.textContent = flashcards[0].titulo;
-    lessonSubtitle.textContent = `Nivel ${nivelId}`;
 
-    // Configurar header
+    // Header
     function getTemaYNivel(level) {
         if (level <= 3) return { tema: "Fundamentos", nivelEnTema: level };
         if (level <= 6) return { tema: "Cuentas Bancarias", nivelEnTema: level - 3 };
@@ -90,14 +68,14 @@ const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`)
         return { tema: "Desconocido", nivelEnTema: 1 };
     }
 
-    const { tema, nivelEnTema } = getTemaYNivel(nivelActual);
+    const { tema, nivelEnTema } = getTemaYNivel(nivelId);
     lessonTitle.textContent = flashcards[0].titulo;
     lessonSubtitle.textContent = `${tema} - Nivel ${nivelEnTema}`;
 
-    // Renderizar tarjeta actual
+    // Renderizar tarjeta
     function renderCard() {
         const current = flashcards[currentIndex];
-        
+
         titleFront.textContent = current.titulo;
         titleBack.textContent = current.titulo;
         image.src = current.imagen || '../public/img/Imagen1.1.png';
@@ -110,8 +88,9 @@ const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`)
 
         cardInner.classList.remove('flipped');
     }
+
     // Eventos
-card.addEventListener('click', () => {
+    card.addEventListener('click', () => {
         cardInner.classList.toggle('flipped');
     });
 
