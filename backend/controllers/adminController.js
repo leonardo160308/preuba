@@ -150,17 +150,16 @@ export async function deleteLevel(req, res) {
 // GESTIÓN DE FLASHCARDS (Sin cambios)
 // ========================================
 
-export async function getFlashcards(req, res) {
+// backend/controllers/adminController.js
+export async function getFlashcardsByLevel(req, res) {
     try {
-        const { levelId } = req.params;
+        const { levelId } = req.params; // Esto debe coincidir con :levelId en la ruta
         const flashcards = await AdminModel.getFlashcardsByLevel(levelId);
         res.json({ success: true, data: flashcards });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ success: false, message: 'Error al obtener flashcards' });
     }
 }
-
 export async function createFlashcard(req, res) {
     try {
         const { levelId, titulo, contenido, imagen } = req.body;

@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadFlashcards(levelId) {
         try {
-            const res = await fetch(`${API_URL}/admin/flashcards/${levelId}`);
+            const res = await fetch(`${API_URL}/admin/flashcards/level/${levelId}`);
             const data = await res.json();
             
             if (data.success) {

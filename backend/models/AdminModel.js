@@ -90,39 +90,59 @@ class AdminModel {
         return rows;
     }
     
-    static async createLevel(nombre, descripcion, categoryId) {
-        // Verificar límite
-        const canCreate = await this.checkLevelsLimit(categoryId);
-        if (!canCreate) {
-            throw new Error('Esta categoría ya tiene todos sus niveles completos');
-        }
-        
-        // Obtener el siguiente orden dentro de la categoría
-        const [maxOrden] = await db.execute(
-            'SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM educational_levels WHERE category_id = ?',
-            [categoryId]
-        );
-        
-        const query = `
-            INSERT INTO educational_levels (nombre, descripcion, orden, category_id) 
-            VALUES (?, ?, ?, ?)
-        `;
-        
-        const [result] = await db.execute(query, [
-            nombre, 
-            descripcion, 
-            maxOrden[0].next_orden,
-            categoryId
-        ]);
-        
-        return { 
-            id: result.insertId, 
-            nombre, 
-            descripcion, 
-            orden: maxOrden[0].next_orden,
-            category_id: categoryId
-        };
+// backend/models/AdminModel.js
+
+static async createLevel(nombre, descripcion, categoryId) {
+    // 1. Obtener la categoría para conocer su rango permitido
+    const category = await this.getCategoryById(categoryId);
+    if (!category) throw new Error('Categoría no encontrada');
+
+    // 2. Verificar si aún hay espacio en la categoría
+    const canCreate = await this.checkLevelsLimit(categoryId);
+    if (!canCreate) {
+        throw new Error('Esta categoría ya tiene todos sus niveles completos según su rango');
     }
+
+    // 3. Calcular el siguiente orden lógico
+    const [rows] = await db.execute(
+        'SELECT MAX(orden) as max_orden FROM educational_levels WHERE category_id = ?',
+        [categoryId]
+    );
+
+    let next_orden;
+    if (rows[0].max_orden) {
+        // Si ya hay niveles, sumamos 1 al último
+        next_orden = rows[0].max_orden + 1;
+    } else {
+        // Si es el PRIMER nivel de esta categoría, usamos su nivel_inicio (ej: 4 para Cuentas)
+        next_orden = category.nivel_inicio;
+    }
+
+    // 4. Validación final de rango
+    if (next_orden > category.nivel_fin) {
+        throw new Error('Se ha alcanzado el límite superior de niveles para esta categoría');
+    }
+
+    const query = `
+        INSERT INTO educational_levels (nombre, descripcion, orden, category_id) 
+        VALUES (?, ?, ?, ?)
+    `;
+    
+    const [result] = await db.execute(query, [
+        nombre,
+        descripcion,
+        next_orden,
+        categoryId
+    ]);
+    
+    return { 
+        id: result.insertId, 
+        nombre, 
+        descripcion, 
+        orden: next_orden, 
+        category_id: categoryId 
+    };
+}
     
     static async updateLevel(id, nombre, descripcion) {
         const query = `
