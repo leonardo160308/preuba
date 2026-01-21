@@ -21,30 +21,36 @@ export const createMovement = async (req, res) => {
         }
 
         // 2. 🔥 Validación FUERTE del monto
-        const montoNumerico = parseFloat(monto);
-        
+        // 🔒 VALIDACIÓN FUERTE DEL MONTO
 
-        if (isNaN(montoNumerico)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El monto debe ser un número válido.'
-            });
-        }
+const montoNumerico = Number(monto);
 
-        if (montoNumerico <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'El monto debe ser mayor a 0.'
-            });
-        }
+// 1️⃣ Debe ser un número real válido
+if (!Number.isFinite(montoNumerico)) {
+    return res.status(400).json({
+        success: false,
+        message: 'Monto inválido'
+    });
+}
 
-        // Límite compatible con DECIMAL(12,2)
-        if (montoNumerico > 999999.99) {
-            return res.status(400).json({
-                success: false,
-                message: 'El monto es demasiado grande. Máximo permitido: $99,999,999.99'
-            });
-        }
+// 2️⃣ Debe ser mayor a 0
+if (montoNumerico <= 0) {
+    return res.status(400).json({
+        success: false,
+        message: 'El monto debe ser mayor a 0.'
+    });
+}
+
+// 3️⃣ Máximo permitido: 8 enteros + 2 decimales
+if (montoNumerico > 99999999.99) {
+    return res.status(400).json({
+        success: false,
+        message: 'El monto es demasiado grande. Máximo permitido: $99,999,999.99'
+    });
+}
+
+
+
 
         // 3. Crear objeto del movimiento
         const newMovement = {

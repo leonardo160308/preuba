@@ -84,7 +84,6 @@ export async function createLevel(req, res) {
             });
         }
         
-        // Verificar límite
         const canCreate = await AdminModel.checkLevelsLimit(categoryId);
         if (!canCreate) {
             return res.status(400).json({
@@ -147,19 +146,20 @@ export async function deleteLevel(req, res) {
 }
 
 // ========================================
-// GESTIÓN DE FLASHCARDS (Sin cambios)
+// ✅ GESTIÓN DE FLASHCARDS (CORREGIDO)
 // ========================================
 
-// backend/controllers/adminController.js
 export async function getFlashcardsByLevel(req, res) {
     try {
-        const { levelId } = req.params; // Esto debe coincidir con :levelId en la ruta
+        const { levelId } = req.params;
         const flashcards = await AdminModel.getFlashcardsByLevel(levelId);
         res.json({ success: true, data: flashcards });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ success: false, message: 'Error al obtener flashcards' });
     }
 }
+
 export async function createFlashcard(req, res) {
     try {
         const { levelId, titulo, contenido, imagen } = req.body;
@@ -255,7 +255,7 @@ export async function moveFlashcard(req, res) {
 }
 
 // ========================================
-// GESTIÓN DE PREGUNTAS (Sin cambios)
+// GESTIÓN DE PREGUNTAS
 // ========================================
 
 export async function getQuestions(req, res) {

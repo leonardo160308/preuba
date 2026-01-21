@@ -219,6 +219,8 @@ function limitarNumero(input, maxEnteros, maxDecimales = 2) {
 limitarNumero(inpIngreso, 8, 2);   // Ingreso fijo
 limitarNumero(inpEgreso, 8, 2);    // Egreso fijo
 limitarNumero(inpMetaMonto, 9, 2); // Meta de ahorro
+const inpMovimientoMonto = document.getElementById('trans-amount');
+limitarNumero(inpMovimientoMonto, 8, 2);
 
         // Eventos para Datos Fijos
         // Usamos 'change' en lugar de 'input' para no saturar al servidor con cada tecla
@@ -420,42 +422,53 @@ limitarNumero(inpMetaMonto, 9, 2); // Meta de ahorro
         // (Tu lógica de recomendaciones iría aquí, la omití por brevedad pero puedes pegarla)
     }
 
-    async function agregarMovimiento(e) {
-        e.preventDefault();
-        const tipo = document.getElementById('trans-type').value; 
-        const categoria = document.getElementById('trans-category').value;
-        const monto = parseFloat(document.getElementById('trans-amount').value);
+async function agregarMovimiento(e) {
+    e.preventDefault();
 
-        if (!categoria || isNaN(monto) || monto <= 0) return;
+    const tipo = document.getElementById('trans-type').value;
+    const categoria = document.getElementById('trans-category').value;
+    const montoRaw = document.getElementById('trans-amount').value;
 
-        // 1. Preparar datos para el Backend
-        const movementData = {
-            user_id: userId,
-            fecha: diaSeleccionado, // Formato YYYY-MM-DD
-            tipo: tipo, // 'income' o 'expense' (asegúrate que el value del select coincida)
-            categoria: categoria,
-            monto: monto,
-            descripcion: 'Movimiento desde Dashboard'
-        };
+    // 🔒 Regex blindado: 1 a 8 enteros + 2 decimales
+    const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
 
-        try {
-            // 2. Enviar a la API
-            await createMovement(movementData);
-
-            // 3. Limpiar Formulario
-            document.getElementById('trans-amount').value = '';
-            
-            // 4. Recargar datos para ver el cambio reflejado (incluyendo monedas)
-            await cargarDatosDelServidor(); 
-            
-            // 5. Actualizar la vista del modal
-            actualizarContenidoModal();
-
-        } catch (error) {
-            console.error("Error al crear movimiento:", error);
-            alert("No se pudo guardar el movimiento.");
-        }
+    if (!categoria) {
+        alert('Selecciona una categoría');
+        return;
     }
+
+    if (!montoRegex.test(montoRaw)) {
+        alert('Monto inválido. Máx 8 dígitos y 2 decimales.');
+        return;
+    }
+
+    const monto = parseFloat(montoRaw);
+
+    if (monto <= 0) {
+        alert('El monto debe ser mayor a 0');
+        return;
+    }
+
+    const movementData = {
+        user_id: userId,
+        fecha: diaSeleccionado,
+        tipo,
+        categoria,
+        monto,
+        descripcion: 'Movimiento desde Dashboard'
+    };
+
+    try {
+        await createMovement(movementData);
+        document.getElementById('trans-amount').value = '';
+        await cargarDatosDelServidor();
+        actualizarContenidoModal();
+    } catch (error) {
+        console.error("Error al crear movimiento:", error);
+        alert("No se pudo guardar el movimiento.");
+    }
+}
+
 
     // Iniciar
     init();

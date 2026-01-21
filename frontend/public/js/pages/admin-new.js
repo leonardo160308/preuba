@@ -7,7 +7,7 @@ const API_URL = 'http://localhost:3000/api';
 document.addEventListener('DOMContentLoaded', async () => {
     
     // ========================================
-    // 1. SEGURIDAD Y AUTH
+    // 1. SEGURIDAD
     // ========================================
     if (!protectRoute()) return;
     
@@ -22,82 +22,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sessionUser = getAuthData();
     const userId = sessionUser.id;
 
-    // Variables globales para almacenar datos
     let categories = [];
     let levels = [];
     let flashcards = [];
     let questions = [];
 
     // ========================================
-    // 2. NAVEGACIÓN (TABS)
+    // 2. NAVEGACIÓN TABS
     // ========================================
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
             
-            // Quitar active de todos
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Activar el seleccionado
             btn.classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
         });
     });
 
+    // Logout
     document.getElementById('logout-btn-admin')?.addEventListener('click', async (e) => {
         e.preventDefault();
         const confirmar = await alertaConfirmacion('¿Cerrar sesión?', 'Salir');
         if (confirmar) logout();
     });
-// Dentro del DOMContentLoaded en admin-new.js...
 
-// 1. ABRIR MODAL FLASHCARD
-document.getElementById('btn-new-flashcard').addEventListener('click', () => {
-    document.getElementById('form-flashcard').reset();
-    document.getElementById('flashcard-id').value = '';
-    document.getElementById('modal-flashcard-title').textContent = 'Nueva Flashcard';
-    document.getElementById('modal-flashcard').classList.add('active');
-});
-
-// 2. GUARDAR FLASHCARD
-document.getElementById('form-flashcard').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // CAPTURAR EL ID DEL NIVEL (Esto es lo que te fallaba)
-    const levelId = document.getElementById('flashcard-level').value;
-    const pregunta = document.getElementById('flashcard-pregunta').value.trim();
-    const respuesta = document.getElementById('flashcard-respuesta').value.trim();
-
-    if (!levelId || !pregunta || !respuesta) {
-        return alertaAdvertencia('Por favor, completa todos los campos y selecciona un nivel');
-    }
-
-    try {
-        const res = await fetch(`${API_URL}/admin/flashcards`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, levelId, pregunta, respuesta })
-        });
-        
-        const data = await res.json();
-        if (data.success) {
-            alertaExito('Flashcard creada');
-            document.getElementById('modal-flashcard').classList.remove('active');
-            // Aquí puedes llamar a una función para refrescar la lista si la tienes
-        } else {
-            alertaError(data.message);
-        }
-    } catch (error) {
-        alertaError('Error al conectar con el servidor');
-    }
-});
     // ========================================
-    // 3. CARGAR DATOS (Categorías y Niveles)
+    // 3. CARGAR DATOS INICIALES
     // ========================================
     async function loadData() {
         try {
-            // Hacemos fetch de categorías y niveles en paralelo
             const [resCat, resLevels] = await Promise.all([
                 fetch(`${API_URL}/admin/categories`),
                 fetch(`${API_URL}/admin/levels`)
@@ -110,7 +66,7 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
             if (dataLevels.success) levels = dataLevels.data;
             
             renderCategoriesAndLevels();
-            updateSelectFilters(); // Actualiza los dropdowns de flashcards/preguntas
+            updateSelectFilters();
             
         } catch (error) {
             console.error('Error cargando datos:', error);
@@ -119,23 +75,19 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
     }
 
     // ========================================
-    // 4. RENDERIZADO PRINCIPAL (Categorías > Niveles)
+    // 4. RENDERIZADO DE CATEGORÍAS Y NIVELES
     // ========================================
     function renderCategoriesAndLevels() {
         const container = document.getElementById('categories-container');
         
-        // Mapeamos cada categoría para crear su tarjeta
         container.innerHTML = categories.map(cat => {
-            // Filtramos los niveles que pertenecen a ESTA categoría
             const catLevels = levels.filter(l => l.category_id === cat.id);
-            
-            // Calculamos límites según tu DB (nivel_inicio y nivel_fin)
             const totalAllowed = cat.nivel_fin - cat.nivel_inicio + 1;
             const currentCount = catLevels.length;
             const isFull = currentCount >= totalAllowed;
 
             return `
-                <div class="category-card" style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div class="category-card" style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: white;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
                         <div>
                             <h3 style="margin:0; color: #2c3e50;">${cat.nombre}</h3>
@@ -158,10 +110,10 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
                                     <br><small>${level.descripcion}</small>
                                 </div>
                                 <div class="actions">
-                                    <button class="btn-secondary btn-small btn-edit-level" data-id="${level.id}" title="Editar">
+                                    <button class="btn-secondary btn-small btn-edit-level" data-id="${level.id}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn-danger btn-small btn-delete-level" data-id="${level.id}" title="Eliminar">
+                                    <button class="btn-danger btn-small btn-delete-level" data-id="${level.id}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -180,12 +132,10 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
             `;
         }).join('');
 
-        // Listeners para los botones generados dinámicamente
         attachCategoryEvents();
     }
 
     function attachCategoryEvents() {
-        // Botón Nuevo Nivel
         document.querySelectorAll('.btn-new-level').forEach(btn => {
             btn.addEventListener('click', () => {
                 const catId = btn.dataset.catId;
@@ -194,47 +144,38 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
             });
         });
 
-        // Botón Editar Nivel
         document.querySelectorAll('.btn-edit-level').forEach(btn => {
             btn.addEventListener('click', () => openLevelModal(btn.dataset.id));
         });
 
-        // Botón Eliminar Nivel
         document.querySelectorAll('.btn-delete-level').forEach(btn => {
             btn.addEventListener('click', () => deleteLevel(btn.dataset.id));
         });
     }
 
     // ========================================
-    // 5. MODAL DE NIVELES (Crear/Editar)
+    // 5. MODAL DE NIVELES
     // ========================================
     const modalLevel = document.getElementById('modal-level');
     const formLevel = document.getElementById('form-level');
 
     function openLevelModal(levelId = null, catId = null, catName = null) {
-        // Limpiar errores previos
         formLevel.reset();
         
         if (levelId) {
-            // MODO EDICIÓN
             const level = levels.find(l => l.id == levelId);
             const cat = categories.find(c => c.id == level.category_id);
             
             document.getElementById('modal-level-title').textContent = 'Editar Nivel';
             document.getElementById('level-id').value = level.id;
-            
-            // Rellenar campos ocultos y visibles
             document.getElementById('level-category-id').value = level.category_id;
             document.getElementById('level-category-name').value = cat ? cat.nombre : 'Categoría desconocida';
             document.getElementById('level-nombre').value = level.nombre;
             document.getElementById('level-descripcion').value = level.descripcion;
             
         } else {
-            // MODO CREACIÓN
             document.getElementById('modal-level-title').textContent = 'Nuevo Nivel';
-            document.getElementById('level-id').value = ''; // Vacío para indicar nuevo
-            
-            // Establecer la categoría preseleccionada
+            document.getElementById('level-id').value = '';
             document.getElementById('level-category-id').value = catId;
             document.getElementById('level-category-name').value = catName;
         }
@@ -242,7 +183,6 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
         modalLevel.classList.add('active');
     }
 
-    // Guardar Nivel (Submit)
     formLevel.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -271,7 +211,7 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
             if (data.success) {
                 alertaExito(id ? 'Nivel actualizado' : 'Nivel creado exitosamente');
                 modalLevel.classList.remove('active');
-                loadData(); // Recargar la lista
+                loadData();
             } else {
                 alertaError(data.message);
             }
@@ -281,9 +221,8 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
         }
     });
 
-    // Eliminar Nivel
     async function deleteLevel(id) {
-        const confirmar = await alertaConfirmacion('¿Eliminar este nivel y todo su contenido?');
+        const confirmar = await alertaConfirmacion('¿Eliminar este nivel?');
         if (!confirmar) return;
         
         try {
@@ -298,7 +237,7 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
                 alertaExito('Nivel eliminado');
                 loadData();
             } else {
-                alertaAdvertencia(data.message); // Si tiene contenido, el backend avisa aquí
+                alertaAdvertencia(data.message);
             }
         } catch (error) {
             alertaError('Error al eliminar');
@@ -306,21 +245,18 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
     }
 
     // ========================================
-    // 6. FLASHCARDS Y PREGUNTAS (Auxiliares)
+    // 6. ACTUALIZAR SELECTS
     // ========================================
-    
-    // Función para actualizar los <select> de las otras pestañas
     function updateSelectFilters() {
         const selects = [
             document.getElementById('flashcard-level-filter'),
             document.getElementById('question-level-filter'),
-            document.getElementById('flashcard-level'), // En el modal
-            document.getElementById('question-level')   // En el modal
+            document.getElementById('flashcard-level'),
+            document.getElementById('question-level')
         ];
 
         let optionsHTML = '<option value="">-- Selecciona un Nivel --</option>';
 
-        // Agrupamos en el select por categoría para que se vea ordenado
         categories.forEach(cat => {
             const catLevels = levels.filter(l => l.category_id === cat.id);
             if(catLevels.length > 0) {
@@ -337,21 +273,20 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
         });
     }
 
-// ========================================
-    // 7. LÓGICA DE FLASHCARDS
     // ========================================
-
-    // Filtro por nivel: Cargar flashcards cuando cambie el select
+    // 7. FLASHCARDS
+    // ========================================
     document.getElementById('flashcard-level-filter')?.addEventListener('change', (e) => {
         const levelId = e.target.value;
         if (levelId) loadFlashcards(levelId);
-        else document.getElementById('flashcards-container').innerHTML = '';
+        else document.getElementById('flashcards-container').innerHTML = '<p class="empty-state">Selecciona un nivel</p>';
     });
 
     async function loadFlashcards(levelId) {
         try {
             const res = await fetch(`${API_URL}/admin/flashcards/level/${levelId}`);
             const data = await res.json();
+            
             if (data.success) {
                 flashcards = data.data;
                 renderFlashcards();
@@ -363,18 +298,22 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
 
     function renderFlashcards() {
         const container = document.getElementById('flashcards-container');
+        
+        if (!container) {
+            console.error('❌ Contenedor flashcards-container no encontrado');
+            return;
+        }
+        
         if (flashcards.length === 0) {
-            container.innerHTML = '<p>No hay flashcards en este nivel.</p>';
+            container.innerHTML = '<p class="empty-state">No hay flashcards en este nivel.</p>';
             return;
         }
 
         container.innerHTML = flashcards.map(f => `
-            <div class="admin-card">
-                <div class="admin-card-content">
-                    <strong>P:</strong> ${f.pregunta}<br>
-                    <strong>R:</strong> ${f.respuesta}
-                </div>
-                <div class="admin-card-actions">
+            <div class="item-card">
+                <h3>${f.titulo}</h3>
+                <p>${f.contenido.substring(0, 100)}...</p>
+                <div class="item-actions">
                     <button class="btn-danger btn-small" onclick="deleteFlashcard(${f.id}, ${f.level_id})">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -383,53 +322,275 @@ document.getElementById('form-flashcard').addEventListener('submit', async (e) =
         `).join('');
     }
 
-    // El código de "Guardar Flashcard" que tenías arriba, muévelo aquí:
-    document.getElementById('form-flashcard').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const levelId = document.getElementById('flashcard-level').value;
-        const pregunta = document.getElementById('flashcard-pregunta').value.trim();
-        const respuesta = document.getElementById('flashcard-respuesta').value.trim();
+    document.getElementById('btn-new-flashcard')?.addEventListener('click', () => {
+        const levelId = document.getElementById('flashcard-level-filter').value;
+        if (!levelId) {
+            alertaAdvertencia('Selecciona un nivel primero');
+            return;
+        }
+        
+        document.getElementById('flashcard-level').value = levelId;
+        document.getElementById('form-flashcard').reset();
+        document.getElementById('flashcard-id').value = '';
+        document.getElementById('modal-flashcard-title').textContent = 'Nueva Flashcard';
+        document.getElementById('modal-flashcard').classList.add('active');
+    });
 
-        if (!levelId || !pregunta || !respuesta) return alertaAdvertencia('Completa todos los campos');
+    document.getElementById('form-flashcard')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const levelId = document.getElementById('flashcard-level').value;
+        const titulo = document.getElementById('flashcard-titulo').value.trim();
+        const contenido = document.getElementById('flashcard-contenido').value.trim();
+        const imagen = document.getElementById('flashcard-imagen')?.value.trim() || null;
+
+        if (!levelId || !titulo || !contenido) {
+            alertaAdvertencia('Completa todos los campos');
+            return;
+        }
 
         try {
             const res = await fetch(`${API_URL}/admin/flashcards`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, levelId, pregunta, respuesta })
+                body: JSON.stringify({ userId, levelId, titulo, contenido, imagen })
             });
+            
             const data = await res.json();
+            
             if (data.success) {
                 alertaExito('Flashcard creada');
                 document.getElementById('modal-flashcard').classList.remove('active');
-                loadFlashcards(levelId); // Recargar la lista automáticamente
+                loadFlashcards(levelId);
+            } else {
+                alertaError(data.message);
             }
-        } catch (error) { alertaError('Error al guardar'); }
+        } catch (error) {
+            alertaError('Error al guardar');
+        }
     });
 
-    // Función global para eliminar (necesita estar en window para el onclick)
     window.deleteFlashcard = async (id, levelId) => {
         const confirmar = await alertaConfirmacion('¿Eliminar esta flashcard?');
         if (!confirmar) return;
+        
         try {
             const res = await fetch(`${API_URL}/admin/flashcards/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId })
             });
+            
             if ((await res.json()).success) {
                 alertaExito('Eliminada');
                 loadFlashcards(levelId);
             }
-        } catch (error) { alertaError('Error al eliminar'); }
+        } catch (error) {
+            alertaError('Error al eliminar');
+        }
     };
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+
+    // ========================================
+    // 8. CERRAR MODALES
+    // ========================================
+    document.querySelectorAll('.modal-close, [data-modal]').forEach(el => {
+        el.addEventListener('click', () => {
+            const modalId = el.dataset.modal || el.closest('.modal').id;
+            document.getElementById(modalId).classList.remove('active');
         });
     });
+    // ========================================
+// 9. PREGUNTAS (FALTABA IMPLEMENTAR)
+// ========================================
+document.getElementById('question-level-filter')?.addEventListener('change', (e) => {
+    const levelId = e.target.value;
+    if (levelId) loadQuestions(levelId);
+    else document.getElementById('questions-container').innerHTML = '<p class="empty-state">Selecciona un nivel</p>';
+});
+
+async function loadQuestions(levelId) {
+    try {
+        const res = await fetch(`${API_URL}/admin/questions/${levelId}`);
+        const data = await res.json();
+        
+        if (data.success) {
+            questions = data.data;
+            renderQuestions();
+        }
+    } catch (error) {
+        alertaError('Error al cargar preguntas');
+    }
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    
+    if (!container) {
+        console.error('❌ Contenedor questions-container no encontrado');
+        return;
+    }
+    
+    if (questions.length === 0) {
+        container.innerHTML = '<p class="empty-state">No hay preguntas en este nivel.</p>';
+        return;
+    }
+
+    container.innerHTML = questions.map(q => `
+        <div class="item-card">
+            <h3>${q.pregunta.substring(0, 60)}...</h3>
+            <div class="meta">
+                <span><i class="fas fa-list"></i> ${Object.keys(q.opciones).length} opciones</span>
+                <span><i class="fas fa-check-circle"></i> Correcta: ${q.correcta}</span>
+            </div>
+            <div class="item-actions">
+                <button class="btn-danger btn-small" onclick="deleteQuestion(${q.id}, ${q.level_id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+document.getElementById('btn-new-question')?.addEventListener('click', () => {
+    const levelId = document.getElementById('question-level-filter').value;
+    if (!levelId) {
+        alertaAdvertencia('Selecciona un nivel primero');
+        return;
+    }
+    
+    document.getElementById('question-level').value = levelId;
+    document.getElementById('form-question').reset();
+    document.getElementById('question-id').value = '';
+    
+    // Resetear opciones
+    const container = document.getElementById('options-container');
+    container.innerHTML = `
+        <div class="option-row">
+            <input type="text" class="option-input" data-key="A" placeholder="Opción A" required>
+        </div>
+        <div class="option-row">
+            <input type="text" class="option-input" data-key="B" placeholder="Opción B" required>
+        </div>
+        <div class="option-row">
+            <input type="text" class="option-input" data-key="C" placeholder="Opción C" required>
+        </div>
+    `;
+    
+    updateCorrectaOptions();
+    document.getElementById('modal-question-title').textContent = 'Nueva Pregunta';
+    document.getElementById('modal-question').classList.add('active');
+});
+
+// Botón añadir opción
+document.getElementById('btn-add-option')?.addEventListener('click', () => {
+    const container = document.getElementById('options-container');
+    const count = container.children.length;
+    
+    if (count >= 5) {
+        alertaAdvertencia('Máximo 5 opciones');
+        return;
+    }
+    
+    const keys = ['A', 'B', 'C', 'D', 'E'];
+    const nextKey = keys[count];
+    
+    const row = document.createElement('div');
+    row.className = 'option-row';
+    row.innerHTML = `
+        <input type="text" class="option-input" data-key="${nextKey}" placeholder="Opción ${nextKey}" required>
+        <button type="button" class="btn-remove-option">&times;</button>
+    `;
+    
+    container.appendChild(row);
+    
+    // Evento eliminar
+    row.querySelector('.btn-remove-option').addEventListener('click', () => {
+        if (container.children.length <= 3) {
+            alertaAdvertencia('Mínimo 3 opciones');
+            return;
+        }
+        row.remove();
+        updateCorrectaOptions();
+    });
+    
+    updateCorrectaOptions();
+});
+
+function updateCorrectaOptions() {
+    const select = document.getElementById('question-correcta');
+    const inputs = document.querySelectorAll('.option-input');
+    const keys = Array.from(inputs).map(i => i.dataset.key);
+    
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Selecciona la correcta</option>' +
+        keys.map(k => `<option value="${k}">${k}</option>`).join('');
+    
+    if (keys.includes(currentValue)) {
+        select.value = currentValue;
+    }
+}
+
+document.getElementById('form-question')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const levelId = document.getElementById('question-level').value;
+    const pregunta = document.getElementById('question-pregunta').value.trim();
+    const correcta = document.getElementById('question-correcta').value;
+    const dificultad = document.getElementById('question-dificultad').value;
+    const imagen = document.getElementById('question-imagen')?.value.trim() || null;
+    
+    // Recopilar opciones
+    const opciones = {};
+    document.querySelectorAll('.option-input').forEach(input => {
+        opciones[input.dataset.key] = input.value.trim();
+    });
+    
+    if (!levelId || !pregunta || !correcta || Object.keys(opciones).length < 3) {
+        alertaAdvertencia('Completa todos los campos');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/admin/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, levelId, pregunta, opciones, correcta, dificultad, imagen })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            alertaExito('Pregunta creada');
+            document.getElementById('modal-question').classList.remove('active');
+            loadQuestions(levelId);
+        } else {
+            alertaError(data.message);
+        }
+    } catch (error) {
+        alertaError('Error al guardar');
+    }
+});
+
+window.deleteQuestion = async (id, levelId) => {
+    const confirmar = await alertaConfirmacion('¿Eliminar esta pregunta?');
+    if (!confirmar) return;
+    
+    try {
+        const res = await fetch(`${API_URL}/admin/questions/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+        
+        if ((await res.json()).success) {
+            alertaExito('Eliminada');
+            loadQuestions(levelId);
+        }
+    } catch (error) {
+        alertaError('Error al eliminar');
+    }
+};
 
     // INICIALIZACIÓN
     loadData();
 });
-

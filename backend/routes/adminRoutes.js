@@ -8,7 +8,7 @@ import {
     createLevel,
     updateLevel,
     deleteLevel,
-    getFlashcards,
+    getFlashcardsByLevel,
     createFlashcard,
     updateFlashcard,
     deleteFlashcard,
@@ -22,14 +22,15 @@ import {
 const router = Router();
 
 // ========================================
-// CATEGORÍAS (Solo lectura)
+// CATEGORÍAS (PÚBLICO - Sin checkAdmin)
 // ========================================
 router.get('/admin/categories', getCategories);
 
 // ========================================
 // NIVELES
 // ========================================
-router.get('/admin/levels', getLevels);
+router.get('/admin/levels', getLevels); // ✅ PÚBLICO para usuarios
+router.get('/levels', getLevels); // ✅ RUTA ALTERNATIVA PÚBLICA
 router.get('/admin/levels/category/:categoryId', getLevelsByCategory);
 router.post('/admin/levels', checkAdmin, createLevel);
 router.put('/admin/levels/:id', checkAdmin, updateLevel);
@@ -38,14 +39,14 @@ router.delete('/admin/levels/:id', checkAdmin, deleteLevel);
 // ========================================
 // FLASHCARDS
 // ========================================
-router.get('/admin/flashcards/:levelId', getFlashcards);
+router.get('/admin/flashcards/level/:levelId', getFlashcardsByLevel);
 router.post('/admin/flashcards', checkAdmin, createFlashcard);
 router.put('/admin/flashcards/:id', checkAdmin, updateFlashcard);
 router.delete('/admin/flashcards/:id', checkAdmin, deleteFlashcard);
 router.patch('/admin/flashcards/:id/move', checkAdmin, moveFlashcard);
 
 // ========================================
-// PREGUNTAS DE QUIZ
+// PREGUNTAS
 // ========================================
 router.get('/admin/questions/:levelId', getQuestions);
 router.post('/admin/questions', checkAdmin, createQuestion);

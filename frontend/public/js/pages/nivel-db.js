@@ -11,15 +11,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Obtener nivel desde URL
     const urlParams = new URLSearchParams(window.location.search);
-    const nivelActual = parseInt(urlParams.get('level')) || 1;
+    const nivelId = parseInt(urlParams.get('level')); // ✅ CAMBIADO: ahora es el ID real
+     if (!nivelId) {
+        alertaError('Nivel no especificado');
+        setTimeout(() => window.location.href = 'lecciones.html', 2000);
+        return;
+    }
 
+    
+
+    // ========================================
+    // CARGAR FLASHCARDS DESDE LA BD
+    // ========================================
+    try {
+        const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelId}`);
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+            flashcards = data.data;
+        } else {
+            alertaError('Este nivel no tiene flashcards aún. Volviendo...', {
+                duration: 3000,
+                onClose: () => { window.location.href = 'lecciones.html'; }
+            });
+            return;
+        }
+    } catch (error) {
+        console.error('Error cargando flashcards:', error);
+        alertaError('Error de conexión. Intenta de nuevo.');
+        return;
+    }
     let flashcards = [];
     let currentIndex = 0;
 
     // ✅ CARGAR FLASHCARDS DESDE LA BD
     try {
-        const response = await fetch(`${API_URL}/admin/flashcards/${nivelActual}`);
-        const data = await response.json();
+// ✅ LÍNEA 26 APROXIMADAMENTE - DEBE SER ASÍ:
+const response = await fetch(`${API_URL}/admin/flashcards/level/${nivelActual}`);
         
         if (data.success && data.data.length > 0) {
             flashcards = data.data;
@@ -37,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Referencias DOM
-    const card = document.getElementById('flashcard');
+  const card = document.getElementById('flashcard');
     const cardInner = card.querySelector('.card-inner');
     const titleFront = document.getElementById('card-title-front');
     const titleBack = document.getElementById('card-title-back');
@@ -49,6 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnQuiz = document.getElementById('btn-ir-quiz');
     const lessonTitle = document.getElementById('lesson-title');
     const lessonSubtitle = document.getElementById('lesson-subtitle');
+       lessonTitle.textContent = flashcards[0].titulo;
+    lessonSubtitle.textContent = `Nivel ${nivelId}`;
 
     // Configurar header
     function getTemaYNivel(level) {
@@ -80,9 +110,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         cardInner.classList.remove('flipped');
     }
-
     // Eventos
-    card.addEventListener('click', () => {
+card.addEventListener('click', () => {
         cardInner.classList.toggle('flipped');
     });
 
@@ -103,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     btnQuiz.addEventListener('click', () => {
-        window.location.href = `quiz.html?level=${nivelActual}`;
+        window.location.href = `quiz.html?level=${nivelId}`;
     });
 
     renderCard();
