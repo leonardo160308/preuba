@@ -147,8 +147,15 @@
             <label for="flashcard-contenido">Contenido *</label>
             <textarea id="flashcard-contenido" rows="6" required></textarea>
             
-            <label for="flashcard-imagen">URL de Imagen (opcional)</label>
-            <input type="text" id="flashcard-imagen">
+<div class="image-selector">
+    <div class="image-selector-grid" id="flashcard-image-grid"></div>
+    <div class="selected-image-preview" id="flashcard-image-preview">
+        <strong>Imagen seleccionada:</strong>
+        <span></span>
+    </div>
+</div>
+<input type="hidden" id="flashcard-imagen">
+
             
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" data-modal="modal-flashcard">Cancelar</button>
@@ -206,8 +213,18 @@
                 <option value="dificil">Difícil</option>
             </select>
             
-            <label for="question-imagen">URL de Imagen (opcional)</label>
-            <input type="text" id="question-imagen">
+            <!-- DENTRO DEL MODAL DE PREGUNTA, REEMPLAZA ESTO: -->
+
+
+<label>Imagen (opcional)</label>
+<div class="image-selector">
+    <div class="image-selector-grid" id="question-image-grid">
+    </div>
+    <div class="selected-image-preview" id="question-image-preview">
+        <strong>Imagen seleccionada:</strong> <span id="question-selected-name"></span>
+    </div>
+</div>
+<input type="hidden" id="question-imagen">
             
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" data-modal="modal-question">Cancelar</button>

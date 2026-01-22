@@ -4,7 +4,82 @@ import { alertaExito, alertaError, alertaAdvertencia, alertaConfirmacion } from 
 
 const API_URL = 'http://localhost:3000/api';
 
+
 document.addEventListener('DOMContentLoaded', async () => {
+// ========================================
+// CONFIGURACIÓN DE IMÁGENES DISPONIBLES
+// ========================================
+const AVAILABLE_IMAGES = [
+    'alcancia.jpg',
+    'compu.jpg',
+    'frascoDinero.jpg',
+    'mapacheConAlcancia.jpg',
+    'mapacheConDinero.jpg',
+    'mapacheDandoBillete.jpg',
+    'mapacheEntendiendo.jpg',
+    'mapacheLeyendo.jpg',
+    'tarjetaDetras1.jpg',
+    'tarjetaDetras2.jpg',
+    'tarjetaDetras3.jpg',
+    'tarjetaDetras4.jpg',
+    'tarjetaDetras5.jpg',
+    'tarjetaDetras6.jpg',
+    'tarjetaDetras7.jpg',
+    'tarjetaFrente1.jpg',
+    'tarjetaFrente4.jpg',
+    'tarjetaFrente5.jpg',
+    'tarjetaFrente6.jpg',
+    'tarjetaFrente7.jpg',
+    'tarjetaFrente8.jpg',
+    'tarjetaFrente9.jpg',
+    'tarjetaFrente10.jpg',
+    'tarjetaFrente11.jpg'
+];
+
+// ========================================
+// FUNCIÓN PARA RENDERIZAR SELECTOR DE IMÁGENES
+// ========================================
+function renderImageSelector(containerId, previewId, hiddenInputId) {
+    const container = document.getElementById(containerId);
+    const preview = document.getElementById(previewId);
+    const hiddenInput = document.getElementById(hiddenInputId);
+
+    if (!container || !preview || !hiddenInput) {
+        console.error('❌ Elementos del selector de imágenes no encontrados', {
+            container,
+            preview,
+            hiddenInput
+        });
+        return;
+    }
+
+    const selectedNameSpan = preview.querySelector('span');
+
+    container.innerHTML = AVAILABLE_IMAGES.map(imgName => `
+        <div class="image-option" data-image="/public/img/fotos/${imgName}">
+            <img src="/public/img/fotos/${imgName}" alt="${imgName}">
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.image-option').forEach(option => {
+        option.addEventListener('click', () => {
+
+            container.querySelectorAll('.image-option').forEach(opt =>
+                opt.classList.remove('selected')
+            );
+
+            option.classList.add('selected');
+
+            const imagePath = option.dataset.image;
+            const imageName = imagePath.split('/').pop();
+
+            hiddenInput.value = imagePath;
+            selectedNameSpan.textContent = imageName;
+            preview.classList.add('active');
+        });
+    });
+}
+
     
     // ========================================
     // 1. SEGURIDAD
@@ -322,19 +397,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
     }
 
-    document.getElementById('btn-new-flashcard')?.addEventListener('click', () => {
-        const levelId = document.getElementById('flashcard-level-filter').value;
-        if (!levelId) {
-            alertaAdvertencia('Selecciona un nivel primero');
-            return;
-        }
-        
-        document.getElementById('flashcard-level').value = levelId;
-        document.getElementById('form-flashcard').reset();
-        document.getElementById('flashcard-id').value = '';
-        document.getElementById('modal-flashcard-title').textContent = 'Nueva Flashcard';
-        document.getElementById('modal-flashcard').classList.add('active');
-    });
+document.getElementById('btn-new-flashcard')?.addEventListener('click', () => {
+    const levelId = document.getElementById('flashcard-level-filter').value;
+    if (!levelId) {
+        alertaAdvertencia('Selecciona un nivel primero');
+        return;
+    }
+    
+    document.getElementById('flashcard-level').value = levelId;
+    document.getElementById('form-flashcard').reset();
+    document.getElementById('flashcard-id').value = '';
+    document.getElementById('modal-flashcard-title').textContent = 'Nueva Flashcard';
+    
+    // ✅ RENDERIZAR SELECTOR DE IMÁGENES
+    renderImageSelector('flashcard-image-grid', 'flashcard-image-preview', 'flashcard-imagen');
+    
+    document.getElementById('modal-flashcard').classList.add('active');
+});
 
     document.getElementById('form-flashcard')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -477,6 +556,10 @@ document.getElementById('btn-new-question')?.addEventListener('click', () => {
     `;
     
     updateCorrectaOptions();
+    
+    // ✅ RENDERIZAR SELECTOR DE IMÁGENES
+    renderImageSelector('question-image-grid', 'question-image-preview', 'question-imagen');
+    
     document.getElementById('modal-question-title').textContent = 'Nueva Pregunta';
     document.getElementById('modal-question').classList.add('active');
 });
