@@ -73,24 +73,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     lessonSubtitle.textContent = `${tema} - Nivel ${nivelEnTema}`;
 
     // Renderizar tarjeta
-    function renderCard() {
-        const current = flashcards[currentIndex];
+function renderCard() {
+    const current = flashcards[currentIndex];
 
-        titleFront.textContent = current.titulo;
-        titleBack.textContent = current.titulo;
-        image.src = current.imagen || '../public/img/Imagen1.1.png';
-        content.textContent = current.contenido;
-        counter.textContent = `Tarjeta ${currentIndex + 1} de ${flashcards.length}`;
+    titleFront.textContent = current.titulo;
+    titleBack.textContent = current.titulo;
+    content.textContent = current.contenido;
+    counter.textContent = `Tarjeta ${currentIndex + 1} de ${flashcards.length}`;
 
-        btnPrev.style.display = currentIndex > 0 ? 'flex' : 'none';
-        btnNext.style.display = currentIndex < flashcards.length - 1 ? 'flex' : 'none';
-        btnQuiz.style.display = currentIndex === flashcards.length - 1 ? 'inline-block' : 'none';
-
-        cardInner.classList.remove('flipped');
+    // ✅ MOSTRAR IMAGEN SOLO SI EXISTE
+    if (current.imagen && current.imagen.trim() !== '') {
+        image.src = current.imagen;
+        image.style.display = 'block';
+    } else {
+        image.style.display = 'none'; // 👈 OCULTAR SI NO HAY IMAGEN
     }
 
-    // Eventos
-    card.addEventListener('click', () => {
+    btnPrev.style.display = currentIndex > 0 ? 'flex' : 'none';
+    btnNext.style.display = currentIndex < flashcards.length - 1 ? 'flex' : 'none';
+    btnQuiz.style.display = currentIndex === flashcards.length - 1 ? 'inline-block' : 'none';
+
+    cardInner.classList.remove('flipped');
+}
+
+    // ✅ EVENTO DE VOLTEO (ESTO ES LO QUE FALTABA)
+    card.addEventListener('click', (e) => {
+        // Evitar voltear si se hace click en las flechas
+        if (e.target.closest('.arrow-btn')) return;
+        
         cardInner.classList.toggle('flipped');
     });
 
