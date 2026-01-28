@@ -3,45 +3,206 @@ import User from '../models/UserModel.js';
 
 // --- FUNCIÓN AUXILIAR: REGLAS DEL JUEGO ---
 // Aquí es donde defines qué debe hacer el usuario para cumplir cada reto.
+// --- FUNCIÓN AUXILIAR: REGLAS DEL JUEGO ---
 const checkCompletionCriteria = async (userId, challengeId) => {
     try {
-        // RETO 1: "Registro de Gastos" (Tener al menos 5 movimientos registrados en total)
-        if (challengeId === 1) { 
+        // ==========================================
+        // RETOS DE CANTIDAD DE MOVIMIENTOS
+        // ==========================================
+        if ([1, 2, 3, 6, 7, 8, 9, 10].includes(challengeId)) {
+            const required = {
+                1: 1, 2: 5, 3: 7, 6: 15, 7: 25, 8: 40, 9: 60, 10: 100
+            };
+            
             const [rows] = await db.execute(
                 'SELECT COUNT(*) as count FROM movements WHERE user_id = ?', 
                 [userId]
             );
-            // Retorna TRUE si tiene 5 o más movimientos
-            return rows[0].count >= 5; 
+            return rows[0].count >= required[challengeId];
         }
 
-        // RETO 2: "Ahorrador Novato" (Tener un balance positivo en el mes actual)
-        if (challengeId === 2) {
-            // Sumamos ingresos y restamos egresos del mes actual
+        // ==========================================
+        // RETOS DE AHORRO
+        // ==========================================
+        // Reto 4: Primer ahorro
+        if (challengeId === 4) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro'",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Retos 11-13: Múltiples ahorros
+        if ([11, 12, 13].includes(challengeId)) {
+            const required = { 11: 3, 12: 5, 13: 10 };
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro'",
+                [userId]
+            );
+            return rows[0].count >= required[challengeId];
+        }
+
+        // Retos 14-15: Cantidad acumulada de ahorro en el mes
+        if ([14, 15].includes(challengeId)) {
+            const required = { 14: 500, 15: 1000 };
+            const [rows] = await db.execute(
+                `SELECT SUM(monto) as total FROM movements 
+                 WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro' 
+                 AND MONTH(fecha) = MONTH(CURRENT_DATE()) AND YEAR(fecha) = YEAR(CURRENT_DATE())`,
+                [userId]
+            );
+            return (rows[0].total || 0) >= required[challengeId];
+        }
+
+        // ==========================================
+        // RETO 5: BALANCE POSITIVO
+        // ==========================================
+        if (challengeId === 5) {
             const query = `
                 SELECT 
                     SUM(CASE WHEN tipo = 'income' THEN monto ELSE 0 END) - 
                     SUM(CASE WHEN tipo = 'expense' THEN monto ELSE 0 END) as balance
                 FROM movements 
-                WHERE user_id = ? AND MONTH(fecha) = MONTH(CURRENT_DATE())
+                WHERE user_id = ? 
+                AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
+                AND YEAR(fecha) = YEAR(CURRENT_DATE())
             `;
             const [rows] = await db.execute(query, [userId]);
-            const balance = parseFloat(rows[0].balance || 0);
-            return balance > 0;
+            return (rows[0].balance || 0) > 0;
         }
 
-        // RETO 3: "Eliminar Deuda" (Registrar al menos un gasto en categoría 'Deuda' o 'Pagos')
-        if (challengeId === 3) {
+        // ==========================================
+        // RETOS DE CATEGORÍAS ESPECÍFICAS
+        // ==========================================
+        // Reto 16: Vivienda
+        if (challengeId === 16) {
             const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'expense' AND (categoria LIKE '%Deuda%' OR categoria LIKE '%Pago%')",
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria LIKE '%Vivienda%'",
                 [userId]
             );
-            return rows[0].count > 0;
+            return rows[0].count >= 1;
         }
 
-        // Para otros retos (IDs 4, 5, etc.), por defecto retornamos TRUE 
-        // (Para que sean fáciles de completar mientras programas más reglas)
-        return true; 
+        // Reto 17: 5 gastos de alimentación
+        if (challengeId === 17) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Alimentación'",
+                [userId]
+            );
+            return rows[0].count >= 5;
+        }
+
+        // Reto 18: 5 gastos de transporte
+        if (challengeId === 18) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Transporte'",
+                [userId]
+            );
+            return rows[0].count >= 5;
+        }
+
+        // Reto 19: 3 gastos de servicios
+        if (challengeId === 19) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Servicios'",
+                [userId]
+            );
+            return rows[0].count >= 3;
+        }
+
+        // Reto 20: 5 categorías diferentes
+        if (challengeId === 20) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(DISTINCT categoria) as count FROM movements WHERE user_id = ?",
+                [userId]
+            );
+            return rows[0].count >= 5;
+        }
+
+        // ==========================================
+        // RETOS DE INGRESOS
+        // ==========================================
+        // Reto 21: Primer salario
+        if (challengeId === 21) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Salario'",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Reto 22: Freelance o Ventas
+        if (challengeId === 22) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND (categoria = 'Freelance' OR categoria = 'Ventas')",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Reto 23: Primera inversión
+        if (challengeId === 23) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Inversiones'",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Reto 24: 3 fuentes de ingreso
+        if (challengeId === 24) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(DISTINCT categoria) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria IN ('Salario', 'Freelance', 'Ventas', 'Inversiones')",
+                [userId]
+            );
+            return rows[0].count >= 3;
+        }
+
+        // ==========================================
+        // RETOS DE BALANCE
+        // ==========================================
+        if ([25, 26, 27, 28].includes(challengeId)) {
+            const required = { 25: 0, 26: 100, 27: 500, 28: 1000 };
+            const query = `
+                SELECT 
+                    SUM(CASE WHEN tipo = 'income' THEN monto ELSE 0 END) - 
+                    SUM(CASE WHEN tipo = 'expense' THEN monto ELSE 0 END) as balance
+                FROM movements 
+                WHERE user_id = ? 
+                AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
+                AND YEAR(fecha) = YEAR(CURRENT_DATE())
+            `;
+            const [rows] = await db.execute(query, [userId]);
+            const balance = rows[0].balance || 0;
+            
+            if (challengeId === 25) return Math.abs(balance) < 10; // Exactamente 0 (tolerancia de $10)
+            return balance >= required[challengeId];
+        }
+
+        // ==========================================
+        // RETOS ESPECIALES
+        // ==========================================
+        // Reto 29: Educación
+        if (challengeId === 29) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Educación'",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Reto 30: Salud
+        if (challengeId === 30) {
+            const [rows] = await db.execute(
+                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Salud'",
+                [userId]
+            );
+            return rows[0].count >= 1;
+        }
+
+        // Por defecto (retos no implementados aún)
+        return false;
 
     } catch (error) {
         console.error("Error validando criterio:", error);

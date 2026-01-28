@@ -8,27 +8,36 @@
 
 /* =================== RESET =================== */
 * {
-    margin: 0;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* =================== BODY =================== */
 body {
   font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
   background-color: var(--muted-bg);
   min-height: 100vh;
-  margin: 0;
-      font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
-
 }
 
+/* =================== HEADER LOGO =================== */
 .logo h1 {
-  font-family: 'Arial', sans-serif; 
+  font-family: 'Arial', sans-serif;
   font-weight: 700;
-  font-size: 48px; 
+  font-size: 48px;
 }
+
+/* =================== MAIN CONTENT =================== */
+.main-content {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px 80px;
+}
+
 /* =================== CONTAINER =================== */
 .container {
+  width: 100%;
+  max-width: 520px;
   min-height: calc(100vh - 110px);
   display: flex;
   flex-direction: column;
@@ -36,12 +45,7 @@ body {
   position: relative;
 }
 
-.container p{
-  font-family: 'Nunito', sans-serif;
-  font-size: 24px;
-}
-
-.container h1{
+.container h1 {
   font-family: 'Baloo 2', cursive;
   font-weight: 700;
   font-size: 36px;
@@ -49,8 +53,14 @@ body {
   margin-bottom: 20px;
 }
 
-button {
-  font-family: 'Nunito', sans-serif;
+.container p {
+  font-size: 24px;
+}
+
+/* =================== LESSON HEADER =================== */
+.lesson-header {
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 /* =================== CARD =================== */
@@ -61,7 +71,12 @@ button {
   height: 420px;
   margin-bottom: 20px;
   cursor: pointer;
-  padding: 20;
+  padding: 20px;
+  transition: transform 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
 }
 
 .card-inner {
@@ -94,7 +109,7 @@ button {
 
 /* =================== FRONT =================== */
 .card-front {
-  background: #2C405B;
+  background-color: #2C405B;
 }
 
 .card-title {
@@ -105,23 +120,32 @@ button {
 }
 
 .card-front img {
-  width: 85%;
-  max-width: 360px;
+  width: 100%;
+  max-width: 300px;
+  max-height: 220px;      /* 🔥 evita que se salga */
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
+
 
 /* =================== BACK =================== */
 .card-back {
   background-color: #fff;
   transform: rotateY(180deg);
   overflow-y: auto;
-  flex-direction: column;
-  align-items: center;
   gap: 28px;
   border: 4px solid #2C405B;
   padding: 36px 40px;
   border-radius: 20px;
+}
+
+.title-back {
+  background-color: #8FA3C2;
+  color: #000;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 14px;
 }
 
 .container-info {
@@ -129,16 +153,6 @@ button {
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-
-.title-back {
-  background-color:#8FA3C2;
-  color: #000;
-  font-size: 26px;
-  font-weight: 700;
-  text-align: center;
-  padding: 10px 14px;
-
 }
 
 .card-text {
@@ -161,43 +175,53 @@ button {
   z-index: 10;
   width: 60px;
   height: 60px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
   padding: 10px;
+  color: #2C405B;
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .arrow-btn:hover {
   transform: translateY(-50%) scale(1.3);
-  opacity: 0.85;
+  opacity: 1;
 }
 
-#prevCard { left: -55px; }
-#nextCard { right: -55px; }
+#prevCard {
+  left: -55px;
+}
+
+#nextCard {
+  right: -55px;
+}
 
 /* =================== BUTTONS =================== */
+.buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+button {
+  font-family: 'Nunito', sans-serif;
+}
+
 .btn-secondary,
- .btn-primary {
-
-  margin-top: 5px;
-  padding: 5px 8px;
-
-  background-color: white;      /* NORMAL */
+.btn-primary {
+  padding: 8px 14px;
+  background-color: #fff;
   border: 2px solid #2C405B;
   border-radius: 10px;
-
   color: #2C405B;
   font-weight: 600;
   font-size: 14px;
-  text-align: center;
-
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
-
-.btn-secondary:hover, 
-.btn-primary:hover{
-  background-color: #2C405B;  /* HOVER */
-  color: #ffffff;
+.btn-secondary:hover,
+.btn-primary:hover {
+  background-color: #2C405B;
+  color: #fff;
 }
 
 /* =================== RESPONSIVE =================== */
@@ -215,7 +239,6 @@ button {
   }
 
   .card-back {
-    flex-direction: column;
     padding: 26px;
   }
 
@@ -226,37 +249,4 @@ button {
   .container-info {
     width: 100%;
   }
-}
-.main-content {
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px 80px;
-}
-
-.container {
-  width: 100%;
-  max-width: 520px; /* 🔥 clave */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-.arrow-btn {
-  color: #2C405B;
-  opacity: 0.6;
-}
-
-.arrow-btn:hover {
-  opacity: 1;
-}
-.lesson-header {
-  margin-bottom: 40px;
-
-}
-.card {
-  transition: transform 0.25s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
 }

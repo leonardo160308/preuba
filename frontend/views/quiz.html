@@ -5,169 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz - TOO-EASY</title>
     <link rel="icon" type="image/x-icon" href="../public/img/favicon.png">
-    <!-- ✅ CSS CORREGIDOS -->
+
+    <!-- CSS -->
     <link rel="stylesheet" href="../public/css/preguntas.css">
     <link rel="stylesheet" href="../public/css/header.css">
     <link rel="stylesheet" href="../public/css/alerts.css">
 </head>
 <body>
 
-    <script type="module">
-    import { logout, isAdmin } from '/public/js/modules/auth.js';
-    import { alertaConfirmacion } from '/public/js/modules/alerts.js';
-    
-    // ✅ MOSTRAR ENLACE ADMIN SI ES ADMIN
-    if (isAdmin()) {
-        const nav = document.querySelector('.nav');
-        const adminLink = document.createElement('a');
-        adminLink.href = '/admin.html';
-        adminLink.textContent = 'ADMIN';
-        adminLink.style.color = '#f39c12'; // Color diferente para destacar
-        nav.insertBefore(adminLink, nav.children[nav.children.length - 1]);
-    }
-    
-    const logoutBtn = document.getElementById('logout-btn-perfil');
-    
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const confirmar = await alertaConfirmacion(
-                '¿Estás seguro de que deseas cerrar sesión?',
-                '👋 Salir de TOO-EASY'
-            );
-            if (confirmar) logout();
-        });
-    }
-</script>
 <!-- ========================================
-     CONTENEDOR PRINCIPAL DEL QUIZ
-     (2 COLUMNAS: IMAGEN + PREGUNTAS)
+     CONTENEDOR PRINCIPAL (2 COLUMNAS)
      ======================================== -->
 <div class="contenedor-quiz">
-    
+
     <!-- ========================================
-         LADO IZQUIERDO: IMAGEN ILUSTRATIVA
+         COLUMNA IZQUIERDA: IMAGEN
          ======================================== -->
     <div class="lado-izquierdo">
-        <!-- ✅ La imagen cambia según la pregunta -->
-        <img id="imagenPregunta" src="../public/img/Imagen1.1.png" alt="Ilustración">
+        <img id="imagenPregunta"
+             src="../public/img/Imagen1.1.png"
+             alt="Ilustración de la pregunta">
     </div>
 
     <!-- ========================================
-         LADO DERECHO: PREGUNTAS Y CONTROLES
+         COLUMNA DERECHA: QUIZ
          ======================================== -->
     <div class="lado-derecho">
-        
-        <!-- ========================================
-             HEADER DEL QUIZ: NIVEL Y PROGRESO
-             ======================================== -->
-<!-- quiz.html -->
-<div class="quiz-header">
-    <div>
-        <h2 id="quiz-title">
-            📚 Nivel <span id="nivel-actual">1</span>
-        </h2>
-        <p id="quiz-subtitle">
-            Tema: <span id="tema-nombre">Fundamentos</span>
-        </p>
-    </div>
-    
-    <div>
-        <span>
-            <span id="pregunta-actual">1</span> / <span id="total-preguntas">5</span>
-        </span>
-    </div>
-</div>
-                
-                <!-- Contador de Preguntas -->
-                <div style="text-align: right;">
-                    <span style="font-size: 1.2rem; font-weight: bold; color: #2C405B;">
-                        <span id="pregunta-actual">1</span> / <span id="total-preguntas">5</span>
-                    </span>
-                </div>
+
+        <!-- HEADER DEL QUIZ -->
+        <div class="quiz-header">
+            <div>
+                <h2 id="quiz-title">
+                    📚 Nivel <span id="nivel-actual">1</span>
+                </h2>
+                <p id="quiz-subtitle">
+                    Tema: <span id="tema-nombre">Fundamentos</span>
+                </p>
             </div>
 
-            <!-- Barra de Progreso -->
-            <div class="progreso-container">
-                <div class="progreso" id="barra-progreso"></div>
+            <div class="contador">
+                <span>
+                    <span id="pregunta-actual">1</span> /
+                    <span id="total-preguntas">5</span>
+                </span>
             </div>
         </div>
 
-        <!-- ========================================
-             PREGUNTA ACTUAL
-             ======================================== -->
+        <!-- BARRA DE PROGRESO -->
+        <div class="progreso-container">
+            <div class="progreso" id="barra-progreso"></div>
+        </div>
+
+        <!-- PREGUNTA -->
         <div class="pregunta-section">
-            <h3 id="textoPregunta" style="font-size: 1.3rem; line-height: 1.5; margin-bottom: 25px; color: #333;">
+            <h3 id="textoPregunta">
                 Cargando pregunta...
             </h3>
         </div>
 
-        <!-- ========================================
-             OPCIONES DE RESPUESTA
-             ======================================== -->
+        <!-- OPCIONES -->
         <div class="opciones" id="opcionesContainer">
-            <!-- Las opciones se generan dinámicamente con JS -->
+            <!-- JS genera opciones -->
         </div>
 
-        <!-- ========================================
-             BOTÓN COMPROBAR
-             ======================================== -->
-        <button id="botonComprobar" class="boton-comprobar" style="display: none;">
+        <!-- BOTÓN -->
+        <button id="botonComprobar"
+                class="boton-comprobar"
+                style="display: none;">
             Comprobar Respuesta
         </button>
 
-        <!-- ========================================
-             RESULTADO (CORRECTO / INCORRECTO)
-             ======================================== -->
-        <div id="resultado" class="resultado" style="display: none;">
-            <!-- Se muestra después de comprobar -->
+        <!-- RESULTADO -->
+        <div id="resultado"
+             class="resultado"
+             style="display: none;">
         </div>
 
     </div>
-
 </div>
 
 <!-- ========================================
-     MODAL DE FINALIZACIÓN
-     (Se muestra al terminar el quiz)
+     MODAL FINAL
      ======================================== -->
 <div id="modal-final" class="modal-final" style="display: none;">
     <div class="modal-content-final">
-        <div id="modal-icono" style="font-size: 5rem; text-align: center; margin-bottom: 20px;">
-            <!-- 🎉 o 😕 según resultado -->
+
+        <div id="modal-icono"
+             style="font-size: 5rem; text-align: center; margin-bottom: 20px;">
         </div>
-        
-        <h2 id="modal-titulo" style="text-align: center; color: #2C405B; margin-bottom: 10px;">
-            <!-- Título dinámico -->
+
+        <h2 id="modal-titulo"
+            style="text-align: center; color: #2C405B;">
         </h2>
-        
-        <p id="modal-puntaje" style="text-align: center; font-size: 1.3rem; margin-bottom: 20px;">
-            <!-- Ej: "5 / 5 Aciertos" -->
+
+        <p id="modal-puntaje"
+           style="text-align: center; font-size: 1.3rem;">
         </p>
-        
-        <div id="modal-recompensa" style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
-            <!-- Ej: "+20 Monedas 🪙" -->
+
+        <div id="modal-recompensa"
+             style="background:#e8f5e9; padding:15px; border-radius:10px; text-align:center;">
         </div>
-        
-        <p id="modal-mensaje" style="text-align: center; color: #666; margin-bottom: 25px;">
-            <!-- Mensaje personalizado -->
+
+        <p id="modal-mensaje"
+           style="text-align:center; color:#666;">
         </p>
-        
-        <!-- Botones de Acción -->
-        <div style="display: flex; gap: 15px; justify-content: center;">
-            <button onclick="window.location.href='lecciones.html'" class="btn-modal btn-secondary">
+
+        <div style="display:flex; gap:15px; justify-content:center;">
+            <button onclick="window.location.href='lecciones.html'"
+                    class="btn-modal btn-secondary">
                 📚 Ver Niveles
             </button>
-            <button id="btn-reintentar" class="btn-modal btn-primary" style="display: none;">
+
+            <button id="btn-reintentar"
+                    class="btn-modal btn-primary"
+                    style="display:none;">
                 🔄 Reintentar
             </button>
         </div>
     </div>
 </div>
 
-<!-- ========================================
-     SCRIPT CONECTADO AL BACKEND
-     ======================================== -->
+<!-- SCRIPT -->
 <script type="module" src="../public/js/pages/quiz.js"></script>
 
 </body>

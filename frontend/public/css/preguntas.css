@@ -6,8 +6,11 @@ body {
 
 .contenedor-quiz {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;   /* 🔥 no fuerza separación rara */
 }
+
+
+
 
 .lado-izquierdo {
   flex: 1;
@@ -16,6 +19,7 @@ body {
   align-items: center;
   background: #d9d9d9;
 }
+
 
 .lado-izquierdo img {
   width: 80%;
@@ -28,8 +32,10 @@ body {
   padding: 40px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 20px;          /* 🔥 controla separación */
+  overflow-y: auto;
 }
+
 
 .progreso-container {
   height: 10px;
@@ -242,31 +248,10 @@ body {
    RESPONSIVE
    ======================================== */
 
-@media (max-width: 768px) {
-    .contenedor-quiz {
-        flex-direction: column;
-    }
-    
-    .lado-izquierdo {
-        width: 100%;
-        height: 250px;
-    }
-    
-    .modal-content-final {
-        padding: 25px;
-    }
-}
 
-body {
-  margin: 0;
-  font-family: "Arial", sans-serif;
-  background-color: #f0f0f0;
-}
 
-.contenedor-quiz {
-  display: flex;
-  height: 100vh;
-}
+
+
 
 .lado-izquierdo {
   flex: 1;
@@ -274,13 +259,18 @@ body {
   justify-content: center;
   align-items: center;
   background: #d9d9d9;
+  overflow: hidden;              /* 🔥 evita desbordes */
 }
 
 .lado-izquierdo img {
-  width: 80%;
-  max-width: 300px;
+  width: 100%;
+  max-width: 320px;
+  max-height: 70vh;              /* 🔥 límite vertical */
+  object-fit: contain;           /* 🔥 mantiene proporción */
   border-radius: 12px;
 }
+
+
 
 .lado-derecho {
   flex: 2;
@@ -525,31 +515,3 @@ body {
    RESPONSIVE
    ======================================== */
 
-@media (max-width: 768px) {
-    .contenedor-quiz {
-        flex-direction: column;
-    }
-    
-    .lado-izquierdo {
-        width: 100%;
-        height: 250px;
-    }
-    
-    .lado-derecho {
-        padding: 20px;
-    }
-    
-    .modal-content-final {
-        padding: 25px;
-    }
-
-    .opcion {
-        padding-left: 15px;
-    }
-
-    .opcion.correcta::before,
-    .opcion.incorrecta::before {
-        position: static;
-        margin-right: 10px;
-    }
-}

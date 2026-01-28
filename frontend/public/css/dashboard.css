@@ -47,8 +47,8 @@ body {
 }
 
 .app-container {
-    max-width: 100%;
-    width: 100%;
+    max-width: 90%;
+    width: 90%;
     margin: 40px auto;
     padding: 0 20px;
     display: flex;
@@ -405,7 +405,7 @@ h2 {
 }
 
 .izquierda {
-    flex: 7;   /* ≈ 70% */
+    flex: 70%;   /* ≈ 70% */
 }
 
 .derecha {
