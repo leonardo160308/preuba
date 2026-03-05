@@ -1,331 +1,335 @@
-// backend/models/AdminModel.js
-import db from '../config/db.js';
+import { supabase } from '../config/supabase.js';
 
 class AdminModel {
-    
+
     // ========================================
-    // CATEGORÍAS (Solo lectura)
+    // CATEGORÍAS
     // ========================================
-    
+
     static async getAllCategories() {
-        const [rows] = await db.execute(
-            'SELECT * FROM learning_categories ORDER BY orden ASC'
-        );
-        return rows;
+        const { data, error } = await supabase
+            .from('learning_categories')
+            .select('*')
+            .order('orden');
+
+        if (error) throw error;
+        return data || [];
     }
-    
+
     static async getCategoryById(categoryId) {
-        const [rows] = await db.execute(
-            'SELECT * FROM learning_categories WHERE id = ?',
-            [categoryId]
-        );
-        return rows[0];
+        const { data, error } = await supabase
+            .from('learning_categories')
+            .select('*')
+            .eq('id', categoryId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+
+        return data;
     }
-    
+
     // ========================================
     // VALIDACIONES DE LÍMITES
     // ========================================
-    
+
     static async checkLevelsLimit(categoryId) {
-        // Obtener el rango de niveles de la categoría
         const category = await this.getCategoryById(categoryId);
         if (!category) return false;
-        
+
         const totalAllowed = category.nivel_fin - category.nivel_inicio + 1;
-        
-        // Contar niveles existentes en esa categoría
-        const [rows] = await db.execute(
-            'SELECT COUNT(*) as total FROM educational_levels WHERE category_id = ?',
-            [categoryId]
-        );
-        
-        return rows[0].total < totalAllowed;
+
+        const { count, error } = await supabase
+            .from('educational_levels')
+            .select('id', { count: 'exact', head: true })
+            .eq('category_id', categoryId);
+
+        if (error) throw error;
+        return count < totalAllowed;
     }
-    
+
     static async checkFlashcardsLimit(levelId = null) {
         if (levelId) {
-            const [rows] = await db.execute(
-                'SELECT COUNT(*) as total FROM flashcards WHERE level_id = ?',
-                [levelId]
-            );
-            return rows[0].total < 30;
+            const { count, error } = await supabase
+                .from('flashcards')
+                .select('id', { count: 'exact', head: true })
+                .eq('level_id', levelId);
+
+            if (error) throw error;
+            return count < 30;
         } else {
-            const [rows] = await db.execute('SELECT COUNT(*) as total FROM flashcards');
-            return rows[0].total < 300;
+            const { count, error } = await supabase
+                .from('flashcards')
+                .select('id', { count: 'exact', head: true });
+
+            if (error) throw error;
+            return count < 300;
         }
     }
-    
+
     static async checkQuestionsLimit(levelId = null) {
         if (levelId) {
-            const [rows] = await db.execute(
-                'SELECT COUNT(*) as total FROM quiz_questions WHERE level_id = ?',
-                [levelId]
-            );
-            return rows[0].total < 15;
+            const { count, error } = await supabase
+                .from('quiz_questions')
+                .select('id', { count: 'exact', head: true })
+                .eq('level_id', levelId);
+
+            if (error) throw error;
+            return count < 15;
         } else {
-            const [rows] = await db.execute('SELECT COUNT(*) as total FROM quiz_questions');
-            return rows[0].total < 200;
+            const { count, error } = await supabase
+                .from('quiz_questions')
+                .select('id', { count: 'exact', head: true });
+
+            if (error) throw error;
+            return count < 200;
         }
     }
 
     // ========================================
     // GESTIÓN DE NIVELES
     // ========================================
-    
+
     static async getAllLevels() {
-        const [rows] = await db.execute(`
-            SELECT el.*, lc.nombre as categoria_nombre 
-            FROM educational_levels el
-            LEFT JOIN learning_categories lc ON el.category_id = lc.id
-            ORDER BY el.category_id ASC, el.orden ASC
-        `);
-        return rows;
+        const { data, error } = await supabase
+            .from('educational_levels')
+            .select(`
+                *,
+                learning_categories (nombre)
+            `)
+            .order('category_id')
+            .order('orden');
+
+        if (error) throw error;
+
+        // Normalizar para que categoria_nombre esté al mismo nivel
+        return (data || []).map(level => ({
+            ...level,
+            categoria_nombre: level.learning_categories?.nombre || null,
+            learning_categories: undefined
+        }));
     }
-    
+
     static async getLevelsByCategory(categoryId) {
-        const [rows] = await db.execute(
-            'SELECT * FROM educational_levels WHERE category_id = ? ORDER BY orden ASC',
-            [categoryId]
-        );
-        return rows;
-    }
-    
-// backend/models/AdminModel.js
+        const { data, error } = await supabase
+            .from('educational_levels')
+            .select('*')
+            .eq('category_id', categoryId)
+            .order('orden');
 
-static async createLevel(nombre, descripcion, categoryId) {
-    // 1. Obtener la categoría para conocer su rango permitido
-    const category = await this.getCategoryById(categoryId);
-    if (!category) throw new Error('Categoría no encontrada');
-
-    // 2. Verificar si aún hay espacio en la categoría
-    const canCreate = await this.checkLevelsLimit(categoryId);
-    if (!canCreate) {
-        throw new Error('Esta categoría ya tiene todos sus niveles completos según su rango');
+        if (error) throw error;
+        return data || [];
     }
 
-    // 3. Calcular el siguiente orden lógico
-    const [rows] = await db.execute(
-        'SELECT MAX(orden) as max_orden FROM educational_levels WHERE category_id = ?',
-        [categoryId]
-    );
+    static async createLevel(nombre, descripcion, categoryId) {
+        const category = await this.getCategoryById(categoryId);
+        if (!category) throw new Error('Categoría no encontrada');
 
-    let next_orden;
-    if (rows[0].max_orden) {
-        // Si ya hay niveles, sumamos 1 al último
-        next_orden = rows[0].max_orden + 1;
-    } else {
-        // Si es el PRIMER nivel de esta categoría, usamos su nivel_inicio (ej: 4 para Cuentas)
-        next_orden = category.nivel_inicio;
+        const canCreate = await this.checkLevelsLimit(categoryId);
+        if (!canCreate) {
+            throw new Error('Esta categoría ya tiene todos sus niveles completos según su rango');
+        }
+
+        // Calcular siguiente orden
+        const { data: maxData, error: maxError } = await supabase
+            .from('educational_levels')
+            .select('orden')
+            .eq('category_id', categoryId)
+            .order('orden', { ascending: false })
+            .limit(1);
+
+        if (maxError) throw maxError;
+
+        const next_orden = maxData && maxData.length > 0
+            ? maxData[0].orden + 1
+            : category.nivel_inicio;
+
+        if (next_orden > category.nivel_fin) {
+            throw new Error('Se ha alcanzado el límite superior de niveles para esta categoría');
+        }
+
+        const { data, error } = await supabase
+            .from('educational_levels')
+            .insert({ nombre, descripcion, orden: next_orden, category_id: categoryId })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
 
-    // 4. Validación final de rango
-    if (next_orden > category.nivel_fin) {
-        throw new Error('Se ha alcanzado el límite superior de niveles para esta categoría');
-    }
-
-    const query = `
-        INSERT INTO educational_levels (nombre, descripcion, orden, category_id) 
-        VALUES (?, ?, ?, ?)
-    `;
-    
-    const [result] = await db.execute(query, [
-        nombre,
-        descripcion,
-        next_orden,
-        categoryId
-    ]);
-    
-    return { 
-        id: result.insertId, 
-        nombre, 
-        descripcion, 
-        orden: next_orden, 
-        category_id: categoryId 
-    };
-}
-    
     static async updateLevel(id, nombre, descripcion) {
-        const query = `
-            UPDATE educational_levels 
-            SET nombre = ?, descripcion = ? 
-            WHERE id = ?
-        `;
-        
-        await db.execute(query, [nombre, descripcion, id]);
-        return { id, nombre, descripcion };
+        const { data, error } = await supabase
+            .from('educational_levels')
+            .update({ nombre, descripcion })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
-    
+
     static async deleteLevel(id) {
-        // Verificar si tiene contenido asociado
-        const [flashcards] = await db.execute(
-            'SELECT COUNT(*) as total FROM flashcards WHERE level_id = ?',
-            [id]
-        );
-        
-        const [questions] = await db.execute(
-            'SELECT COUNT(*) as total FROM quiz_questions WHERE level_id = ?',
-            [id]
-        );
-        
-        const hasContent = flashcards[0].total > 0 || questions[0].total > 0;
-        
-        if (hasContent) {
+        const { count: flashCount, error: fe } = await supabase
+            .from('flashcards')
+            .select('id', { count: 'exact', head: true })
+            .eq('level_id', id);
+
+        if (fe) throw fe;
+
+        const { count: qCount, error: qe } = await supabase
+            .from('quiz_questions')
+            .select('id', { count: 'exact', head: true })
+            .eq('level_id', id);
+
+        if (qe) throw qe;
+
+        if (flashCount > 0 || qCount > 0) {
             return {
                 success: false,
-                message: `Este nivel tiene ${flashcards[0].total} flashcards y ${questions[0].total} preguntas. Elimínalas primero.`,
-                flashcards: flashcards[0].total,
-                questions: questions[0].total
+                message: `Este nivel tiene ${flashCount} flashcards y ${qCount} preguntas. Elimínalas primero.`,
+                flashcards: flashCount,
+                questions: qCount
             };
         }
-        
-        await db.execute('DELETE FROM educational_levels WHERE id = ?', [id]);
+
+        const { error } = await supabase
+            .from('educational_levels')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
         return { success: true };
     }
 
     // ========================================
-    // GESTIÓN DE FLASHCARDS (Sin cambios)
+    // GESTIÓN DE FLASHCARDS
     // ========================================
-    
+
     static async getFlashcardsByLevel(levelId) {
-        const [rows] = await db.execute(
-            'SELECT * FROM flashcards WHERE level_id = ? ORDER BY orden ASC',
-            [levelId]
-        );
-        return rows;
+        const { data, error } = await supabase
+            .from('flashcards')
+            .select('*')
+            .eq('level_id', levelId)
+            .order('orden');
+
+        if (error) throw error;
+        return data || [];
     }
-    
+
     static async createFlashcard(levelId, titulo, contenido, imagen) {
-        const [maxOrden] = await db.execute(
-            'SELECT COALESCE(MAX(orden), 0) + 1 as next_orden FROM flashcards WHERE level_id = ?',
-            [levelId]
-        );
-        
-        const query = `
-            INSERT INTO flashcards (level_id, titulo, contenido, imagen, orden) 
-            VALUES (?, ?, ?, ?, ?)
-        `;
-        
-        const [result] = await db.execute(query, [
-            levelId,
-            titulo,
-            contenido,
-            imagen || null,
-            maxOrden[0].next_orden
-        ]);
-        
-        return { 
-            id: result.insertId, 
-            level_id: levelId, 
-            titulo, 
-            contenido, 
-            imagen,
-            orden: maxOrden[0].next_orden
-        };
+        // Calcular siguiente orden
+        const { data: maxData } = await supabase
+            .from('flashcards')
+            .select('orden')
+            .eq('level_id', levelId)
+            .order('orden', { ascending: false })
+            .limit(1);
+
+        const next_orden = (maxData && maxData.length > 0) ? maxData[0].orden + 1 : 1;
+
+        const { data, error } = await supabase
+            .from('flashcards')
+            .insert({ level_id: levelId, titulo, contenido, imagen: imagen || null, orden: next_orden })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
-    
+
     static async updateFlashcard(id, titulo, contenido, imagen) {
-        const query = `
-            UPDATE flashcards 
-            SET titulo = ?, contenido = ?, imagen = ? 
-            WHERE id = ?
-        `;
-        
-        await db.execute(query, [titulo, contenido, imagen || null, id]);
-        return { id, titulo, contenido, imagen };
+        const { data, error } = await supabase
+            .from('flashcards')
+            .update({ titulo, contenido, imagen: imagen || null })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
-    
+
     static async deleteFlashcard(id) {
-        await db.execute('DELETE FROM flashcards WHERE id = ?', [id]);
+        const { error } = await supabase
+            .from('flashcards')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
         return { success: true };
     }
-    
+
     static async moveFlashcard(id, newLevelId) {
-        await db.execute(
-            'UPDATE flashcards SET level_id = ? WHERE id = ?',
-            [newLevelId, id]
-        );
+        const { error } = await supabase
+            .from('flashcards')
+            .update({ level_id: newLevelId })
+            .eq('id', id);
+
+        if (error) throw error;
         return { success: true };
     }
 
     // ========================================
-    // GESTIÓN DE PREGUNTAS (Sin cambios)
+    // GESTIÓN DE PREGUNTAS
     // ========================================
-    
-// ✅ DESPUÉS (CORREGIDO)
-static async getQuestionsByLevel(levelId) {
-    const [rows] = await db.execute(
-        'SELECT * FROM quiz_questions WHERE level_id = ? ORDER BY id ASC',
-        [levelId]
-    );
-    
-    return rows.map(q => {
-        // ✅ DETECTAR SI YA ES OBJETO O SI ES STRING
-        let opciones = q.opciones;
-        
-        // Si es string, parsearlo
-        if (typeof opciones === 'string') {
-            try {
-                opciones = JSON.parse(opciones);
-            } catch (e) {
-                console.error('Error parseando opciones:', e);
-                opciones = {}; // Fallback seguro
-            }
-        }
-        
-        return {
+
+    static async getQuestionsByLevel(levelId) {
+        const { data, error } = await supabase
+            .from('quiz_questions')
+            .select('*')
+            .eq('level_id', levelId)
+            .order('id');
+
+        if (error) throw error;
+
+        return (data || []).map(q => ({
             ...q,
-            opciones: opciones
-        };
-    });
-}
-    
-    static async createQuestion(levelId, pregunta, opciones, correcta, dificultad, imagen) {
-        const query = `
-            INSERT INTO quiz_questions (level_id, pregunta, opciones, correcta, dificultad, imagen) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-        
-        const [result] = await db.execute(query, [
-            levelId,
-            pregunta,
-            JSON.stringify(opciones),
-            correcta,
-            dificultad || 'media',
-            imagen || null
-        ]);
-        
-        return { 
-            id: result.insertId, 
-            level_id: levelId, 
-            pregunta, 
-            opciones,
-            correcta,
-            dificultad,
-            imagen
-        };
+            // Supabase devuelve JSONB ya parseado, pero por si acaso:
+            opciones: typeof q.opciones === 'string' ? JSON.parse(q.opciones) : q.opciones
+        }));
     }
-    
-static async updateQuestion(id, pregunta, opciones, correcta, dificultad, imagen) {
-    const query = `
-        UPDATE quiz_questions 
-        SET pregunta = ?, opciones = ?, correcta = ?, dificultad = ?, imagen = ? 
-        WHERE id = ?
-    `;
-    
-    await db.execute(query, [
-        pregunta,
-        JSON.stringify(opciones), // ✅ Convertir a string al guardar
-        correcta,
-        dificultad,
-        imagen || null,
-        id
-    ]);
-    
-    return { id, pregunta, opciones, correcta, dificultad, imagen };
-}
-    
+
+    static async createQuestion(levelId, pregunta, opciones, correcta, dificultad, imagen) {
+        const { data, error } = await supabase
+            .from('quiz_questions')
+            .insert({
+                level_id: levelId,
+                pregunta,
+                opciones, // Supabase maneja JSONB nativamente
+                correcta,
+                dificultad: dificultad || 'media',
+                imagen: imagen || null
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    static async updateQuestion(id, pregunta, opciones, correcta, dificultad, imagen) {
+        const { data, error } = await supabase
+            .from('quiz_questions')
+            .update({ pregunta, opciones, correcta, dificultad, imagen: imagen || null })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     static async deleteQuestion(id) {
-        await db.execute('DELETE FROM quiz_questions WHERE id = ?', [id]);
+        const { error } = await supabase
+            .from('quiz_questions')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
         return { success: true };
     }
 }

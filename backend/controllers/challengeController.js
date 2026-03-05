@@ -1,162 +1,111 @@
-import db from '../config/db.js';
+import { supabase } from '../config/supabase.js';
 import User from '../models/UserModel.js';
 
-// --- FUNCIÓN AUXILIAR: REGLAS DEL JUEGO ---
-// Aquí es donde defines qué debe hacer el usuario para cumplir cada reto.
-// --- FUNCIÓN AUXILIAR: REGLAS DEL JUEGO ---
+// Obtener el inicio y fin del mes actual en formato ISO
+const getMonthRange = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    return { start, end };
+};
+
+// ==========================================
+// FUNCIÓN AUXILIAR: REGLAS DEL JUEGO
+// ==========================================
 const checkCompletionCriteria = async (userId, challengeId) => {
     try {
+        // Traer todos los movimientos del usuario (para cálculos en JS)
+        const { data: allMovements } = await supabase
+            .from('movements')
+            .select('*')
+            .eq('user_id', userId);
+
+        const movements = allMovements || [];
+        const { start, end } = getMonthRange();
+
+        // Movimientos del mes actual
+        const monthMovements = movements.filter(m => m.fecha >= start && m.fecha <= end);
+
         // ==========================================
-        // RETOS DE CANTIDAD DE MOVIMIENTOS
+        // RETOS DE CANTIDAD DE MOVIMIENTOS TOTALES
         // ==========================================
         if ([1, 2, 3, 6, 7, 8, 9, 10].includes(challengeId)) {
-            const required = {
-                1: 1, 2: 5, 3: 7, 6: 15, 7: 25, 8: 40, 9: 60, 10: 100
-            };
-            
-            const [rows] = await db.execute(
-                'SELECT COUNT(*) as count FROM movements WHERE user_id = ?', 
-                [userId]
-            );
-            return rows[0].count >= required[challengeId];
+            const required = { 1: 1, 2: 5, 3: 7, 6: 15, 7: 25, 8: 40, 9: 60, 10: 100 };
+            return movements.length >= required[challengeId];
         }
 
         // ==========================================
-        // RETOS DE AHORRO
+        // RETO 4: Primer ahorro
         // ==========================================
-        // Reto 4: Primer ahorro
         if (challengeId === 4) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Ahorro').length >= 1;
         }
 
-        // Retos 11-13: Múltiples ahorros
+        // RETOS 11-13: Múltiples ahorros
         if ([11, 12, 13].includes(challengeId)) {
             const required = { 11: 3, 12: 5, 13: 10 };
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro'",
-                [userId]
-            );
-            return rows[0].count >= required[challengeId];
+            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Ahorro').length >= required[challengeId];
         }
 
-        // Retos 14-15: Cantidad acumulada de ahorro en el mes
+        // RETOS 14-15: Ahorro acumulado en el mes
         if ([14, 15].includes(challengeId)) {
             const required = { 14: 500, 15: 1000 };
-            const [rows] = await db.execute(
-                `SELECT SUM(monto) as total FROM movements 
-                 WHERE user_id = ? AND tipo = 'income' AND categoria = 'Ahorro' 
-                 AND MONTH(fecha) = MONTH(CURRENT_DATE()) AND YEAR(fecha) = YEAR(CURRENT_DATE())`,
-                [userId]
-            );
-            return (rows[0].total || 0) >= required[challengeId];
+            const total = monthMovements
+                .filter(m => m.tipo === 'income' && m.categoria === 'Ahorro')
+                .reduce((sum, m) => sum + parseFloat(m.monto), 0);
+            return total >= required[challengeId];
         }
 
         // ==========================================
-        // RETO 5: BALANCE POSITIVO
+        // RETO 5: BALANCE POSITIVO EN EL MES
         // ==========================================
         if (challengeId === 5) {
-            const query = `
-                SELECT 
-                    SUM(CASE WHEN tipo = 'income' THEN monto ELSE 0 END) - 
-                    SUM(CASE WHEN tipo = 'expense' THEN monto ELSE 0 END) as balance
-                FROM movements 
-                WHERE user_id = ? 
-                AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha) = YEAR(CURRENT_DATE())
-            `;
-            const [rows] = await db.execute(query, [userId]);
-            return (rows[0].balance || 0) > 0;
+            const balance = monthMovements.reduce((sum, m) => {
+                const monto = parseFloat(m.monto);
+                return m.tipo === 'income' ? sum + monto : sum - monto;
+            }, 0);
+            return balance > 0;
         }
 
         // ==========================================
         // RETOS DE CATEGORÍAS ESPECÍFICAS
         // ==========================================
-        // Reto 16: Vivienda
         if (challengeId === 16) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria LIKE '%Vivienda%'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.categoria && m.categoria.includes('Vivienda')).length >= 1;
         }
-
-        // Reto 17: 5 gastos de alimentación
         if (challengeId === 17) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Alimentación'",
-                [userId]
-            );
-            return rows[0].count >= 5;
+            return movements.filter(m => m.categoria === 'Alimentación').length >= 5;
         }
-
-        // Reto 18: 5 gastos de transporte
         if (challengeId === 18) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Transporte'",
-                [userId]
-            );
-            return rows[0].count >= 5;
+            return movements.filter(m => m.categoria === 'Transporte').length >= 5;
         }
-
-        // Reto 19: 3 gastos de servicios
         if (challengeId === 19) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Servicios'",
-                [userId]
-            );
-            return rows[0].count >= 3;
+            return movements.filter(m => m.categoria === 'Servicios').length >= 3;
         }
-
-        // Reto 20: 5 categorías diferentes
         if (challengeId === 20) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(DISTINCT categoria) as count FROM movements WHERE user_id = ?",
-                [userId]
-            );
-            return rows[0].count >= 5;
+            const categorias = new Set(movements.map(m => m.categoria).filter(Boolean));
+            return categorias.size >= 5;
         }
 
         // ==========================================
         // RETOS DE INGRESOS
         // ==========================================
-        // Reto 21: Primer salario
         if (challengeId === 21) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria = 'Salario'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Salario').length >= 1;
         }
-
-        // Reto 22: Freelance o Ventas
         if (challengeId === 22) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND (categoria = 'Freelance' OR categoria = 'Ventas')",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.tipo === 'income' && ['Freelance', 'Ventas'].includes(m.categoria)).length >= 1;
         }
-
-        // Reto 23: Primera inversión
         if (challengeId === 23) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Inversiones'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.categoria === 'Inversiones').length >= 1;
         }
-
-        // Reto 24: 3 fuentes de ingreso
         if (challengeId === 24) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(DISTINCT categoria) as count FROM movements WHERE user_id = ? AND tipo = 'income' AND categoria IN ('Salario', 'Freelance', 'Ventas', 'Inversiones')",
-                [userId]
+            const fuentes = new Set(
+                movements
+                    .filter(m => m.tipo === 'income' && ['Salario', 'Freelance', 'Ventas', 'Inversiones'].includes(m.categoria))
+                    .map(m => m.categoria)
             );
-            return rows[0].count >= 3;
+            return fuentes.size >= 3;
         }
 
         // ==========================================
@@ -164,72 +113,49 @@ const checkCompletionCriteria = async (userId, challengeId) => {
         // ==========================================
         if ([25, 26, 27, 28].includes(challengeId)) {
             const required = { 25: 0, 26: 100, 27: 500, 28: 1000 };
-            const query = `
-                SELECT 
-                    SUM(CASE WHEN tipo = 'income' THEN monto ELSE 0 END) - 
-                    SUM(CASE WHEN tipo = 'expense' THEN monto ELSE 0 END) as balance
-                FROM movements 
-                WHERE user_id = ? 
-                AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha) = YEAR(CURRENT_DATE())
-            `;
-            const [rows] = await db.execute(query, [userId]);
-            const balance = rows[0].balance || 0;
-            
-            if (challengeId === 25) return Math.abs(balance) < 10; // Exactamente 0 (tolerancia de $10)
+            const balance = monthMovements.reduce((sum, m) => {
+                const monto = parseFloat(m.monto);
+                return m.tipo === 'income' ? sum + monto : sum - monto;
+            }, 0);
+
+            if (challengeId === 25) return Math.abs(balance) < 10;
             return balance >= required[challengeId];
         }
 
         // ==========================================
         // RETOS ESPECIALES
         // ==========================================
-        // Reto 29: Educación
         if (challengeId === 29) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Educación'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.categoria === 'Educación').length >= 1;
         }
-
-        // Reto 30: Salud
         if (challengeId === 30) {
-            const [rows] = await db.execute(
-                "SELECT COUNT(*) as count FROM movements WHERE user_id = ? AND categoria = 'Salud'",
-                [userId]
-            );
-            return rows[0].count >= 1;
+            return movements.filter(m => m.categoria === 'Salud').length >= 1;
         }
 
-        // Por defecto (retos no implementados aún)
         return false;
 
     } catch (error) {
-        console.error("Error validando criterio:", error);
+        console.error('Error validando criterio:', error);
         return false;
     }
 };
 
-
-// --- CONTROLADORES EXPORTADOS ---
-
-// 1. GET: Obtener estado de los retos (Cuáles ya completó el usuario)
+// ==========================================
+// 1. GET: Obtener retos completados del usuario
+// ==========================================
 export const getChallenges = async (req, res) => {
     try {
         const userId = req.params.userId;
 
-        // Consultamos la tabla intermedia para ver qué ha reclamado este usuario
-        const query = `
-            SELECT challenge_id 
-            FROM user_challenges 
-            WHERE user_id = ? AND claimed = 1
-        `;
-        
-        const [rows] = await db.execute(query, [userId]);
-        
-        // Convertimos la respuesta [{challenge_id: 1}, {challenge_id: 3}] a [1, 3]
-        const completedIds = rows.map(row => row.challenge_id);
+        const { data, error } = await supabase
+            .from('user_challenges')
+            .select('challenge_id')
+            .eq('user_id', userId)
+            .eq('claimed', true);
 
+        if (error) throw error;
+
+        const completedIds = (data || []).map(row => row.challenge_id);
         res.json({ success: true, completedIds });
 
     } catch (error) {
@@ -238,84 +164,82 @@ export const getChallenges = async (req, res) => {
     }
 };
 
-
-// 2. POST: Intentar completar un reto y recibir recompensa
+// ==========================================
+// 2. POST: Reclamar un reto
+// ==========================================
 export const claimChallenge = async (req, res) => {
     const { userId, challengeId } = req.body;
-    let connection = null;
 
     try {
-        // A. Obtener información del reto (cuánto paga) de la BD
-        // Nota: Asumimos que los IDs de la BD coinciden con los del Frontend
-        // Si no tienes los retos en BD, puedes usar un objeto estático aquí.
-        const [challenges] = await db.execute('SELECT * FROM challenges WHERE id = ?', [challengeId]);
-        
-        // Si no existe en BD, usamos datos por defecto para que no falle tu prueba
-        const challenge = challenges[0] || { 
-            id: challengeId, 
-            titulo: 'Reto Genérico', 
-            reward_currency: 'wood', // Por defecto madera
-            reward_amount: 10 
+        // Info del reto (puedes tener una tabla "challenges" o usar valores por defecto)
+        const challenge = {
+            id: challengeId,
+            reward_currency: 'wood',
+            reward_amount: 10
         };
 
-        // B. Verificar si ya fue reclamado
-        const [existing] = await db.execute(
-            'SELECT claimed FROM user_challenges WHERE user_id = ? AND challenge_id = ?', 
-            [userId, challengeId]
-        );
+        // Verificar si ya fue reclamado
+        const { data: existing } = await supabase
+            .from('user_challenges')
+            .select('claimed')
+            .eq('user_id', userId)
+            .eq('challenge_id', challengeId)
+            .single();
 
-        if (existing.length > 0 && existing[0].claimed) {
+        if (existing && existing.claimed) {
             return res.status(400).json({ success: false, message: '¡Ya reclamaste este reto anteriormente!' });
         }
 
-        // C. VALIDAR SI CUMPLE LOS REQUISITOS (Lógica de Juego)
+        // Validar requisitos
         const cumpleRequisitos = await checkCompletionCriteria(userId, parseInt(challengeId));
 
         if (!cumpleRequisitos) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Aún no cumples los requisitos de este reto. ¡Revisa tus movimientos!' 
+            return res.status(400).json({
+                success: false,
+                message: 'Aún no cumples los requisitos de este reto. ¡Revisa tus movimientos!'
             });
         }
 
-        // D. INICIAR TRANSACCIÓN (Para asegurar que se den los recursos Y se marque completado al mismo tiempo)
-        connection = await db.getConnection();
-        await connection.beginTransaction();
+        // Actualizar recursos del usuario
+        const user = await User.findById(userId);
+        let updateData = {};
 
-        // 1. Actualizar recursos del usuario (Madera o Monedas)
-        let updateQuery = '';
         if (challenge.reward_currency === 'wood') {
-            updateQuery = 'UPDATE users SET wood = wood + ? WHERE id = ?';
+            updateData.wood = (user.wood || 0) + challenge.reward_amount;
         } else {
-            updateQuery = 'UPDATE users SET coins = coins + ? WHERE id = ?';
+            updateData.coins = (user.coins || 0) + challenge.reward_amount;
         }
-        
-        await connection.execute(updateQuery, [challenge.reward_amount, userId]);
 
-        // 2. Registrar el reto como completado
-        await connection.execute(
-            `INSERT INTO user_challenges (user_id, challenge_id, claimed, claimed_at) 
-             VALUES (?, ?, 1, NOW()) 
-             ON DUPLICATE KEY UPDATE claimed = 1, claimed_at = NOW()`,
-            [userId, challengeId]
-        );
+        const { error: userError } = await supabase
+            .from('users')
+            .update(updateData)
+            .eq('id', userId);
 
-        await connection.commit(); // Confirmar cambios
+        if (userError) throw userError;
 
-        // E. Obtener nuevos saldos para actualizar el Frontend
-        const [updatedUser] = await db.execute('SELECT coins, wood FROM users WHERE id = ?', [userId]);
+        // Registrar reto como completado (upsert)
+        const { error: challengeError } = await supabase
+            .from('user_challenges')
+            .upsert({
+                user_id: userId,
+                challenge_id: challengeId,
+                claimed: true,
+                claimed_at: new Date().toISOString()
+            }, { onConflict: 'user_id,challenge_id' });
 
-        res.json({ 
-            success: true, 
+        if (challengeError) throw challengeError;
+
+        // Obtener nuevos saldos
+        const updatedUser = await User.findById(userId);
+
+        res.json({
+            success: true,
             message: `¡Reto completado! Ganaste ${challenge.reward_amount} de ${challenge.reward_currency === 'wood' ? 'Madera 🪵' : 'Monedas 🪙'}.`,
-            new_stats: updatedUser[0]
+            new_stats: { coins: updatedUser.coins, wood: updatedUser.wood }
         });
 
     } catch (error) {
-        if (connection) await connection.rollback(); // Deshacer cambios si hay error
-        console.error("Error en completeChallenge:", error);
+        console.error('Error en claimChallenge:', error);
         res.status(500).json({ success: false, message: 'Error en el servidor.', error: error.message });
-    } finally {
-        if (connection) connection.release(); // Liberar conexión
     }
 };

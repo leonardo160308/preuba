@@ -1,107 +1,91 @@
-import db from '../config/db.js';
+import { supabase } from '../config/supabase.js';
 
 class User {
-    // 1. CREAR (Create): Registra un nuevo usuario
+
+    // 1. CREAR usuario
     static async create(userData) {
-        // Desestructurar datos para asegurar el orden de los parámetros en la consulta
-        const { nombre,email, password_hash, edad, genero, foto } = userData;
-        
-        const query = `
-            INSERT INTO users (nombre, email, password_hash, edad, genero, foto) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
+        const { nombre, email, password_hash, edad, genero, foto } = userData;
 
-        try {
-            // Ejecutamos la consulta. 'result' contiene metadatos como insertId.
-            const [result] = await db.execute(query, [nombre, email, password_hash, edad, genero, foto]);
-            
-            // Devolvemos el ID generado y el resto de los datos
-            return { id: result.insertId, ...userData };
-        } catch (error) {
-            // Re-lanzar el error para que sea manejado por el controlador (ej. duplicidad de email)
+        const { data, error } = await supabase
+            .from('users')
+            .insert({ nombre, email, password_hash, edad, genero, foto })
+            .select()
+            .single();
+
+        if (error) {
+            // Simular el código de error de MySQL para duplicados
+            if (error.code === '23505') {
+                const dupError = new Error(error.message);
+                dupError.code = 'ER_DUP_ENTRY';
+                throw dupError;
+            }
             throw error;
         }
+
+        return data;
     }
 
-    
-    // 2. LEER (Read): Buscar usuario por ID (útil para el perfil)
+    // 2. BUSCAR por ID
     static async findById(id) {
-        const query = 'SELECT * FROM users WHERE id = ?';
-        try {
-            // Ejecutamos la consulta. 'rows' es el primer elemento del resultado y contiene los datos.
-            const [rows] = await db.execute(query, [id]);
-            // Devolvemos la primera fila encontrada (el usuario)
-            return rows[0]; 
-        } catch (error) {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null; // No encontrado
             throw error;
         }
+
+        return data;
     }
-    
-    // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
-   // 3. ACTUALIZAR (Update): Para monedas, nivel, avatar, etc.
-static async update(id, updateData) {
-    // Lista de campos permitidos para actualizar (SEGURIDAD)
-    const allowedFields = [
-        'nombre',
-        'password_hash',
-        'edad',
-        'genero',
-        'foto',
-        'level',
-        'coins',
-        'wood',
-        'dashboard_balance', // 🔥 AQUÍ VA
-        'house_level',
-        'beaver_level',
-        'current_appearance',
-        'current_beaver'
-    ];
-    
-    // Filtrar solo campos permitidos
-    const filteredData = {};
-    Object.keys(updateData).forEach(key => {
-        if (allowedFields.includes(key)) {
-            filteredData[key] = updateData[key];
+
+    // 3. ACTUALIZAR
+    static async update(id, updateData) {
+        const allowedFields = [
+            'nombre', 'password_hash', 'edad', 'genero', 'foto',
+            'level', 'coins', 'wood', 'dashboard_balance',
+            'house_level', 'beaver_level', 'current_appearance', 'current_beaver'
+        ];
+
+        const filteredData = {};
+        Object.keys(updateData).forEach(key => {
+            if (allowedFields.includes(key)) {
+                filteredData[key] = updateData[key];
+            }
+        });
+
+        if (Object.keys(filteredData).length === 0) {
+            console.warn('No hay campos válidos para actualizar');
+            return null;
         }
-    });
-    
-    const fields = Object.keys(filteredData)
-        .map(key => `${key} = ?`)
-        .join(', ');
 
-    const values = Object.values(filteredData);
+        const { data, error } = await supabase
+            .from('users')
+            .update(filteredData)
+            .eq('id', id)
+            .select()
+            .single();
 
-    if (fields.length === 0) {
-        console.warn('No hay campos válidos para actualizar');
-        return null;
+        if (error) throw error;
+
+        // Simular affectedRows para compatibilidad con el código existente
+        return { affectedRows: data ? 1 : 0, data };
     }
 
-    const query = `UPDATE users SET ${fields} WHERE id = ?`;
-
-    try {
-        console.log('Ejecutando UPDATE:', query, [...values, id]);
-        const [result] = await db.execute(query, [...values, id]);
-        return result;
-    } catch (error) {
-        console.error('Error en User.update:', error);
-        throw error;
-    }
-}
-
-
-    // 4. BORRAR (Delete Lógico): Cambiar is_active a false
-// 4. BORRAR (Delete Lógico): Cambiar is_active a false
+    // 4. BAJA LÓGICA
     static async deleteLogical(id) {
-        const query = 'UPDATE users SET is_active = 0 WHERE id = ?';
-        try {
-            console.log('Ejecutando baja lógica para usuario:', id); // Debug
-            const [result] = await db.execute(query, [id]);
-            console.log('Resultado:', result); // Debug
-            return result;
-        } catch (error) {
-            console.error('Error en deleteLogical:', error);
-            throw error;
-        }
+        const { data, error } = await supabase
+            .from('users')
+            .update({ is_active: false })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return { affectedRows: data ? 1 : 0 };
     }
 }
 
