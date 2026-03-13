@@ -94,26 +94,26 @@
             id="user-avatar" 
             onerror="this.src='https://via.placeholder.com/100'"
         >
-        <button class="btn-edit" id="btn-change-avatar" title="Cambiar Avatar"><p>Editar</p></button>
+        <button class="btn-edit" onclick="openProfileModal()" title="Editar Perfil"><p>Editar</p></button>
     </div>
     
     <div class="user-details">
         <div class="detail-row">
-            <span class="label">Nombre:</span>
-            <span class="value" id="user-name">...</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Nivel Educativo:</span>
-            <span class="value" id="user-level">1</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Nivel Casa:</span>
-            <span class="value" id="lbl-house-level">1</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Nivel Castor:</span>
-            <span class="value" id="lbl-beaver-level">1</span>
-        </div>
+    <span class="label">Nombre:</span>
+    <span class="value" id="user-name">...</span>
+</div>
+<div class="detail-row">
+    <span class="label">Género:</span>
+    <span class="value" id="user-genero">...</span>
+</div>
+<div class="detail-row">
+    <span class="label">Edad:</span>
+    <span class="value" id="user-edad">...</span>
+</div>
+<div class="detail-row">
+    <span class="label">Nivel Educativo:</span>
+    <span class="value" id="user-level">1</span>
+</div>
     </div>
 </div>
 
@@ -273,6 +273,148 @@
         </div>
     </div> 
 </div>
+<!-- ===== MODAL EDITAR PERFIL ===== -->
+<div class="overlay" id="profileOverlay">
+  <div class="modal-perfil" id="profileModal">
+    <button class="btn-close-modal" onclick="closeProfileModal()">✕</button>
+    <div class="modal-title">Editar Datos del Perfil</div>
+
+    <!-- Avatar con picker -->
+    <div class="avatar-wrap-modal">
+      <div class="avatar-container-modal" id="avatarContainerModal">
+        <img src="/public/img/icono_perfil-removebg-preview.png" id="avatarPreview" class="avatar-preview-modal" alt="Avatar">
+        <div class="avatar-edit-btn-modal" onclick="toggleAvatarPickerModal(event)">✏️</div>
+        <div class="avatar-picker-modal" id="avatarPickerModal">
+          <p>Elige tu avatar</p>
+          <div class="avatar-options-modal">
+            <div class="avatar-opt" onclick="selectAvatarModal('avatar1')"><img src="/public/img/avatars/perfil1.png" onerror="this.src='https://via.placeholder.com/60/FF6B6B/fff?text=1'"></div>
+            <div class="avatar-opt" onclick="selectAvatarModal('avatar2')"><img src="/public/img/avatars/perfil2.png" onerror="this.src='https://via.placeholder.com/60/4ECDC4/fff?text=2'"></div>
+            <div class="avatar-opt" onclick="selectAvatarModal('avatar3')"><img src="/public/img/avatars/perfil3.png" onerror="this.src='https://via.placeholder.com/60/45B7D1/fff?text=3'"></div>
+            <div class="avatar-opt" onclick="selectAvatarModal('avatar4')"><img src="/public/img/avatars/perfil4.png" onerror="this.src='https://via.placeholder.com/60/FFA07A/fff?text=4'"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fields-label-modal">Campos Editables</div>
+
+    <div class="field-modal"><input type="text" id="inputUsername" placeholder="Nombre de usuario" /></div>
+    <div class="field-modal select-wrap-modal">
+      <select id="selectGenero">
+  <option value="" disabled selected>Género</option>
+  <option value="Masculino">Masculino</option>
+  <option value="Femenino">Femenino</option>
+  <option value="Otro">Otro</option>
+  <option value="Prefiero no decir">Prefiero no decir</option>
+</select>
+    </div>
+<div class="field-modal"><input type="number" id="inputEdad" placeholder="Edad (15-99)" min="15" max="99" /></div>
+
+    <div class="modal-footer-perfil">
+      <button class="btn-delete-modal" onclick="openConfirmDelete()">Eliminar Cuenta</button>
+      <button class="btn-accept-modal" onclick="saveProfile()">ACEPTAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRMAR ELIMINAR ===== -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">¿Eliminar cuenta?</div>
+    <div class="confirm-text">Esta acción es permanente y no se puede deshacer. ¿Estás seguro?</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel-confirm" onclick="closeConfirmDelete()">No, cancelar</button>
+      <button class="btn-confirm-delete" onclick="deleteAccount()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-perfil" id="toastPerfil"></div>
+
+<script>
+  // ===== ABRIR/CERRAR MODAL =====
+  function openProfileModal() {
+    document.getElementById('profileOverlay').classList.add('active');
+  }
+  function closeProfileModal() {
+    document.getElementById('profileOverlay').classList.remove('active');
+    closeAvatarPickerModal();
+  }
+  document.getElementById('profileOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeProfileModal();
+  });
+
+  // ===== AVATAR PICKER =====
+  function toggleAvatarPickerModal(e) {
+    e.stopPropagation();
+    document.getElementById('avatarPickerModal').classList.toggle('open');
+  }
+  function closeAvatarPickerModal() {
+    document.getElementById('avatarPickerModal').classList.remove('open');
+  }
+  function selectAvatarModal(avatarKey) {
+    const paths = {
+      avatar1: '/public/img/avatars/perfil1.png',
+      avatar2: '/public/img/avatars/perfil2.png',
+      avatar3: '/public/img/avatars/perfil3.png',
+      avatar4: '/public/img/avatars/perfil4.png',
+    };
+    document.getElementById('avatarPreview').src = paths[avatarKey];
+    document.getElementById('user-avatar').src = paths[avatarKey]; // actualiza el avatar principal
+    closeAvatarPickerModal();
+    showToastPerfil('Avatar actualizado ✓');
+  }
+  document.addEventListener('click', function(e) {
+    const container = document.getElementById('avatarContainerModal');
+    if (container && !container.contains(e.target)) closeAvatarPickerModal();
+  });
+
+  // ===== GUARDAR PERFIL =====
+ function saveProfile() {
+    const username = document.getElementById('inputUsername').value.trim();
+    const edad = parseInt(document.getElementById('inputEdad').value);
+    const genero = document.getElementById('selectGenero').value;
+
+    // Primero validas
+    if (!username) { showToastPerfil('⚠️ Escribe tu nombre de usuario'); return; }
+    if (!edad || edad < 15 || edad > 99) { showToastPerfil('⚠️ La edad debe ser entre 15 y 99 años'); return; }
+
+    // Luego actualizas la tarjeta
+    document.getElementById('user-name').textContent = username;
+    document.getElementById('user-genero').textContent = genero || '—';
+    document.getElementById('user-edad').textContent = edad + ' años';
+
+    console.log('Guardar:', { username, genero, edad });
+    showToastPerfil('✅ Perfil actualizado');
+    setTimeout(closeProfileModal, 1200);
+}
+  // ===== ELIMINAR CUENTA =====
+  function openConfirmDelete() {
+    document.getElementById('confirmOverlay').classList.add('active');
+  }
+  function closeConfirmDelete() {
+    document.getElementById('confirmOverlay').classList.remove('active');
+  }
+  function deleteAccount() {
+    // 👇 Aquí llamas tu función real de eliminar cuenta
+    console.log('Cuenta eliminada');
+    closeConfirmDelete();
+    closeProfileModal();
+    showToastPerfil('🗑️ Cuenta eliminada');
+  }
+
+  // ===== TOAST =====
+  function showToastPerfil(msg) {
+    const t = document.getElementById('toastPerfil');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+<!-- Pega esto en cualquier parte del body, no importa dónde -->
+<span id="lbl-house-level" style="display:none"></span>
+<span id="lbl-beaver-level" style="display:none"></span>
 <script type="module" src="../public/js/pages/profile.js"></script>
 
 </body>
