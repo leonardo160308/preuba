@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="progress-text" style="color: #fff; font-weight:bold;">${percentage}%</span>
                     
                     <div class="reward-pill">
-                        🪵 ${challenge.reward_wood}
-                    </div>
+    <img src="../public/img/madera.png" alt="Madera" class="reward-icon">
+    <span>${challenge.reward_wood}</span>
+</div>
                 </div>
             `;
             

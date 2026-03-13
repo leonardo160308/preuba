@@ -94,7 +94,7 @@
             id="user-avatar" 
             onerror="this.src='https://via.placeholder.com/100'"
         >
-        <button class="btn-edit" id="btn-change-avatar" title="Cambiar Avatar">✏️</button>
+        <button class="btn-edit" id="btn-change-avatar" title="Cambiar Avatar"><p>Editar</p></button>
     </div>
     
     <div class="user-details">
@@ -152,13 +152,21 @@
     </div>
 </div>
             
-            
-
-            <div class="upgrade-actions">
+        <div class="stats-bar">
+    <div class="stat-item">
+        <img src="../public/img/moneda.png" alt="Monedas" class="stat-icon">
+        <span id="coin-count">0</span>
+    </div>
+    <div class="stat-item">
+        <img src="../public/img/madera.png" alt="Madera" class="stat-icon">
+        <span id="wood-count">0</span>
+    </div>
+    
+</div>
+<div class="upgrade-actions">
             
             <!-- Botón Mejorar Casa -->
             <button id="btn-upgrade-house" class="btn-upgrade btn-wood">
-                <div class="btn-icon">🏠</div>
                 <div class="btn-text">
                     <span>Mejorar Casa</span>
                     <small>Costo: <span id="cost-house">20</span> 🪵</small>
@@ -167,23 +175,12 @@
 
             <!-- Botón Entrenar Castor -->
             <button id="btn-upgrade-beaver" class="btn-upgrade btn-coin">
-                <div class="btn-icon">🦫</div>
                 <div class="btn-text">
                     <span>Entrenar Castor</span>
                     <small>Costo: <span id="cost-beaver">34</span> 🪙</small>
                 </div>
             </button>
 
-        </div>
-            <div class="stats-bar">
-            <div class="stat-item">
-                <i class="fas fa-coins coin-icon"></i>
-                <span id="coin-count">0</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-tree wood-icon"></i>
-                <span id="wood-count">0</span>
-            </div>
         </div>
         <button id="btn-delete-account" class="btn-delete-account">
             Eliminar Cuenta

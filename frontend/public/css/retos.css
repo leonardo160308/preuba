@@ -58,15 +58,8 @@ body {
 }
 
 /* Tarjeta superior (Título) */
-.top-stats-card {
-    background-color: #e9ecef;
-    padding: 20px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0; /* No dejes que esto se encoja */
-}
+
+
 
 /* Contenedor GRANDE de la lista */
 .challenges-list-container {
@@ -146,15 +139,20 @@ body {
     background: #2c3e50; 
     width: 0%; 
 }
-.reward-pill { 
-    background: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+/* El contenedor de la recompensa */
+.reward-pill {
+    display: flex;
+    align-items: center; /* Centra verticalmente el icono y el número */
+    gap: 5px;            /* Espacio pequeño entre imagen y número */
+    padding: 4px 8px;
+    border-radius: 12px;
+}
 
-/* Responsive */
-@media (max-width: 900px) {
-    .split-layout { flex-direction: column; overflow-y: auto; }
-    .left-panel { width: 100%; min-width: 0; height: auto; }
-    .right-panel-image { display: none; } /* Ocultar imagen en móvil para dar espacio */
-    body { overflow: auto; height: auto; }
+/* La imagen "en bebé" */
+.reward-icon {
+    width: 45px;  /* Tamaño pequeño */
+    height: 45px; /* Mantener proporción cuadrada */
+    object-fit: contain; /* Evita que se deforme */
 }
 
 /* ======== BOTONES ======== */
@@ -180,3 +178,32 @@ button:hover {
   background-color: #6585AA;  /* HOVER */
   color: #ffffff;
 }
+
+/* El contenedor principal separa el título del grupo de la derecha */
+.top-stats-card {
+    background-color: #e9ecef;
+    padding: 10px 20px; /* Ajustado para que no sea tan alto */
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between; /* Empuja el H2 a la izquierda y el stats-bar a la derecha */
+    align-items: center;
+}
+
+/* El contenedor del icono y el número */
+.stat-item {
+    display: flex;
+    align-items: center; /* Centra verticalmente el icono con el texto */
+    gap: 10px; /* Espacio entre la madera y el 1000 */
+}
+
+.stat-item img {
+    width: 100px; /* Ajusta según el tamaño de tu imagen */
+    height: auto;
+}
+
+#wood-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
