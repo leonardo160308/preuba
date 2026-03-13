@@ -150,7 +150,7 @@ h2 {
 .chart-container {
     position: relative;
     height: 200px;
-    width: 100%;
+    width: 90%;
     margin-top: 20px;
 }
 
@@ -249,7 +249,7 @@ h2 {
 
 /* --- 6. Modal (Ventana Emergente) --- */
 .modal {
-    position: fixed;
+    position:absolute;
     z-index: 100;
     left: 0;
     top: 0;
@@ -405,7 +405,7 @@ h2 {
 }
 
 .izquierda {
-    flex: 70%;   /* ≈ 70% */
+    flex: 65%;   /* ≈ 70% */
 }
 
 .derecha {
