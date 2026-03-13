@@ -128,17 +128,24 @@ export async function getUserData(userId) {
  * @param {Object} updateData - Datos a actualizar
  * @returns {Promise<Object>}
  */
-export async function updateUserData(userId, updateData) {
+// ACTUALIZAR DATOS DEL USUARIO
+export async function updateUserData(userId, data) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updateData)
+
+        const res = await fetch(`/api/users/${userId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
         });
-        return await response.json();
+
+        const result = await res.json();
+        return result;
+
     } catch (error) {
-        console.error('Error actualizando usuario:', error);
-        throw error;
+        console.error("Error updateUserData:", error);
+        return { success: false, message: "Error de conexión" };
     }
 }
 

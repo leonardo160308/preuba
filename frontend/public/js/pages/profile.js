@@ -1,7 +1,6 @@
 /* assets/js/pages/profile.js - CON ALERTAS VISUALES COMPLETAS */
 
-import { getUserData, upgradeItem, equipSkin, deleteUser } from '../modules/api.js';
-import { protectRoute, getAuthData, logout } from '../modules/auth.js';
+import { getUserData, upgradeItem, equipSkin, deleteUser, updateUserData } from '../modules/api.js';import { protectRoute, getAuthData, logout } from '../modules/auth.js';
 import { alertaExito, alertaError, alertaInfo, alertaAdvertencia, alertaConfirmacion } from '../modules/alerts.js'; // ✅ NUEVO
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -77,6 +76,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeAvatarModal = document.getElementById('close-avatar-modal');
     const btnConfirmAvatar = document.getElementById('btn-confirm-avatar');
     const btnDeleteAccount = document.getElementById('btn-delete-account');
+    const inputEdad = document.getElementById("inputEdad");
+
+if(inputEdad){
+    inputEdad.addEventListener("input", () => {
+        inputEdad.value = inputEdad.value.replace(/[^0-9]/g,'');
+        if(inputEdad.value.length > 2){
+            inputEdad.value = inputEdad.value.slice(0,2);
+        }
+    });
+
+    inputEdad.addEventListener("keydown", (e) => {
+        if(e.key === "e" || e.key === "." || e.key === "-"){
+            e.preventDefault();
+        }
+    });
+}
 
     let selectedAvatar = null;
 
@@ -125,6 +140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         domMadera.textContent = currentUserData.wood || 0;
         lblHouseLevel.textContent = currentUserData.house_level || 1;
         lblBeaverLevel.textContent = currentUserData.beaver_level || 1;
+        const generoEl = document.getElementById('user-genero');
+    const edadEl   = document.getElementById('user-edad');
+    const levelEl  = document.getElementById('user-level');
+    if (generoEl) generoEl.textContent = currentUserData.genero || '—';
+    if (edadEl)   edadEl.textContent   = currentUserData.edad ? `${currentUserData.edad} años` : '—';
+    if (levelEl)  levelEl.textContent  = currentUserData.level || 1;
 
         // BOTÓN CASA
         if (txtCostHouse) txtCostHouse.textContent = COSTO_CASA_BASE;
@@ -462,4 +483,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     init();
+    window.saveProfile = async function () {
+
+    const nombre = document.getElementById('inputUsername').value.trim();
+    const edad = parseInt(document.getElementById('inputEdad').value);
+    const genero = document.getElementById('selectGenero').value;
+
+    if (!nombre || nombre.length < 3) {
+        alertaAdvertencia("El nombre debe tener al menos 3 caracteres");
+        return;
+    }
+
+    if (!edad || edad < 15 || edad > 99) {
+        alertaAdvertencia("Edad inválida (15 - 99)");
+        return;
+    }
+
+    try {
+
+        alertaInfo("Guardando cambios...", { duration: 1500 });
+
+        const result = await updateUserData(userId, {
+            nombre,
+            edad,
+            genero
+        });
+
+        if (result.success) {
+
+            currentUserData.nombre = nombre;
+            currentUserData.edad = edad;
+            currentUserData.genero = genero;
+
+            // actualizar UI
+            userNameLbl.textContent = nombre;
+            welcomeMsg.textContent = `Hola, ${nombre}!`;
+
+            document.getElementById('user-genero').textContent = genero || "—";
+            document.getElementById('user-edad').textContent = `${edad} años`;
+
+            alertaExito("Perfil actualizado correctamente");
+
+            document.getElementById('profileOverlay').classList.remove('active');
+
+        } else {
+            alertaError(result.message);
+        }
+
+    } catch (error) {
+        console.error(error);
+        alertaError("Error al actualizar perfil");
+    }
+};
 });

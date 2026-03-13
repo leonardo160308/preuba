@@ -182,9 +182,7 @@
             </button>
 
         </div>
-        <button id="btn-delete-account" class="btn-delete-account">
-            Eliminar Cuenta
-        </button>
+        
         </div>
 
         <!-- Barra de Recursos -->
@@ -308,12 +306,20 @@
   <option value="Prefiero no decir">Prefiero no decir</option>
 </select>
     </div>
-<div class="field-modal"><input type="number" id="inputEdad" placeholder="Edad (15-99)" min="15" max="99" /></div>
+<div class="field-modal"><input 
+type="number"
+id="inputEdad"
+placeholder="Edad (15-99)"
+min="15"
+max="99"
+step="1"
+oninput="limitarEdad(this)"
+onkeydown="return event.key !== 'e' && event.key !== '.' && event.key !== '-'"
+></div>
 
     <div class="modal-footer-perfil">
       <button class="btn-delete-modal" onclick="openConfirmDelete()">Eliminar Cuenta</button>
-      <button class="btn-accept-modal" onclick="saveProfile()">ACEPTAR</button>
-    </div>
+<button class="btn-accept-modal" onclick="saveProfile()">ACEPTAR</button>    </div>
   </div>
 </div>
 
@@ -396,13 +402,11 @@
   function closeConfirmDelete() {
     document.getElementById('confirmOverlay').classList.remove('active');
   }
-  function deleteAccount() {
-    // 👇 Aquí llamas tu función real de eliminar cuenta
-    console.log('Cuenta eliminada');
+ function deleteAccount() {
     closeConfirmDelete();
     closeProfileModal();
-    showToastPerfil('🗑️ Cuenta eliminada');
-  }
+    document.getElementById('btn-delete-account')?.click(); // ✅ llama la lógica real
+}
 
   // ===== TOAST =====
   function showToastPerfil(msg) {
@@ -411,6 +415,80 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
   }
+  // ========================================
+    // MODAL EDITAR PERFIL — FUNCIONES GLOBALES
+    // Sobreescriben las del inline script de perfil.html
+    // ========================================
+function openProfileModalFn() {
+
+    document.getElementById('profileOverlay').classList.add('active');
+
+    if (!currentUserData) return;
+
+    document.getElementById('inputUsername').value = currentUserData.nombre || '';
+    document.getElementById('selectGenero').value  = currentUserData.genero || '';
+    document.getElementById('inputEdad').value     = currentUserData.edad || '';
+}
+
+    async function saveProfileFn() {
+        const nombre   = document.getElementById('inputUsername').value.trim();
+        const edadRaw  = document.getElementById('inputEdad').value;
+        const genero   = document.getElementById('selectGenero').value;
+        const edad     = parseInt(edadRaw);
+
+        if (!nombre || nombre.length < 3) {
+            window.showToastPerfil?.('⚠️ Nombre muy corto (mín. 3 caracteres)');
+            return;
+        }
+        if (!edad || edad < 15 || edad > 99) {
+            window.showToastPerfil?.('⚠️ La edad debe ser entre 15 y 99 años');
+            return;
+        }
+
+        try {
+            const result = await updateUserData(userId, { nombre, edad, genero });
+
+            if (result && result.success !== false) {
+                // Actualizar estado local
+                currentUserData.nombre = nombre;
+                currentUserData.edad   = edad;
+                currentUserData.genero = genero;
+
+                // Actualizar DOM
+                if (welcomeMsg)  welcomeMsg.textContent  = `Hola, ${nombre}!`;
+                if (userNameLbl) userNameLbl.textContent = nombre;
+                const generoEl = document.getElementById('user-genero');
+                const edadEl   = document.getElementById('user-edad');
+                if (generoEl) generoEl.textContent = genero || '—';
+                if (edadEl)   edadEl.textContent   = `${edad} años`;
+
+                window.showToastPerfil?.('✅ Perfil actualizado correctamente');
+                setTimeout(() => {
+                    document.getElementById('profileOverlay').classList.remove('active');
+                }, 1200);
+
+            } else {
+                window.showToastPerfil?.('❌ Error: ' + (result?.message || 'desconocido'));
+            }
+        } catch (error) {
+            console.error(error);
+            window.showToastPerfil?.('❌ Error de conexión');
+        }
+    }
+
+    // Exponer al scope global (sobreescribe las del inline script)
+    window.openProfileModal = openProfileModalFn;
+    window.saveProfile      = saveProfileFn;
+
+    // Conectar el deleteAccount del modal con la lógica real
+    window.deleteAccountFromModal = () => {
+        window.closeConfirmDelete?.();
+        window.closeProfileModal?.();
+        document.getElementById('btn-delete-account')?.click();
+    };
+
+    // ========================================
+    init();  // ← este ya estaba, no lo dupliques
 </script>
 <!-- Pega esto en cualquier parte del body, no importa dónde -->
 <span id="lbl-house-level" style="display:none"></span>
