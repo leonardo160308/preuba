@@ -71,7 +71,7 @@ class Movement {
         return data;
     }
 
-    // 6. ELIMINAR por ID
+    // 6. ELIMINAR por ID con usuario
     static async deleteById(movementId, userId) {
         const { error } = await supabase
             .from('movements')
@@ -92,6 +92,21 @@ class Movement {
 
         if (error) throw error;
         return { affectedRows: 1 };
+    }
+
+    // 7. ACTUALIZAR tipo, categoria y monto
+    static async update(movementId, updateData) {
+        const { tipo, categoria, monto } = updateData;
+
+        const { data, error } = await supabase
+            .from('movements')
+            .update({ tipo, categoria, monto })
+            .eq('id', movementId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
 }
 

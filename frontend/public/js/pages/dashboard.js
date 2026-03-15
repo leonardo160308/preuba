@@ -1,33 +1,120 @@
 /* assets/js/pages/dashboard.js */
 
-// 1. IMPORTACIONES: Conexión con el Backend y Sesión
-import { 
-    getDashboardFixed, 
-    updateGoal, 
-    getDashboardData, 
-    createMovement 
+import {
+    getDashboardFixed,
+    updateGoal,
+    getDashboardData,
+    createMovement,
+    updateMovement,
+    deleteMovement
 } from '../modules/api.js';
 
-import { 
-    protectRoute, 
-    getAuthData, 
-    logout 
+import {
+    protectRoute,
+    getAuthData,
+    logout
 } from '../modules/auth.js';
+
+// ========================================
+// CATEGORÍAS POR TIPO DE MOVIMIENTO
+// ========================================
+const CATEGORIAS = {
+    income: [
+        "Salario",
+        "Trabajo extra",
+        "Freelance",
+        "Comisiones",
+        "Propinas",
+        "Ventas",
+        "Negocio propio",
+        "Ingresos online",
+        "Publicidad",
+        "Intereses",
+        "Dividendos",
+        "Inversiones",
+        "Renta recibida",
+        "Premios o sorteos",
+        "Beca",
+        "Apoyo familiar",
+        "Reembolso",
+        "Devoluciones",
+        "Bonos",
+        "Otros ingresos"
+    ],
+    expense: [
+        "Renta / Hipoteca",
+        "Electricidad",
+        "Agua",
+        "Gas",
+        "Internet",
+        "Mantenimiento del hogar",
+        "Supermercado",
+        "Restaurantes",
+        "Comida rápida",
+        "Delivery",
+        "Café / Snacks",
+        "Gasolina",
+        "Transporte público",
+        "Taxi / Uber",
+        "Estacionamiento",
+        "Peajes",
+        "Mantenimiento del vehículo",
+        "Ropa",
+        "Calzado",
+        "Tecnología",
+        "Electrónica",
+        "Accesorios",
+        "Videojuegos",
+        "Streaming",
+        "Cine",
+        "Eventos",
+        "Hobbies",
+        "Cursos",
+        "Libros",
+        "Material escolar",
+        "Medicamentos",
+        "Consultas médicas",
+        "Seguro médico",
+        "Gimnasio",
+        "Pago de tarjeta",
+        "Préstamos",
+        "Comisiones bancarias",
+        "Mascotas",
+        "Regalos",
+        "Donaciones",
+        "Viajes",
+        "Imprevistos",
+        "Suscripciones",
+        "Otros gastos"
+    ]
+};
+
+// ========================================
+// FUNCIÓN: Llenar un <select> con categorías
+// ========================================
+function llenarCategorias(selectEl, tipo, valorActual = '') {
+    const lista = CATEGORIAS[tipo] || [];
+    selectEl.innerHTML = '<option value="">-- Selecciona una categoría --</option>';
+    lista.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        if (cat === valorActual) opt.selected = true;
+        selectEl.appendChild(opt);
+    });
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // --- 0. SEGURIDAD: Verificar sesión ---
-    if (!protectRoute()) return; // Si no hay login, te saca de aquí.
+    if (!protectRoute()) return;
 
     const usuarioLogueado = getAuthData();
     const userId = usuarioLogueado.id;
 
-    // --- 1. ESTADO DE LA APLICACIÓN ---
-    const fechaActual = new Date(); 
-    let mesVisualizado = fechaActual.getMonth(); 
+    const fechaActual = new Date();
+    let mesVisualizado = fechaActual.getMonth();
     let anioVisualizado = fechaActual.getFullYear();
 
-    // Estado local (se llena desde la API)
     let datosFijos = {
         ingresoFijo: 0,
         egresoFijo: 0,
@@ -35,102 +122,108 @@ document.addEventListener('DOMContentLoaded', async () => {
         metaCantidad: 0
     };
 
-    // Mapa en memoria para el calendario (Fecha -> {ingresos:[], egresos:[]})
     let movimientosDB = new Map();
-
     let chartInstance = null;
-    let diaSeleccionado = null; 
+    let diaSeleccionado = null;
 
-    // --- 2. REFERENCIAS AL DOM ---
-    const inpIngreso = document.getElementById('fixed-income');
-    const inpEgreso = document.getElementById('fixed-expense');
-    const inpMetaNombre = document.getElementById('goal-name');
-    const inpMetaMonto = document.getElementById('goal-amount');
-    
-    const txtAhorro = document.getElementById('calculated-savings');
-    const txtRestante = document.getElementById('calculated-remaining');
-    const txtEstado = document.getElementById('goal-status');
+    // ID del movimiento que se está editando actualmente
+    let movimientoEnEdicion = null;
 
-    const lblMesYear = document.getElementById('current-month-year');
+    // --- REFERENCIAS AL DOM ---
+    const inpIngreso     = document.getElementById('fixed-income');
+    const inpEgreso      = document.getElementById('fixed-expense');
+    const inpMetaNombre  = document.getElementById('goal-name');
+    const inpMetaMonto   = document.getElementById('goal-amount');
+
+    const txtAhorro      = document.getElementById('calculated-savings');
+    const txtRestante    = document.getElementById('calculated-remaining');
+    const txtEstado      = document.getElementById('goal-status');
+
+    const lblMesYear     = document.getElementById('current-month-year');
     const gridCalendario = document.getElementById('calendar-grid');
-    const btnPrevMonth = document.getElementById('prev-month');
-    const btnNextMonth = document.getElementById('next-month');
+    const btnPrevMonth   = document.getElementById('prev-month');
+    const btnNextMonth   = document.getElementById('next-month');
 
-    const modal = document.getElementById('day-modal');
-    const btnCloseModal = document.getElementById('close-modal');
+    const modal          = document.getElementById('day-modal');
+    const btnCloseModal  = document.getElementById('close-modal');
     const formMovimiento = document.getElementById('transaction-form');
-    
-    const modalTitle = document.getElementById('modal-date-title');
-    const modalIncome = document.getElementById('day-income');
-    const modalExpense = document.getElementById('day-expense');
-    const modalTotal = document.getElementById('day-total');
-    const listRecomendaciones = document.getElementById('recommendations-list');
+
+    const modalTitle     = document.getElementById('modal-date-title');
+    const modalIncome    = document.getElementById('day-income');
+    const modalExpense   = document.getElementById('day-expense');
+    const modalTotal     = document.getElementById('day-total');
     const listMovimientos = document.getElementById('movements-list');
 
-    // Botón Salir (Asegúrate de tener un botón con este ID o clase en tu HTML)
+    // Selects de nuevo movimiento
+    const selTipo        = document.getElementById('trans-type');
+    const selCategoria   = document.getElementById('trans-category');
+
+    // Sección de edición
+    const editContainer  = document.getElementById('edit-movement-container');
+    const selEditTipo    = document.getElementById('edit-trans-type');
+    const selEditCat     = document.getElementById('edit-trans-category');
+    const inpEditMonto   = document.getElementById('edit-trans-amount');
+    const formEdicion    = document.getElementById('edit-transaction-form');
+    const btnEditEliminar = document.getElementById('edit-btn-delete');
+
     const btnLogout = document.getElementById('logout-btn') || document.querySelector('.btn-logout');
 
-    // --- 3. FUNCIONES DE CARGA DE DATOS (API) ---
-
+    // --- CARGA INICIAL ---
     async function cargarDatosDelServidor() {
         try {
-            // Hacemos dos peticiones al mismo tiempo para ser más rápidos
             const [fixedResponse, movementsResponse] = await Promise.all([
                 getDashboardFixed(userId),
                 getDashboardData(userId)
             ]);
 
-            // A. Procesar Datos Fijos
             if (fixedResponse.success) {
                 const data = fixedResponse.data;
                 datosFijos = {
-                    ingresoFijo: parseFloat(data.ingreso_fijo) || 0,
-                    egresoFijo: parseFloat(data.egreso_fijo) || 0,
-                    metaNombre: data.meta_nombre || '',
-                    metaCantidad: parseFloat(data.meta_cantidad) || 0
+                    ingresoFijo:   parseFloat(data.ingreso_fijo)  || 0,
+                    egresoFijo:    parseFloat(data.egreso_fijo)   || 0,
+                    metaNombre:    data.meta_nombre               || '',
+                    metaCantidad:  parseFloat(data.meta_cantidad) || 0
                 };
                 actualizarInputsFijos();
             }
 
-            // B. Procesar Movimientos (Transformar Array SQL a Map Calendario)
             if (movementsResponse.success) {
                 procesarMovimientosParaMap(movementsResponse.history);
             }
 
-            // C. Renderizar todo con los nuevos datos
             actualizarDashboard();
             renderizarCalendario();
 
         } catch (error) {
-            console.error("Error cargando dashboard:", error);
-            alert("Error al cargar tus datos. Revisa tu conexión.");
+            console.error('Error cargando dashboard:', error);
+            alert('Error al cargar tus datos. Revisa tu conexión.');
         }
     }
 
     function actualizarInputsFijos() {
-        inpIngreso.value = datosFijos.ingresoFijo || '';
-        inpEgreso.value = datosFijos.egresoFijo || '';
-        inpMetaNombre.value = datosFijos.metaNombre || '';
-        inpMetaMonto.value = datosFijos.metaCantidad || '';
+        inpIngreso.value     = datosFijos.ingresoFijo  || '';
+        inpEgreso.value      = datosFijos.egresoFijo   || '';
+        inpMetaNombre.value  = datosFijos.metaNombre   || '';
+        inpMetaMonto.value   = datosFijos.metaCantidad || '';
     }
 
-    // Transforma la lista plana de la BD a la estructura que usa tu calendario
+    // Guarda id, tipo y categoria para poder editar/eliminar
     function procesarMovimientosParaMap(listaMovimientos) {
-        movimientosDB = new Map(); // Limpiar mapa
-        
+        movimientosDB = new Map();
+
         listaMovimientos.forEach(mov => {
-            // mov.fecha viene como "2023-10-25T00:00:00.000Z" o "2023-10-25"
-            // Cortamos para tener solo YYYY-MM-DD
-            const fechaKey = mov.fecha.split('T')[0]; 
+            const fechaKey = mov.fecha.split('T')[0];
 
             if (!movimientosDB.has(fechaKey)) {
                 movimientosDB.set(fechaKey, { ingresos: [], egresos: [] });
             }
 
             const diaData = movimientosDB.get(fechaKey);
-            const item = { 
-                categoria: mov.categoria, 
-                monto: parseFloat(mov.monto) 
+            const item = {
+                id:        mov.id,
+                categoria: mov.categoria,
+                monto:     parseFloat(mov.monto),
+                tipo:      mov.tipo
             };
 
             if (mov.tipo === 'income') {
@@ -141,134 +234,120 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- 4. FUNCIONES DE GUARDADO (API) ---
-
+    // --- GUARDAR DATOS FIJOS ---
     async function guardarDatosFijos() {
-        // Leemos valores actuales del DOM
         const payload = {
-            ingreso_fijo: parseFloat(inpIngreso.value) || 0,
-            egreso_fijo: parseFloat(inpEgreso.value) || 0,
-            meta_nombre: inpMetaNombre.value || '',
+            ingreso_fijo:  parseFloat(inpIngreso.value)   || 0,
+            egreso_fijo:   parseFloat(inpEgreso.value)    || 0,
+            meta_nombre:   inpMetaNombre.value             || '',
             meta_cantidad: parseFloat(inpMetaMonto.value) || 0
         };
 
-        // Actualizamos estado local para que la UI responda rápido
         datosFijos = {
-            ingresoFijo: payload.ingreso_fijo,
-            egresoFijo: payload.egreso_fijo,
-            metaNombre: payload.meta_nombre,
+            ingresoFijo:  payload.ingreso_fijo,
+            egresoFijo:   payload.egreso_fijo,
+            metaNombre:   payload.meta_nombre,
             metaCantidad: payload.meta_cantidad
         };
-        actualizarDashboard(); // Recalcular gráfica al instante
+        actualizarDashboard();
 
-        // Enviar al Backend
         try {
             await updateGoal(userId, payload);
-            console.log("Datos fijos guardados en nube");
         } catch (error) {
-            console.error("Error al guardar datos fijos:", error);
+            console.error('Error al guardar datos fijos:', error);
         }
     }
-// --- VALIDACIÓN FINANCIERA SEGURA ---
-// maxEnteros = dígitos antes del punto
-// maxDecimales = dígitos después del punto
-function limitarNumero(input, maxEnteros, maxDecimales = 2) {
-    input.addEventListener('input', () => {
-        let valor = input.value;
 
-        // Quitar todo excepto números y punto
-        valor = valor.replace(/[^\d.]/g, '');
+    // --- VALIDACIÓN DE INPUTS NUMÉRICOS ---
+    function limitarNumero(input, maxEnteros, maxDecimales = 2) {
+        input.addEventListener('input', () => {
+            let valor = input.value;
+            valor = valor.replace(/[^\d.]/g, '');
 
-        // Evitar más de un punto
-        const partes = valor.split('.');
-        if (partes.length > 2) {
-            valor = partes[0] + '.' + partes.slice(1).join('');
-        }
+            const partes = valor.split('.');
+            if (partes.length > 2) {
+                valor = partes[0] + '.' + partes.slice(1).join('');
+            }
 
-        let [enteros, decimales] = valor.split('.');
+            let [enteros, decimales] = valor.split('.');
 
-        // ❗ Evitar punto como primer carácter
-        if (enteros === '' && valor.startsWith('.')) {
-            enteros = '0';
-        }
+            if (enteros === '' && valor.startsWith('.')) enteros = '0';
+            if (enteros && enteros.length > maxEnteros) enteros = enteros.slice(0, maxEnteros);
 
-        // Limitar enteros
-        if (enteros.length > maxEnteros) {
-            enteros = enteros.slice(0, maxEnteros);
-        }
+            if (decimales !== undefined) {
+                decimales = decimales.slice(0, maxDecimales);
+                valor = `${enteros}.${decimales}`;
+            } else {
+                valor = enteros || '';
+            }
 
-        // Limitar decimales
-        if (decimales !== undefined) {
-            decimales = decimales.slice(0, maxDecimales);
-            valor = `${enteros}.${decimales}`;
-        } else {
-            valor = enteros;
-        }
+            input.value = valor;
+        });
+    }
 
-        input.value = valor;
-    });
-}
-
-
-    // --- 5. INICIALIZACIÓN ---
-
+    // --- INIT ---
     async function init() {
-        inicializarGrafica(); // Crear instancia vacía
-        await cargarDatosDelServidor(); // Llenarla con datos reales
-        // Limitar números financieros
-limitarNumero(inpIngreso, 8, 2);   // Ingreso fijo
-limitarNumero(inpEgreso, 8, 2);    // Egreso fijo
-limitarNumero(inpMetaMonto, 9, 2); // Meta de ahorro
-const inpMovimientoMonto = document.getElementById('trans-amount');
-limitarNumero(inpMovimientoMonto, 8, 2);
+        inicializarGrafica();
+        await cargarDatosDelServidor();
 
-        // Eventos para Datos Fijos
-        // Usamos 'change' en lugar de 'input' para no saturar al servidor con cada tecla
+        limitarNumero(inpIngreso, 8, 2);
+        limitarNumero(inpEgreso, 8, 2);
+        limitarNumero(inpMetaMonto, 9, 2);
+        limitarNumero(document.getElementById('trans-amount'), 8, 2);
+        limitarNumero(inpEditMonto, 8, 2);
+
+        // Llenar categorías iniciales para el formulario de nuevo movimiento
+        llenarCategorias(selCategoria, selTipo.value);
+
+        // Actualizar categorías al cambiar el tipo (nuevo movimiento)
+        selTipo.addEventListener('change', () => {
+            llenarCategorias(selCategoria, selTipo.value);
+        });
+
+        // Actualizar categorías al cambiar el tipo (edición)
+        selEditTipo.addEventListener('change', () => {
+            llenarCategorias(selEditCat, selEditTipo.value);
+        });
+
         [inpIngreso, inpEgreso, inpMetaMonto, inpMetaNombre].forEach(input => {
             input.addEventListener('change', guardarDatosFijos);
         });
 
-        // Eventos UI
         btnPrevMonth.addEventListener('click', () => cambiarMes(-1));
         btnNextMonth.addEventListener('click', () => cambiarMes(1));
         btnCloseModal.addEventListener('click', cerrarModal);
-        window.addEventListener('click', (e) => { if(e.target === modal) cerrarModal(); });
+        window.addEventListener('click', e => { if (e.target === modal) cerrarModal(); });
 
-        // Evento Nuevo Movimiento
         formMovimiento.addEventListener('submit', agregarMovimiento);
 
-        // Evento Logout
-        if(btnLogout) {
-            btnLogout.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
+        // Formulario de edición
+        formEdicion.addEventListener('submit', guardarEdicion);
+        btnEditEliminar.addEventListener('click', eliminarDesdeEdicion);
+
+        if (btnLogout) {
+            btnLogout.addEventListener('click', e => { e.preventDefault(); logout(); });
         }
     }
 
-    // --- 6. LÓGICA UI (CALENDARIO Y GRÁFICAS) ---
-    // (Esta parte es casi idéntica a tu código original, solo usa las variables actualizadas)
-
+    // --- CALENDARIO ---
     function cambiarMes(delta) {
         mesVisualizado += delta;
-        if (mesVisualizado > 11) {
-            mesVisualizado = 0;
-            anioVisualizado++;
-        } else if (mesVisualizado < 0) {
-            mesVisualizado = 11;
-            anioVisualizado--;
-        }
+        if (mesVisualizado > 11) { mesVisualizado = 0; anioVisualizado++; }
+        else if (mesVisualizado < 0) { mesVisualizado = 11; anioVisualizado--; }
         renderizarCalendario();
-        actualizarDashboard(); 
+        actualizarDashboard();
     }
 
     function renderizarCalendario() {
-        gridCalendario.innerHTML = ''; 
-        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        gridCalendario.innerHTML = '';
+        const nombresMeses = [
+            "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+            "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+        ];
         lblMesYear.textContent = `${nombresMeses[mesVisualizado]} ${anioVisualizado}`;
 
         const primerDiaMes = new Date(anioVisualizado, mesVisualizado, 1).getDay();
-        const diasEnMes = new Date(anioVisualizado, mesVisualizado + 1, 0).getDate();
+        const diasEnMes    = new Date(anioVisualizado, mesVisualizado + 1, 0).getDate();
 
         for (let i = 0; i < primerDiaMes; i++) {
             const emptyCell = document.createElement('div');
@@ -277,20 +356,16 @@ limitarNumero(inpMovimientoMonto, 8, 2);
         }
 
         for (let dia = 1; dia <= diasEnMes; dia++) {
-            const celda = document.createElement('div');
-            celda.classList.add('day-cell');
-            
-            // Construir fecha formato YYYY-MM-DD
+            const celda    = document.createElement('div');
             const fechaKey = `${anioVisualizado}-${String(mesVisualizado + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const datosDia = obtenerDatosDia(fechaKey);
-            
-            if (datosDia.colorDia !== 'sin color') {
-                celda.classList.add(`day-${datosDia.colorDia}`);
-            }
+
+            celda.classList.add('day-cell');
+            if (datosDia.colorDia !== 'sin color') celda.classList.add(`day-${datosDia.colorDia}`);
 
             celda.innerHTML = `
                 <span class="day-number">${dia}</span>
-                ${datosDia.balance !== 0 ? `<span class="day-balance-preview">$${datosDia.balance}</span>` : ''}
+                ${datosDia.balance !== 0 ? `<span class="day-balance-preview">$${datosDia.balance.toFixed(2)}</span>` : ''}
             `;
 
             celda.addEventListener('click', () => abrirModal(fechaKey, dia));
@@ -301,9 +376,9 @@ limitarNumero(inpMovimientoMonto, 8, 2);
     function obtenerDatosDia(fecha) {
         const data = movimientosDB.get(fecha) || { ingresos: [], egresos: [] };
         const totalIngresos = data.ingresos.reduce((acc, val) => acc + val.monto, 0);
-        const totalEgresos = data.egresos.reduce((acc, val) => acc + val.monto, 0);
+        const totalEgresos  = data.egresos.reduce((acc, val) => acc + val.monto, 0);
         const balance = totalIngresos - totalEgresos;
-        
+
         let colorDia = 'sin color';
         if (balance > 0) colorDia = 'green';
         else if (balance < 0) colorDia = 'red';
@@ -314,35 +389,32 @@ limitarNumero(inpMovimientoMonto, 8, 2);
 
     function actualizarDashboard() {
         let totalIngresosVariables = 0;
-        let totalEgresosVariables = 0;
+        let totalEgresosVariables  = 0;
 
-        // Recorremos el mapa local para sumar lo que corresponde al mes visualizado
         movimientosDB.forEach((data, fecha) => {
-            const [y, m, d] = fecha.split('-');
+            const [y, m] = fecha.split('-');
             if (parseInt(y) === anioVisualizado && parseInt(m) === (mesVisualizado + 1)) {
                 totalIngresosVariables += data.ingresos.reduce((s, i) => s + i.monto, 0);
-                totalEgresosVariables += data.egresos.reduce((s, e) => s + e.monto, 0);
+                totalEgresosVariables  += data.egresos.reduce((s, e) => s + e.monto, 0);
             }
         });
 
-        const ingresoTotal = datosFijos.ingresoFijo + totalIngresosVariables;
-        const egresoTotal = datosFijos.egresoFijo + totalEgresosVariables;
+        const ingresoTotal  = datosFijos.ingresoFijo + totalIngresosVariables;
+        const egresoTotal   = datosFijos.egresoFijo  + totalEgresosVariables;
         const ahorroMensual = ingresoTotal - egresoTotal;
         const faltaParaMeta = Math.max(0, datosFijos.metaCantidad - ahorroMensual);
 
-        txtAhorro.textContent = `$${ahorroMensual.toFixed(2)}`;
+        txtAhorro.textContent   = `$${ahorroMensual.toFixed(2)}`;
         txtRestante.textContent = `$${faltaParaMeta.toFixed(2)}`;
-        
+
         if (ahorroMensual < 0) {
             txtAhorro.style.color = '#E57373';
-            txtEstado.textContent = "Déficit";
+            txtEstado.textContent = 'Déficit';
         } else {
             txtAhorro.style.color = '#81C784';
-            if (faltaParaMeta === 0 && datosFijos.metaCantidad > 0) {
-                txtEstado.textContent = "¡Meta Alcanzada!";
-            } else {
-                txtEstado.textContent = "En progreso";
-            }
+            txtEstado.textContent = (faltaParaMeta === 0 && datosFijos.metaCantidad > 0)
+                ? '¡Meta Alcanzada!'
+                : 'En progreso';
         }
 
         actualizarGrafica(ingresoTotal, egresoTotal, ahorroMensual);
@@ -377,32 +449,37 @@ limitarNumero(inpMovimientoMonto, 8, 2);
         }
     }
 
-    // --- 7. MODAL Y AGREGAR MOVIMIENTO ---
-
+    // --- MODAL ---
     function abrirModal(fecha, diaNumero) {
         diaSeleccionado = fecha;
         modal.classList.remove('hidden');
         modalTitle.textContent = `Detalle del ${diaNumero}/${mesVisualizado + 1}/${anioVisualizado}`;
+        ocultarFormEdicion();
         actualizarContenidoModal();
     }
 
     function cerrarModal() {
         modal.classList.add('hidden');
         diaSeleccionado = null;
+        ocultarFormEdicion();
     }
 
+    // ========================================
+    // RENDERIZAR LISTA DE MOVIMIENTOS (con lápiz de edición)
+    // ========================================
     function actualizarContenidoModal() {
         const datos = obtenerDatosDia(diaSeleccionado);
-        
-        modalIncome.textContent = `+$${datos.totalIngresos}`;
-        modalExpense.textContent = `-$${datos.totalEgresos}`;
-        modalTotal.textContent = `$${datos.balance}`;
-        modalTotal.className = datos.balance > 0 ? "text-green" : (datos.balance < 0 ? "text-red" : "");
+
+        modalIncome.textContent  = `+$${datos.totalIngresos.toFixed(2)}`;
+        modalExpense.textContent = `-$${datos.totalEgresos.toFixed(2)}`;
+        modalTotal.textContent   = `$${datos.balance.toFixed(2)}`;
+        modalTotal.className     = datos.balance > 0 ? 'text-green' : (datos.balance < 0 ? 'text-red' : '');
 
         listMovimientos.innerHTML = '';
+
         const todosMovs = [
-            ...datos.movimientos.ingresos.map(m => ({...m, tipo: 'ingreso'})),
-            ...datos.movimientos.egresos.map(m => ({...m, tipo: 'egreso'}))
+            ...datos.movimientos.ingresos.map(m => ({ ...m, tipo: 'income' })),
+            ...datos.movimientos.egresos.map(m => ({ ...m, tipo: 'expense' }))
         ];
 
         if (todosMovs.length === 0) {
@@ -410,66 +487,175 @@ limitarNumero(inpMovimientoMonto, 8, 2);
         } else {
             todosMovs.forEach(m => {
                 const li = document.createElement('li');
+                li.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;';
                 li.innerHTML = `
-                    <span>${m.categoria}</span>
-                    <span class="${m.tipo === 'ingreso' ? 'text-green' : 'text-red'}">
-                        ${m.tipo === 'ingreso' ? '+' : '-'}$${m.monto}
+                    <span style="flex:1; font-size:0.9rem; color:#555;">${m.categoria}</span>
+                    <span class="${m.tipo === 'income' ? 'text-green' : 'text-red'}" style="font-weight:bold; margin-right:10px;">
+                        ${m.tipo === 'income' ? '+' : '-'}$${m.monto.toFixed(2)}
                     </span>
+                    <button
+                        class="btn-edit-mov"
+                        data-id="${m.id}"
+                        title="Editar movimiento"
+                        style="
+                            background: none;
+                            border: 1px solid #6585AA;
+                            border-radius: 6px;
+                            color: #6585AA;
+                            cursor: pointer;
+                            padding: 4px 8px;
+                            font-size: 0.85rem;
+                            transition: background 0.2s;
+                        "
+                    >✏️</button>
                 `;
+
+                // Click en lápiz → mostrar formulario de edición
+                li.querySelector('.btn-edit-mov').addEventListener('click', () => {
+                    mostrarFormEdicion(m);
+                });
+
                 listMovimientos.appendChild(li);
             });
         }
-        // (Tu lógica de recomendaciones iría aquí, la omití por brevedad pero puedes pegarla)
     }
 
-async function agregarMovimiento(e) {
-    e.preventDefault();
+    // ========================================
+    // FORMULARIO DE EDICIÓN
+    // ========================================
+    function mostrarFormEdicion(movimiento) {
+        movimientoEnEdicion = movimiento;
 
-    const tipo = document.getElementById('trans-type').value;
-    const categoria = document.getElementById('trans-category').value;
-    const montoRaw = document.getElementById('trans-amount').value;
+        // Rellenar tipo
+        selEditTipo.value = movimiento.tipo;
 
-    // 🔒 Regex blindado: 1 a 8 enteros + 2 decimales
-    const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
+        // Rellenar categorías según tipo y preseleccionar la actual
+        llenarCategorias(selEditCat, movimiento.tipo, movimiento.categoria);
 
-    if (!categoria) {
-        alert('Selecciona una categoría');
-        return;
+        // Rellenar monto
+        inpEditMonto.value = movimiento.monto;
+
+        // Mostrar sección de edición
+        editContainer.style.display = 'block';
+        editContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    if (!montoRegex.test(montoRaw)) {
-        alert('Monto inválido. Máx 8 dígitos y 2 decimales.');
-        return;
+    function ocultarFormEdicion() {
+        editContainer.style.display = 'none';
+        movimientoEnEdicion = null;
+        if (formEdicion) formEdicion.reset();
     }
 
-    const monto = parseFloat(montoRaw);
+    // Guardar cambios del movimiento editado
+    async function guardarEdicion(e) {
+        e.preventDefault();
+        if (!movimientoEnEdicion) return;
 
-    if (monto <= 0) {
-        alert('El monto debe ser mayor a 0');
-        return;
+        const tipo       = selEditTipo.value;
+        const categoria  = selEditCat.value;
+        const montoRaw   = inpEditMonto.value;
+
+        if (!categoria) {
+            alert('Selecciona una categoría.');
+            return;
+        }
+
+        const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
+        if (!montoRegex.test(montoRaw)) {
+            alert('Monto inválido. Máximo 8 dígitos y 2 decimales.');
+            return;
+        }
+
+        const monto = parseFloat(montoRaw);
+        if (monto <= 0) {
+            alert('El monto debe ser mayor a 0.');
+            return;
+        }
+
+        try {
+            const result = await updateMovement(movimientoEnEdicion.id, { tipo, categoria, monto });
+
+            if (result.success) {
+                ocultarFormEdicion();
+                await cargarDatosDelServidor();
+                // Reabrir el modal en el mismo día
+                if (diaSeleccionado) actualizarContenidoModal();
+            } else {
+                alert(result.message || 'Error al actualizar el movimiento.');
+            }
+        } catch (error) {
+            console.error('Error guardando edición:', error);
+            alert('Error de conexión al guardar los cambios.');
+        }
     }
 
-    const movementData = {
-        user_id: userId,
-        fecha: diaSeleccionado,
-        tipo,
-        categoria,
-        monto,
-        descripcion: 'Movimiento desde Dashboard'
-    };
+    // Eliminar desde el formulario de edición
+    async function eliminarDesdeEdicion() {
+        if (!movimientoEnEdicion) return;
 
-    try {
-        await createMovement(movementData);
-        document.getElementById('trans-amount').value = '';
-        await cargarDatosDelServidor();
-        actualizarContenidoModal();
-    } catch (error) {
-        console.error("Error al crear movimiento:", error);
-        alert("No se pudo guardar el movimiento.");
+        if (!confirm('¿Eliminar este movimiento? Esta acción no se puede deshacer.')) return;
+
+        try {
+            const result = await deleteMovement(movimientoEnEdicion.id, userId);
+
+            if (result.success) {
+                ocultarFormEdicion();
+                await cargarDatosDelServidor();
+                if (diaSeleccionado) actualizarContenidoModal();
+            } else {
+                alert(result.message || 'Error al eliminar el movimiento.');
+            }
+        } catch (error) {
+            console.error('Error eliminando movimiento:', error);
+            alert('Error de conexión al eliminar el movimiento.');
+        }
     }
-}
 
+    // --- AGREGAR NUEVO MOVIMIENTO ---
+    async function agregarMovimiento(e) {
+        e.preventDefault();
 
-    // Iniciar
+        const tipo      = document.getElementById('trans-type').value;
+        const categoria = document.getElementById('trans-category').value;
+        const montoRaw  = document.getElementById('trans-amount').value;
+
+        const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
+
+        if (!categoria) {
+            alert('Selecciona una categoría.');
+            return;
+        }
+
+        if (!montoRegex.test(montoRaw)) {
+            alert('Monto inválido. Máx 8 dígitos y 2 decimales.');
+            return;
+        }
+
+        const monto = parseFloat(montoRaw);
+        if (monto <= 0) {
+            alert('El monto debe ser mayor a 0.');
+            return;
+        }
+
+        const movementData = {
+            user_id:     userId,
+            fecha:       diaSeleccionado,
+            tipo,
+            categoria,
+            monto,
+            descripcion: 'Movimiento desde Dashboard'
+        };
+
+        try {
+            await createMovement(movementData);
+            document.getElementById('trans-amount').value = '';
+            await cargarDatosDelServidor();
+            actualizarContenidoModal();
+        } catch (error) {
+            console.error('Error al crear movimiento:', error);
+            alert('No se pudo guardar el movimiento.');
+        }
+    }
+
     init();
 });

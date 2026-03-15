@@ -6,7 +6,6 @@ export const createMovement = async (req, res) => {
     try {
         const { user_id, fecha, tipo, categoria, monto, descripcion } = req.body;
 
-        // 1. Validaciones básicas
         if (
             !user_id ||
             !fecha ||
@@ -20,77 +19,38 @@ export const createMovement = async (req, res) => {
             });
         }
 
-        // 2. 🔥 Validación FUERTE del monto
-        // 🔒 VALIDACIÓN FUERTE DEL MONTO
+        const montoNumerico = Number(monto);
 
-const montoNumerico = Number(monto);
-
-// 1️⃣ Debe ser un número real válido
-if (!Number.isFinite(montoNumerico)) {
-    return res.status(400).json({
-        success: false,
-        message: 'Monto inválido'
-    });
-}
-
-// 2️⃣ Debe ser mayor a 0
-if (montoNumerico <= 0) {
-    return res.status(400).json({
-        success: false,
-        message: 'El monto debe ser mayor a 0.'
-    });
-}
-
-// 3️⃣ Máximo permitido: 8 enteros + 2 decimales
-if (montoNumerico > 99999999.99) {
-    return res.status(400).json({
-        success: false,
-        message: 'El monto es demasiado grande. Máximo permitido: $99,999,999.99'
-    });
-}
-
-
-
-
-        // 3. Crear objeto del movimiento
-        const newMovement = {
-            user_id,
-            fecha,
-            tipo,
-            categoria,
-            descripcion,
-            monto: montoNumerico
-        };
-
-        // 4. Registrar movimiento
-        const createdMovement = await Movement.create(newMovement);
-
-        // 5. Calcular impacto en dashboard_balance
-        let balanceChange = 0;
-
-        if (tipo === 'income') {
-            balanceChange = montoNumerico;
-        } else {
-            balanceChange = -montoNumerico;
+        if (!Number.isFinite(montoNumerico)) {
+            return res.status(400).json({ success: false, message: 'Monto inválido' });
         }
 
-        // 6. Obtener usuario
-        const user = await User.findById(user_id);
-        if (!user) {
-            return res.status(404).json({
+        if (montoNumerico <= 0) {
+            return res.status(400).json({ success: false, message: 'El monto debe ser mayor a 0.' });
+        }
+
+        if (montoNumerico > 99999999.99) {
+            return res.status(400).json({
                 success: false,
-                message: 'Usuario no encontrado.'
+                message: 'El monto es demasiado grande. Máximo permitido: $99,999,999.99'
             });
         }
 
-        // 7. Calcular nuevo balance
+        const newMovement = { user_id, fecha, tipo, categoria, descripcion, monto: montoNumerico };
+        const createdMovement = await Movement.create(newMovement);
+
+        const balanceChange = tipo === 'income' ? montoNumerico : -montoNumerico;
+
+        const user = await User.findById(user_id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado.' });
+        }
+
         const currentBalance = parseFloat(user.dashboard_balance) || 0;
         const newBalance = currentBalance + balanceChange;
 
-        // 8. Actualizar SOLO dashboard_balance
         await User.update(user_id, { dashboard_balance: newBalance });
 
-        // 9. Respuesta
         res.status(201).json({
             success: true,
             message: `Movimiento registrado. Balance actualizado: $${currentBalance.toFixed(2)} → $${newBalance.toFixed(2)}`,
@@ -108,59 +68,107 @@ if (montoNumerico > 99999999.99) {
     }
 };
 
+// --- U: UPDATE MOVEMENT (RECALCULA BALANCE) ---
+export const updateMovement = async (req, res) => {
+    try {
+        const { movementId } = req.params;
+        const { tipo, categoria, monto } = req.body;
+
+        if (!tipo || !monto || (tipo !== 'income' && tipo !== 'expense')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tipo (income/expense), categoría y monto son obligatorios.'
+            });
+        }
+
+        const montoNumerico = Number(monto);
+
+        if (!Number.isFinite(montoNumerico) || montoNumerico <= 0) {
+            return res.status(400).json({ success: false, message: 'Monto inválido. Debe ser mayor a 0.' });
+        }
+
+        if (montoNumerico > 99999999.99) {
+            return res.status(400).json({
+                success: false,
+                message: 'El monto es demasiado grande. Máximo: $99,999,999.99'
+            });
+        }
+
+        // Obtener movimiento original
+        const oldMovement = await Movement.findById(movementId);
+        if (!oldMovement) {
+            return res.status(404).json({ success: false, message: 'Movimiento no encontrado.' });
+        }
+
+        // Obtener usuario
+        const user = await User.findById(oldMovement.user_id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado.' });
+        }
+
+        // Calcular delta de balance: revertir efecto anterior + aplicar nuevo
+        const oldEffect = oldMovement.tipo === 'income'
+            ? parseFloat(oldMovement.monto)
+            : -parseFloat(oldMovement.monto);
+
+        const newEffect = tipo === 'income' ? montoNumerico : -montoNumerico;
+        const delta = newEffect - oldEffect;
+
+        const currentBalance = parseFloat(user.dashboard_balance) || 0;
+        const newBalance = currentBalance + delta;
+
+        // Actualizar movimiento en BD
+        const updated = await Movement.update(movementId, { tipo, categoria, monto: montoNumerico });
+
+        // Actualizar balance del usuario
+        await User.update(oldMovement.user_id, { dashboard_balance: newBalance });
+
+        res.json({
+            success: true,
+            message: 'Movimiento actualizado correctamente.',
+            data: updated,
+            new_balance: newBalance
+        });
+
+    } catch (error) {
+        console.error('Error al actualizar movimiento:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error en el servidor al actualizar movimiento.',
+            error: error.message
+        });
+    }
+};
+
 // --- D: DELETE MOVEMENT (REVERSA BALANCE DASHBOARD) ---
 export const deleteMovement = async (req, res) => {
     try {
         const { movementId } = req.params;
 
         if (!movementId) {
-            return res.status(400).json({
-                success: false,
-                message: 'ID del movimiento requerido.'
-            });
+            return res.status(400).json({ success: false, message: 'ID del movimiento requerido.' });
         }
 
-        // 1. Buscar el movimiento
         const movement = await Movement.findById(movementId);
-
         if (!movement) {
-            return res.status(404).json({
-                success: false,
-                message: 'Movimiento no encontrado.'
-            });
+            return res.status(404).json({ success: false, message: 'Movimiento no encontrado.' });
         }
 
-        // 2. Obtener usuario
         const user = await User.findById(movement.user_id);
-
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'Usuario no encontrado.'
-            });
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado.' });
         }
 
-        // 3. Revertir impacto en dashboard_balance
-        let balanceChange = 0;
-
-        if (movement.tipo === 'income') {
-            balanceChange = -parseFloat(movement.monto);
-        } else {
-            balanceChange = parseFloat(movement.monto);
-        }
+        const balanceChange = movement.tipo === 'income'
+            ? -parseFloat(movement.monto)
+            : parseFloat(movement.monto);
 
         const currentBalance = parseFloat(user.dashboard_balance) || 0;
         const newBalance = currentBalance + balanceChange;
 
-        // 4. Actualizar balance
-        await User.update(movement.user_id, {
-            dashboard_balance: newBalance
-        });
-
-        // 5. Eliminar movimiento
+        await User.update(movement.user_id, { dashboard_balance: newBalance });
         await Movement.delete(movementId);
 
-        // 6. Respuesta
         res.json({
             success: true,
             message: 'Movimiento eliminado y balance actualizado.',
@@ -176,52 +184,36 @@ export const deleteMovement = async (req, res) => {
         });
     }
 };
+
 // --- R: GET MOVEMENTS + TOTALS BY USER ---
-// backend/controllers/movementController.js
-
-
 export const getMovementData = async (req, res) => {
     try {
         const { userId } = req.params;
 
         if (!userId) {
-            return res.status(400).json({
-                success: false,
-                message: 'ID de usuario requerido.'
-            });
+            return res.status(400).json({ success: false, message: 'ID de usuario requerido.' });
         }
 
-        // ✅ CAMBIO AQUÍ: usar el método correcto
         const movements = await Movement.findByUserId(userId);
 
-        // 2. Calcular totales
         let totalIncome = 0;
         let totalExpense = 0;
 
         for (const m of movements) {
             const monto = parseFloat(m.monto) || 0;
-
-            if (m.tipo === 'income') {
-                totalIncome += monto;
-            } else if (m.tipo === 'expense') {
-                totalExpense += monto;
-            }
+            if (m.tipo === 'income') totalIncome += monto;
+            else if (m.tipo === 'expense') totalExpense += monto;
         }
 
         const balance = totalIncome - totalExpense;
 
-        // ✅ AÑADIR history al response
         res.json({
             success: true,
             data: {
                 movements,
-                totals: {
-                    income: totalIncome,
-                    expense: totalExpense,
-                    balance
-                }
+                totals: { income: totalIncome, expense: totalExpense, balance }
             },
-            history: movements // ✅ Esto es lo que espera el frontend
+            history: movements
         });
 
     } catch (error) {
