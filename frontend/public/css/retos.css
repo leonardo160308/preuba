@@ -207,3 +207,48 @@ button:hover {
     color: #333;
 }
 
+/* ── AGREGAR AL FINAL DE frontend/public/css/retos.css ────────────────────── */
+
+/* Botón listo para reclamar */
+.btn-claim.ready {
+    background-color: #27ae60;
+    border-color: #27ae60;
+    color: #ffffff;
+    font-weight: 700;
+    animation: pulse-green 1.5s ease-in-out infinite;
+}
+.btn-claim.ready:hover {
+    background-color: #1e8449;
+    border-color: #1e8449;
+}
+
+/* Botón ya reclamado */
+.btn-claim.claimed {
+    background-color: #7f8c8d;
+    border-color: #7f8c8d;
+    color: #ffffff;
+    cursor: default;
+    opacity: 0.75;
+}
+
+/* Tarjeta completada / reclamada */
+.challenge-card.completed {
+    opacity: 0.8;
+}
+.challenge-card.completed .progress-fill {
+    background: #27ae60;
+}
+
+/* Tarjeta lista para reclamar */
+.challenge-card.claimable {
+    border-left: 4px solid #27ae60;
+}
+.challenge-card.claimable .progress-fill {
+    background: #27ae60;
+}
+
+/* Animación pulso para botón listo */
+@keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+}

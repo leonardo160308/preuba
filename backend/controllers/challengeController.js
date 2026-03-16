@@ -1,7 +1,20 @@
 import { supabase } from '../config/supabase.js';
 import User from '../models/UserModel.js';
 
-// Obtener el inicio y fin del mes actual en formato ISO
+// ==========================================
+// RECOMPENSAS REALES POR RETO
+// ==========================================
+const CHALLENGE_REWARDS = {
+    1: 5,  2: 5,  3: 5,  4: 5,  5: 5,
+    6: 6,  7: 6,  8: 6,  9: 6,  10: 6,
+    11: 6, 12: 6, 13: 6, 14: 6, 15: 6,
+    16: 6, 17: 6, 18: 6, 19: 6, 20: 6,
+    21: 9, 22: 9, 23: 9, 24: 9,
+    25: 9, 26: 9, 27: 9, 28: 9,
+    29: 9, 30: 9
+};
+
+// Obtener inicio y fin del mes actual
 const getMonthRange = () => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -10,138 +23,152 @@ const getMonthRange = () => {
 };
 
 // ==========================================
-// FUNCIÓN AUXILIAR: REGLAS DEL JUEGO
+// FUNCIÓN PURA: CALCULA PROGRESO
+// Recibe movimientos ya cargados (sin llamada a DB)
+// Devuelve { current, required }
 // ==========================================
-const checkCompletionCriteria = async (userId, challengeId) => {
-    try {
-        // Traer todos los movimientos del usuario (para cálculos en JS)
-        const { data: allMovements } = await supabase
-            .from('movements')
-            .select('*')
-            .eq('user_id', userId);
+const computeProgress = (movements, monthMovements, challengeId) => {
+    const id = challengeId;
 
-        const movements = allMovements || [];
-        const { start, end } = getMonthRange();
-
-        // Movimientos del mes actual
-        const monthMovements = movements.filter(m => m.fecha >= start && m.fecha <= end);
-
-        // ==========================================
-        // RETOS DE CANTIDAD DE MOVIMIENTOS TOTALES
-        // ==========================================
-        if ([1, 2, 3, 6, 7, 8, 9, 10].includes(challengeId)) {
-            const required = { 1: 1, 2: 5, 3: 7, 6: 15, 7: 25, 8: 40, 9: 60, 10: 100 };
-            return movements.length >= required[challengeId];
-        }
-
-        // ==========================================
-        // RETO 4: Primer ahorro
-        // ==========================================
-        if (challengeId === 4) {
-            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Ahorro').length >= 1;
-        }
-
-        // RETOS 11-13: Múltiples ahorros
-        if ([11, 12, 13].includes(challengeId)) {
-            const required = { 11: 3, 12: 5, 13: 10 };
-            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Ahorro').length >= required[challengeId];
-        }
-
-        // RETOS 14-15: Ahorro acumulado en el mes
-        if ([14, 15].includes(challengeId)) {
-            const required = { 14: 500, 15: 1000 };
-            const total = monthMovements
-                .filter(m => m.tipo === 'income' && m.categoria === 'Ahorro')
-                .reduce((sum, m) => sum + parseFloat(m.monto), 0);
-            return total >= required[challengeId];
-        }
-
-        // ==========================================
-        // RETO 5: BALANCE POSITIVO EN EL MES
-        // ==========================================
-        if (challengeId === 5) {
-            const balance = monthMovements.reduce((sum, m) => {
-                const monto = parseFloat(m.monto);
-                return m.tipo === 'income' ? sum + monto : sum - monto;
-            }, 0);
-            return balance > 0;
-        }
-
-        // ==========================================
-        // RETOS DE CATEGORÍAS ESPECÍFICAS
-        // ==========================================
-        if (challengeId === 16) {
-            return movements.filter(m => m.categoria && m.categoria.includes('Vivienda')).length >= 1;
-        }
-        if (challengeId === 17) {
-            return movements.filter(m => m.categoria === 'Alimentación').length >= 5;
-        }
-        if (challengeId === 18) {
-            return movements.filter(m => m.categoria === 'Transporte').length >= 5;
-        }
-        if (challengeId === 19) {
-            return movements.filter(m => m.categoria === 'Servicios').length >= 3;
-        }
-        if (challengeId === 20) {
-            const categorias = new Set(movements.map(m => m.categoria).filter(Boolean));
-            return categorias.size >= 5;
-        }
-
-        // ==========================================
-        // RETOS DE INGRESOS
-        // ==========================================
-        if (challengeId === 21) {
-            return movements.filter(m => m.tipo === 'income' && m.categoria === 'Salario').length >= 1;
-        }
-        if (challengeId === 22) {
-            return movements.filter(m => m.tipo === 'income' && ['Freelance', 'Ventas'].includes(m.categoria)).length >= 1;
-        }
-        if (challengeId === 23) {
-            return movements.filter(m => m.categoria === 'Inversiones').length >= 1;
-        }
-        if (challengeId === 24) {
-            const fuentes = new Set(
-                movements
-                    .filter(m => m.tipo === 'income' && ['Salario', 'Freelance', 'Ventas', 'Inversiones'].includes(m.categoria))
-                    .map(m => m.categoria)
-            );
-            return fuentes.size >= 3;
-        }
-
-        // ==========================================
-        // RETOS DE BALANCE
-        // ==========================================
-        if ([25, 26, 27, 28].includes(challengeId)) {
-            const required = { 25: 0, 26: 100, 27: 500, 28: 1000 };
-            const balance = monthMovements.reduce((sum, m) => {
-                const monto = parseFloat(m.monto);
-                return m.tipo === 'income' ? sum + monto : sum - monto;
-            }, 0);
-
-            if (challengeId === 25) return Math.abs(balance) < 10;
-            return balance >= required[challengeId];
-        }
-
-        // ==========================================
-        // RETOS ESPECIALES
-        // ==========================================
-        if (challengeId === 29) {
-            return movements.filter(m => m.categoria === 'Educación').length >= 1;
-        }
-        if (challengeId === 30) {
-            return movements.filter(m => m.categoria === 'Salud').length >= 1;
-        }
-
-        return false;
-
-    } catch (error) {
-        console.error('Error validando criterio:', error);
-        return false;
+    // ── CANTIDAD TOTAL DE MOVIMIENTOS ──────────────────────────────────────
+    const totalMap = { 1: 1, 2: 5, 3: 7, 6: 15, 7: 25, 8: 40, 9: 60, 10: 100 };
+    if (totalMap[id] !== undefined) {
+        const req = totalMap[id];
+        return { current: Math.min(movements.length, req), required: req };
     }
+
+    // ── RETO 4: PRIMER INGRESO ─────────────────────────────────────────────
+    if (id === 4) {
+        const c = movements.filter(m => m.tipo === 'income').length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 5: BALANCE POSITIVO EN EL MES ────────────────────────────────
+    if (id === 5) {
+        const bal = monthMovements.reduce((s, m) =>
+            m.tipo === 'income' ? s + parseFloat(m.monto) : s - parseFloat(m.monto), 0);
+        return { current: bal > 0 ? 1 : 0, required: 1 };
+    }
+
+    // ── RETOS 11-13: CONTEO DE INGRESOS ───────────────────────────────────
+    const incomeCountMap = { 11: 3, 12: 5, 13: 10 };
+    if (incomeCountMap[id] !== undefined) {
+        const req = incomeCountMap[id];
+        const c = movements.filter(m => m.tipo === 'income').length;
+        return { current: Math.min(c, req), required: req };
+    }
+
+    // ── RETOS 14-15: TOTAL DE INGRESOS EN EL MES ──────────────────────────
+    if (id === 14 || id === 15) {
+        const req = id === 14 ? 500 : 1000;
+        const total = monthMovements
+            .filter(m => m.tipo === 'income')
+            .reduce((s, m) => s + parseFloat(m.monto), 0);
+        return { current: parseFloat(Math.min(total, req).toFixed(2)), required: req };
+    }
+
+    // ── RETO 16: RENTA / HIPOTECA ─────────────────────────────────────────
+    if (id === 16) {
+        const c = movements.filter(m => m.categoria === 'Renta / Hipoteca').length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 17: ALIMENTACIÓN (5 movs) ───────────────────────────────────
+    if (id === 17) {
+        const cats = ['Supermercado', 'Restaurantes', 'Comida rápida', 'Delivery', 'Café / Snacks'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 5), required: 5 };
+    }
+
+    // ── RETO 18: TRANSPORTE (5 movs) ──────────────────────────────────────
+    if (id === 18) {
+        const cats = ['Gasolina', 'Transporte público', 'Taxi / Uber', 'Estacionamiento', 'Peajes', 'Mantenimiento del vehículo'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 5), required: 5 };
+    }
+
+    // ── RETO 19: SERVICIOS DEL HOGAR (3 movs) ────────────────────────────
+    if (id === 19) {
+        const cats = ['Electricidad', 'Agua', 'Gas', 'Internet'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 3), required: 3 };
+    }
+
+    // ── RETO 20: 5 CATEGORÍAS DISTINTAS ───────────────────────────────────
+    if (id === 20) {
+        const cats = new Set(movements.map(m => m.categoria).filter(Boolean));
+        return { current: Math.min(cats.size, 5), required: 5 };
+    }
+
+    // ── RETO 21: PRIMER SALARIO ────────────────────────────────────────────
+    if (id === 21) {
+        const c = movements.filter(m => m.tipo === 'income' && m.categoria === 'Salario').length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 22: INGRESOS EXTRA ───────────────────────────────────────────
+    if (id === 22) {
+        const cats = ['Freelance', 'Ventas', 'Trabajo extra', 'Comisiones', 'Propinas', 'Negocio propio', 'Ingresos online'];
+        const c = movements.filter(m => m.tipo === 'income' && cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 23: INVERSIONES ──────────────────────────────────────────────
+    if (id === 23) {
+        const cats = ['Inversiones', 'Dividendos', 'Intereses'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 24: 3 FUENTES DE INGRESO DISTINTAS ───────────────────────────
+    if (id === 24) {
+        const incomeCats = [
+            'Salario', 'Trabajo extra', 'Freelance', 'Comisiones', 'Propinas',
+            'Ventas', 'Negocio propio', 'Ingresos online', 'Intereses', 'Dividendos', 'Inversiones'
+        ];
+        const fuentes = new Set(
+            movements
+                .filter(m => m.tipo === 'income' && incomeCats.includes(m.categoria))
+                .map(m => m.categoria)
+        );
+        return { current: Math.min(fuentes.size, 3), required: 3 };
+    }
+
+    // ── RETO 25: MES EQUILIBRADO (±$10) ──────────────────────────────────
+    if (id === 25) {
+        const bal = monthMovements.reduce((s, m) =>
+            m.tipo === 'income' ? s + parseFloat(m.monto) : s - parseFloat(m.monto), 0);
+        return { current: Math.abs(bal) < 10 ? 1 : 0, required: 1 };
+    }
+
+    // ── RETOS 26-28: BALANCE POSITIVO EN EL MES ───────────────────────────
+    if (id === 26 || id === 27 || id === 28) {
+        const reqMap = { 26: 100, 27: 500, 28: 1000 };
+        const req = reqMap[id];
+        const bal = monthMovements.reduce((s, m) =>
+            m.tipo === 'income' ? s + parseFloat(m.monto) : s - parseFloat(m.monto), 0);
+        return { current: parseFloat(Math.min(Math.max(bal, 0), req).toFixed(2)), required: req };
+    }
+
+    // ── RETO 29: EDUCACIÓN ────────────────────────────────────────────────
+    if (id === 29) {
+        const cats = ['Cursos', 'Libros', 'Material escolar'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    // ── RETO 30: SALUD ────────────────────────────────────────────────────
+    if (id === 30) {
+        const cats = ['Medicamentos', 'Consultas médicas', 'Seguro médico', 'Gimnasio'];
+        const c = movements.filter(m => cats.includes(m.categoria)).length;
+        return { current: Math.min(c, 1), required: 1 };
+    }
+
+    return { current: 0, required: 1 };
 };
 
 // ==========================================
-// 1. GET: Obtener retos completados del usuario
+// 1. GET: Retos completados (claimed)
 // ==========================================
 export const getChallenges = async (req, res) => {
     try {
@@ -165,50 +192,89 @@ export const getChallenges = async (req, res) => {
 };
 
 // ==========================================
-// 2. POST: Reclamar un reto
+// 2. GET: Progreso real de todos los retos
+// ==========================================
+export const getAllChallengesProgress = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Una sola consulta a DB para calcular todos los retos
+        const { data: allMovements, error } = await supabase
+            .from('movements')
+            .select('*')
+            .eq('user_id', userId);
+
+        if (error) throw error;
+
+        const movements = allMovements || [];
+        const { start, end } = getMonthRange();
+        const monthMovements = movements.filter(m => m.fecha >= start && m.fecha <= end);
+
+        const progress = {};
+        for (let id = 1; id <= 30; id++) {
+            const p = computeProgress(movements, monthMovements, id);
+            progress[id] = {
+                current: p.current,
+                required: p.required,
+                percentage: Math.min(100, Math.round((p.current / p.required) * 100))
+            };
+        }
+
+        res.json({ success: true, progress });
+
+    } catch (error) {
+        console.error('Error en getAllChallengesProgress:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener progreso de retos.' });
+    }
+};
+
+// ==========================================
+// 3. POST: Reclamar un reto
 // ==========================================
 export const claimChallenge = async (req, res) => {
     const { userId, challengeId } = req.body;
+    const cId = parseInt(challengeId);
 
     try {
-        // Info del reto (puedes tener una tabla "challenges" o usar valores por defecto)
-        const challenge = {
-            id: challengeId,
-            reward_currency: 'wood',
-            reward_amount: 10
-        };
-
         // Verificar si ya fue reclamado
         const { data: existing } = await supabase
             .from('user_challenges')
             .select('claimed')
             .eq('user_id', userId)
-            .eq('challenge_id', challengeId)
+            .eq('challenge_id', cId)
             .single();
 
         if (existing && existing.claimed) {
             return res.status(400).json({ success: false, message: '¡Ya reclamaste este reto anteriormente!' });
         }
 
-        // Validar requisitos
-        const cumpleRequisitos = await checkCompletionCriteria(userId, parseInt(challengeId));
+        // Cargar movimientos y validar progreso
+        const { data: allMovements } = await supabase
+            .from('movements')
+            .select('*')
+            .eq('user_id', userId);
 
-        if (!cumpleRequisitos) {
+        const movements = allMovements || [];
+        const { start, end } = getMonthRange();
+        const monthMovements = movements.filter(m => m.fecha >= start && m.fecha <= end);
+
+        const prog = computeProgress(movements, monthMovements, cId);
+        const cumple = prog.current >= prog.required;
+
+        if (!cumple) {
+            const pct = Math.round((prog.current / prog.required) * 100);
             return res.status(400).json({
                 success: false,
-                message: 'Aún no cumples los requisitos de este reto. ¡Revisa tus movimientos!'
+                message: `Aún no cumples los requisitos. Progreso: ${pct}% (${prog.current} / ${prog.required}).`
             });
         }
 
+        // Recompensa correcta según el reto
+        const rewardAmount = CHALLENGE_REWARDS[cId] || 5;
+
         // Actualizar recursos del usuario
         const user = await User.findById(userId);
-        let updateData = {};
-
-        if (challenge.reward_currency === 'wood') {
-            updateData.wood = (user.wood || 0) + challenge.reward_amount;
-        } else {
-            updateData.coins = (user.coins || 0) + challenge.reward_amount;
-        }
+        const updateData = { wood: (user.wood || 0) + rewardAmount };
 
         const { error: userError } = await supabase
             .from('users')
@@ -217,24 +283,23 @@ export const claimChallenge = async (req, res) => {
 
         if (userError) throw userError;
 
-        // Registrar reto como completado (upsert)
+        // Registrar reto como completado
         const { error: challengeError } = await supabase
             .from('user_challenges')
             .upsert({
                 user_id: userId,
-                challenge_id: challengeId,
+                challenge_id: cId,
                 claimed: true,
                 claimed_at: new Date().toISOString()
             }, { onConflict: 'user_id,challenge_id' });
 
         if (challengeError) throw challengeError;
 
-        // Obtener nuevos saldos
         const updatedUser = await User.findById(userId);
 
         res.json({
             success: true,
-            message: `¡Reto completado! Ganaste ${challenge.reward_amount} de ${challenge.reward_currency === 'wood' ? 'Madera 🪵' : 'Monedas 🪙'}.`,
+            message: `¡Reto completado! Ganaste ${rewardAmount} Madera 🪵`,
             new_stats: { coins: updatedUser.coins, wood: updatedUser.wood }
         });
 

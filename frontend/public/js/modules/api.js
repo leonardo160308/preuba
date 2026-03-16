@@ -285,3 +285,14 @@ export async function purchaseSkin(userId, skinId, cost, currency) {
         throw error;
     }
 }
+
+export async function getChallengesProgress(userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/challenges/progress/${userId}`);
+        if (!response.ok) throw new Error('No se pudo obtener el progreso de los retos.');
+        return await response.json();
+    } catch (error) {
+        console.error('Error obteniendo progreso de retos:', error);
+        return { success: false, progress: {} };
+    }
+}

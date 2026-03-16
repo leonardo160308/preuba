@@ -1,130 +1,107 @@
 /* assets/js/data/challenges.js */
 
 export const challengesData = [
+
     // ==========================================
-    // NIVEL PRINCIPIANTE (Fáciles)
+    // NIVEL PRINCIPIANTE
     // ==========================================
     {
         id: 1,
         title: "Primer Registro",
         description: "Registra tu primer movimiento financiero en el dashboard.",
-        reward_wood: 5,
-        required_data: "1_movements"
+        reward_wood: 5
     },
     {
         id: 2,
         title: "Semana Organizada",
-        description: "Registra al menos 5 movimientos en una semana.",
-        reward_wood: 5,
-        required_data: "5_movements"
+        description: "Registra al menos 5 movimientos en total.",
+        reward_wood: 5
     },
     {
         id: 3,
         title: "Control Semanal",
-        description: "Registra al menos 7 movimientos (uno por día durante una semana).",
-              reward_wood: 5,
-
-        required_data: "7_movements"
+        description: "Registra al menos 7 movimientos en total.",
+        reward_wood: 5
     },
     {
         id: 4,
-        title: "Primer Ahorro",
-        description: "Registra tu primer ingreso en la categoría 'Ahorro'.",
-             reward_wood: 5,
-
-        required_data: "first_ahorro"
+        title: "Primer Ingreso",
+        description: "Registra tu primer ingreso de cualquier categoría.",
+        reward_wood: 5
     },
     {
         id: 5,
         title: "Balance Positivo",
         description: "Logra que tus ingresos superen tus gastos en el mes actual.",
-             reward_wood: 5,
-        required_data: "positive_balance"
+        reward_wood: 5
     },
 
     // ==========================================
-    // NIVEL INTERMEDIO (Moderados)
+    // NIVEL INTERMEDIO
     // ==========================================
     {
         id: 6,
         title: "Registrador Activo",
         description: "Registra al menos 15 movimientos en total.",
-   reward_wood: 6,
-        required_data: "15_movements"
+        reward_wood: 6
     },
     {
         id: 7,
         title: "Experto en Registros",
         description: "Alcanza 25 movimientos registrados en total.",
-   reward_wood: 6,
-        required_data: "25_movements"
+        reward_wood: 6
     },
     {
         id: 8,
         title: "Controlador Financiero",
         description: "Registra 40 movimientos en total.",
-reward_wood: 6,
-
-        required_data: "40_movements"
+        reward_wood: 6
     },
     {
         id: 9,
         title: "Maestro de las Finanzas",
         description: "Logra registrar 60 movimientos en total.",
-reward_wood: 6,
-
-        required_data: "60_movements"
+        reward_wood: 6
     },
     {
         id: 10,
         title: "Gurú Financiero",
         description: "Registra 100 movimientos en total.",
-reward_wood: 6,
-
-        required_data: "100_movements"
+        reward_wood: 6
     },
 
     // ==========================================
-    // RETOS DE AHORRO
+    // RETOS DE INGRESOS
     // ==========================================
     {
         id: 11,
-        title: "Ahorrador Novato",
-        description: "Registra 3 ingresos en la categoría 'Ahorro'.",
-    reward_wood: 6,
-
-        required_data: "3_ahorros"
+        title: "Generador de Ingresos",
+        description: "Registra 3 ingresos de cualquier categoría.",
+        reward_wood: 6
     },
     {
         id: 12,
-        title: "Ahorrador Consistente",
-        description: "Registra 5 ingresos en la categoría 'Ahorro'.",
-     reward_wood: 6,
-
-        required_data: "5_ahorros"
+        title: "Ingresos Constantes",
+        description: "Registra 5 ingresos de cualquier categoría.",
+        reward_wood: 6
     },
     {
         id: 13,
-        title: "Ahorrador Experto",
-        description: "Registra 10 ingresos en la categoría 'Ahorro'.",
-reward_wood: 6,
-
-        required_data: "10_ahorros"
+        title: "Flujo de Ingresos",
+        description: "Registra 10 ingresos de cualquier categoría.",
+        reward_wood: 6
     },
     {
         id: 14,
-        title: "Ahorrador Maestro",
-        description: "Acumula $500 o más en movimientos de 'Ahorro' en el mes actual.",
-  reward_wood: 6,
-
-        required_data: "500_ahorro_mes"
+        title: "Mes Productivo",
+        description: "Acumula $500 o más en ingresos durante el mes actual.",
+        reward_wood: 6
     },
     {
         id: 15,
-        title: "Ahorrador Legendario",
-        description: "Acumula $1000 o más en movimientos de 'Ahorro' en el mes actual.",
-    reward_wood: 6,
-        required_data: "1000_ahorro_mes"
+        title: "Gran Mes de Ingresos",
+        description: "Acumula $1,000 o más en ingresos durante el mes actual.",
+        reward_wood: 6
     },
 
     // ==========================================
@@ -133,69 +110,60 @@ reward_wood: 6,
     {
         id: 16,
         title: "Control de Vivienda",
-        description: "Registra tu gasto de renta/vivienda del mes.",
-        reward_wood: 6,
-        required_data: "vivienda_expense"
+        description: "Registra un gasto en 'Renta / Hipoteca'.",
+        reward_wood: 6
     },
     {
         id: 17,
         title: "Control de Alimentación",
-        description: "Registra al menos 5 gastos de alimentación.",
-        reward_wood: 6,
-        required_data: "5_alimentacion"
+        description: "Registra al menos 5 gastos de comida (Supermercado, Restaurantes, Comida rápida, Delivery o Café / Snacks).",
+        reward_wood: 6
     },
     {
         id: 18,
         title: "Control de Transporte",
-        description: "Registra 5 gastos de transporte.",
-        reward_wood: 6,
-        required_data: "5_transporte"
+        description: "Registra 5 gastos de transporte (Gasolina, Transporte público, Taxi / Uber, Estacionamiento o Peajes).",
+        reward_wood: 6
     },
     {
         id: 19,
         title: "Control de Servicios",
-        description: "Registra tus gastos de servicios (luz, agua, internet, etc.).",
-        reward_wood: 6,
-        required_data: "3_servicios"
+        description: "Registra 3 gastos de servicios del hogar (Electricidad, Agua, Gas o Internet).",
+        reward_wood: 6
     },
     {
         id: 20,
         title: "Gastos Diversificados",
         description: "Registra movimientos en al menos 5 categorías diferentes.",
-        reward_wood: 6,
-        required_data: "5_categories_used"
+        reward_wood: 6
     },
 
     // ==========================================
-    // RETOS DE INGRESOS
+    // RETOS DE FUENTES DE INGRESO
     // ==========================================
     {
         id: 21,
         title: "Primer Salario Registrado",
         description: "Registra tu primer ingreso en la categoría 'Salario'.",
-        reward_wood: 9,
-        required_data: "first_salario"
+        reward_wood: 9
     },
     {
         id: 22,
         title: "Ingresos Extra",
-        description: "Registra un ingreso en 'Freelance' o 'Ventas'.",
-        reward_wood: 9,
-        required_data: "freelance_or_ventas"
+        description: "Registra un ingreso en Freelance, Ventas, Trabajo extra, Comisiones, Propinas o Negocio propio.",
+        reward_wood: 9
     },
     {
         id: 23,
         title: "Inversionista Inicial",
-        description: "Registra tu primer movimiento en 'Inversiones'.",
-        reward_wood: 9,
-        required_data: "first_inversion"
+        description: "Registra un movimiento en 'Inversiones', 'Dividendos' o 'Intereses'.",
+        reward_wood: 9
     },
     {
         id: 24,
         title: "Múltiples Fuentes de Ingreso",
-        description: "Registra ingresos en al menos 3 categorías diferentes (Salario, Freelance, Ventas, Inversiones).",
-        reward_wood: 9,
-        required_data: "3_income_sources"
+        description: "Registra ingresos en al menos 3 categorías distintas.",
+        reward_wood: 9
     },
 
     // ==========================================
@@ -204,30 +172,26 @@ reward_wood: 6,
     {
         id: 25,
         title: "Mes Equilibrado",
-        description: "Termina el mes con un balance de exactamente $0 (ingresos = gastos).",
-        reward_wood: 9,
-        required_data: "balanced_month"
+        description: "Termina el mes con un balance de exactamente $0 (margen ±$10).",
+        reward_wood: 9
     },
     {
         id: 26,
         title: "Mes Rentable",
         description: "Termina el mes con un balance positivo de $100 o más.",
-        reward_wood: 9,
-        required_data: "100_profit_month"
+        reward_wood: 9
     },
     {
         id: 27,
         title: "Mes Altamente Rentable",
         description: "Termina el mes con un balance positivo de $500 o más.",
-        reward_wood: 9,
-        required_data: "500_profit_month"
+        reward_wood: 9
     },
     {
         id: 28,
         title: "Campeón de Ahorro",
-        description: "Termina el mes con un balance positivo de $1000 o más.",
-        reward_wood: 9,
-        required_data: "1000_profit_month"
+        description: "Termina el mes con un balance positivo de $1,000 o más.",
+        reward_wood: 9
     },
 
     // ==========================================
@@ -236,15 +200,13 @@ reward_wood: 6,
     {
         id: 29,
         title: "Educación Financiera",
-        description: "Registra un gasto en la categoría 'Educación'.",
-        reward_wood: 9,
-        required_data: "educacion_expense"
+        description: "Registra un gasto en 'Cursos', 'Libros' o 'Material escolar'.",
+        reward_wood: 9
     },
     {
         id: 30,
         title: "Cuida tu Salud",
-        description: "Registra un gasto en la categoría 'Salud'.",
-        reward_wood: 9,
-        required_data: "salud_expense"
+        description: "Registra un gasto en 'Medicamentos', 'Consultas médicas', 'Seguro médico' o 'Gimnasio'.",
+        reward_wood: 9
     }
 ];
