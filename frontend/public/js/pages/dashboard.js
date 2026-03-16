@@ -15,83 +15,26 @@ import {
     logout
 } from '../modules/auth.js';
 
-// ========================================
-// CATEGORÍAS POR TIPO DE MOVIMIENTO
-// ========================================
 const CATEGORIAS = {
     income: [
-        "Salario",
-        "Trabajo extra",
-        "Freelance",
-        "Comisiones",
-        "Propinas",
-        "Ventas",
-        "Negocio propio",
-        "Ingresos online",
-        "Publicidad",
-        "Intereses",
-        "Dividendos",
-        "Inversiones",
-        "Renta recibida",
-        "Premios o sorteos",
-        "Beca",
-        "Apoyo familiar",
-        "Reembolso",
-        "Devoluciones",
-        "Bonos",
-        "Otros ingresos"
+        "Salario","Trabajo extra","Freelance","Comisiones","Propinas","Ventas",
+        "Negocio propio","Ingresos online","Publicidad","Intereses","Dividendos",
+        "Inversiones","Renta recibida","Premios o sorteos","Beca","Apoyo familiar",
+        "Reembolso","Devoluciones","Bonos","Otros ingresos"
     ],
     expense: [
-        "Renta / Hipoteca",
-        "Electricidad",
-        "Agua",
-        "Gas",
-        "Internet",
-        "Mantenimiento del hogar",
-        "Supermercado",
-        "Restaurantes",
-        "Comida rápida",
-        "Delivery",
-        "Café / Snacks",
-        "Gasolina",
-        "Transporte público",
-        "Taxi / Uber",
-        "Estacionamiento",
-        "Peajes",
-        "Mantenimiento del vehículo",
-        "Ropa",
-        "Calzado",
-        "Tecnología",
-        "Electrónica",
-        "Accesorios",
-        "Videojuegos",
-        "Streaming",
-        "Cine",
-        "Eventos",
-        "Hobbies",
-        "Cursos",
-        "Libros",
-        "Material escolar",
-        "Medicamentos",
-        "Consultas médicas",
-        "Seguro médico",
-        "Gimnasio",
-        "Pago de tarjeta",
-        "Préstamos",
-        "Comisiones bancarias",
-        "Mascotas",
-        "Regalos",
-        "Donaciones",
-        "Viajes",
-        "Imprevistos",
-        "Suscripciones",
-        "Otros gastos"
+        "Renta / Hipoteca","Electricidad","Agua","Gas","Internet",
+        "Mantenimiento del hogar","Supermercado","Restaurantes","Comida rápida",
+        "Delivery","Café / Snacks","Gasolina","Transporte público","Taxi / Uber",
+        "Estacionamiento","Peajes","Mantenimiento del vehículo","Ropa","Calzado",
+        "Tecnología","Electrónica","Accesorios","Videojuegos","Streaming","Cine",
+        "Eventos","Hobbies","Cursos","Libros","Material escolar","Medicamentos",
+        "Consultas médicas","Seguro médico","Gimnasio","Pago de tarjeta","Préstamos",
+        "Comisiones bancarias","Mascotas","Regalos","Donaciones","Viajes",
+        "Imprevistos","Suscripciones","Otros gastos"
     ]
 };
 
-// ========================================
-// FUNCIÓN: Llenar un <select> con categorías
-// ========================================
 function llenarCategorias(selectEl, tipo, valorActual = '') {
     const lista = CATEGORIAS[tipo] || [];
     selectEl.innerHTML = '<option value="">-- Selecciona una categoría --</option>';
@@ -115,57 +58,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     let mesVisualizado = fechaActual.getMonth();
     let anioVisualizado = fechaActual.getFullYear();
 
-    let datosFijos = {
-        ingresoFijo: 0,
-        egresoFijo: 0,
-        metaNombre: '',
-        metaCantidad: 0
-    };
-
+    let datosFijos = { ingresoFijo: 0, egresoFijo: 0, metaNombre: '', metaCantidad: 0 };
     let movimientosDB = new Map();
     let chartInstance = null;
     let diaSeleccionado = null;
-
-    // ID del movimiento que se está editando actualmente
     let movimientoEnEdicion = null;
+
+    // ─── TIPO DE GRÁFICO ACTIVO (1, 2 o 3) ───────────────────────────────
+    let currentChartType = 1;
 
     // --- REFERENCIAS AL DOM ---
     const inpIngreso     = document.getElementById('fixed-income');
     const inpEgreso      = document.getElementById('fixed-expense');
     const inpMetaNombre  = document.getElementById('goal-name');
     const inpMetaMonto   = document.getElementById('goal-amount');
-
     const txtAhorro      = document.getElementById('calculated-savings');
     const txtRestante    = document.getElementById('calculated-remaining');
     const txtEstado      = document.getElementById('goal-status');
-
     const lblMesYear     = document.getElementById('current-month-year');
     const gridCalendario = document.getElementById('calendar-grid');
     const btnPrevMonth   = document.getElementById('prev-month');
     const btnNextMonth   = document.getElementById('next-month');
-
     const modal          = document.getElementById('day-modal');
     const btnCloseModal  = document.getElementById('close-modal');
     const formMovimiento = document.getElementById('transaction-form');
-
     const modalTitle     = document.getElementById('modal-date-title');
     const modalIncome    = document.getElementById('day-income');
     const modalExpense   = document.getElementById('day-expense');
     const modalTotal     = document.getElementById('day-total');
     const listMovimientos = document.getElementById('movements-list');
-
-    // Selects de nuevo movimiento
     const selTipo        = document.getElementById('trans-type');
     const selCategoria   = document.getElementById('trans-category');
-
-    // Sección de edición
     const editContainer  = document.getElementById('edit-movement-container');
     const selEditTipo    = document.getElementById('edit-trans-type');
     const selEditCat     = document.getElementById('edit-trans-category');
     const inpEditMonto   = document.getElementById('edit-trans-amount');
     const formEdicion    = document.getElementById('edit-transaction-form');
     const btnEditEliminar = document.getElementById('edit-btn-delete');
-
     const btnLogout = document.getElementById('logout-btn') || document.querySelector('.btn-logout');
 
     // --- CARGA INICIAL ---
@@ -186,14 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
                 actualizarInputsFijos();
             }
-
             if (movementsResponse.success) {
                 procesarMovimientosParaMap(movementsResponse.history);
             }
-
             actualizarDashboard();
             renderizarCalendario();
-
         } catch (error) {
             console.error('Error cargando dashboard:', error);
             alert('Error al cargar tus datos. Revisa tu conexión.');
@@ -201,40 +127,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function actualizarInputsFijos() {
-        inpIngreso.value     = datosFijos.ingresoFijo  || '';
-        inpEgreso.value      = datosFijos.egresoFijo   || '';
-        inpMetaNombre.value  = datosFijos.metaNombre   || '';
-        inpMetaMonto.value   = datosFijos.metaCantidad || '';
+        inpIngreso.value    = datosFijos.ingresoFijo  || '';
+        inpEgreso.value     = datosFijos.egresoFijo   || '';
+        inpMetaNombre.value = datosFijos.metaNombre   || '';
+        inpMetaMonto.value  = datosFijos.metaCantidad || '';
     }
 
-    // Guarda id, tipo y categoria para poder editar/eliminar
     function procesarMovimientosParaMap(listaMovimientos) {
         movimientosDB = new Map();
-
         listaMovimientos.forEach(mov => {
             const fechaKey = mov.fecha.split('T')[0];
-
             if (!movimientosDB.has(fechaKey)) {
                 movimientosDB.set(fechaKey, { ingresos: [], egresos: [] });
             }
-
             const diaData = movimientosDB.get(fechaKey);
-            const item = {
-                id:        mov.id,
-                categoria: mov.categoria,
-                monto:     parseFloat(mov.monto),
-                tipo:      mov.tipo
-            };
-
-            if (mov.tipo === 'income') {
-                diaData.ingresos.push(item);
-            } else {
-                diaData.egresos.push(item);
-            }
+            const item = { id: mov.id, categoria: mov.categoria, monto: parseFloat(mov.monto), tipo: mov.tipo };
+            if (mov.tipo === 'income') diaData.ingresos.push(item);
+            else diaData.egresos.push(item);
         });
     }
 
-    // --- GUARDAR DATOS FIJOS ---
     async function guardarDatosFijos() {
         const payload = {
             ingreso_fijo:  parseFloat(inpIngreso.value)   || 0,
@@ -242,7 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             meta_nombre:   inpMetaNombre.value             || '',
             meta_cantidad: parseFloat(inpMetaMonto.value) || 0
         };
-
         datosFijos = {
             ingresoFijo:  payload.ingreso_fijo,
             egresoFijo:   payload.egreso_fijo,
@@ -250,7 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             metaCantidad: payload.meta_cantidad
         };
         actualizarDashboard();
-
         try {
             await updateGoal(userId, payload);
         } catch (error) {
@@ -258,34 +168,274 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- VALIDACIÓN DE INPUTS NUMÉRICOS ---
     function limitarNumero(input, maxEnteros, maxDecimales = 2) {
         input.addEventListener('input', () => {
             let valor = input.value;
             valor = valor.replace(/[^\d.]/g, '');
-
             const partes = valor.split('.');
-            if (partes.length > 2) {
-                valor = partes[0] + '.' + partes.slice(1).join('');
-            }
-
+            if (partes.length > 2) valor = partes[0] + '.' + partes.slice(1).join('');
             let [enteros, decimales] = valor.split('.');
-
             if (enteros === '' && valor.startsWith('.')) enteros = '0';
             if (enteros && enteros.length > maxEnteros) enteros = enteros.slice(0, maxEnteros);
-
             if (decimales !== undefined) {
                 decimales = decimales.slice(0, maxDecimales);
                 valor = `${enteros}.${decimales}`;
             } else {
                 valor = enteros || '';
             }
-
             input.value = valor;
         });
     }
 
-    // --- INIT ---
+    // ─────────────────────────────────────────────────────────────────────
+    // HELPERS PARA DATOS DE GRÁFICOS
+    // ─────────────────────────────────────────────────────────────────────
+
+    /** Obtiene todos los movimientos del mes/año visualizado */
+    function getMovimientosMesActual() {
+        const result = { ingresos: [], egresos: [] };
+        movimientosDB.forEach((data, fecha) => {
+            const [y, m] = fecha.split('-');
+            if (parseInt(y) === anioVisualizado && parseInt(m) === (mesVisualizado + 1)) {
+                result.ingresos.push(...data.ingresos);
+                result.egresos.push(...data.egresos);
+            }
+        });
+        return result;
+    }
+
+    /** Datos para Gráfico 1: Balance neto diario */
+    function buildChart1Data() {
+        const diasEnMes = new Date(anioVisualizado, mesVisualizado + 1, 0).getDate();
+        const labels = Array.from({ length: diasEnMes }, (_, i) => String(i + 1));
+        const ingresos = new Array(diasEnMes).fill(0);
+        const egresos  = new Array(diasEnMes).fill(0);
+        const balance  = new Array(diasEnMes).fill(0);
+
+        movimientosDB.forEach((data, fecha) => {
+            const [y, m, d] = fecha.split('-');
+            if (parseInt(y) === anioVisualizado && parseInt(m) === (mesVisualizado + 1)) {
+                const idx = parseInt(d) - 1;
+                const inc = data.ingresos.reduce((s, i) => s + i.monto, 0);
+                const exp = data.egresos.reduce((s, e) => s + e.monto, 0);
+                ingresos[idx] = inc;
+                egresos[idx]  = exp;
+                balance[idx]  = inc - exp;
+            }
+        });
+
+        return { labels, ingresos, egresos, balance };
+    }
+
+    /** Datos para Gráfico 2: Ingresos por categoría */
+    function buildChart2Data() {
+        const { ingresos } = getMovimientosMesActual();
+        const totales = {};
+        ingresos.forEach(mov => {
+            const cat = mov.categoria || 'Otros ingresos';
+            totales[cat] = (totales[cat] || 0) + mov.monto;
+        });
+        const labels = Object.keys(totales);
+        const values = Object.values(totales);
+        return { labels, values };
+    }
+
+    /** Datos para Gráfico 3: Egresos por categoría */
+    function buildChart3Data() {
+        const { egresos } = getMovimientosMesActual();
+        const totales = {};
+        egresos.forEach(mov => {
+            const cat = mov.categoria || 'Otros gastos';
+            totales[cat] = (totales[cat] || 0) + mov.monto;
+        });
+        const labels = Object.keys(totales);
+        const values = Object.values(totales);
+        return { labels, values };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // INICIALIZAR Y ACTUALIZAR GRÁFICO
+    // ─────────────────────────────────────────────────────────────────────
+
+    function inicializarGrafica() {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function actualizarGrafica() {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+
+        if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
+
+        if (currentChartType === 1) {
+            _buildLineChart(ctx);
+        } else if (currentChartType === 2) {
+            _buildBarChartIngresos(ctx);
+        } else {
+            _buildBarChartEgresos(ctx);
+        }
+    }
+
+    function _buildLineChart(ctx) {
+        const { labels, ingresos, egresos, balance } = buildChart1Data();
+
+        const allValues = [...ingresos, ...egresos, ...balance];
+        const maxVal = Math.max(...allValues, 0);
+        const minVal = Math.min(...balance, 0);
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Ingresos',
+                        data: ingresos,
+                        borderColor: '#2e7d32',
+                        backgroundColor: 'rgba(46,125,50,0.08)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Egresos',
+                        data: egresos,
+                        borderColor: '#c62828',
+                        backgroundColor: 'rgba(198,40,40,0.08)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Balance neto',
+                        data: balance,
+                        borderColor: '#1565C0',
+                        backgroundColor: 'rgba(21,101,192,0.08)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Día del mes', font: { size: 12 } },
+                        ticks: { autoSkip: false, maxRotation: 0, font: { size: 10 } }
+                    },
+                    y: {
+                        suggestedMax: maxVal > 0 ? Math.ceil(maxVal * 1.15) : 100,
+                        suggestedMin: minVal < 0 ? Math.floor(minVal * 1.15) : 0,
+                        ticks: {
+                            callback: v => '$' + v.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function _buildBarChartIngresos(ctx) {
+        const { labels, values } = buildChart2Data();
+        const maxVal = Math.max(...values, 0);
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length ? labels : ['Sin datos'],
+                datasets: [{
+                    label: 'Ingresos ($)',
+                    data: values.length ? values : [0],
+                    backgroundColor: 'rgba(46,125,50,0.75)',
+                    borderColor: '#2e7d32',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 30,
+                            font: { size: 10 },
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: maxVal > 0 ? Math.ceil(maxVal * 1.15) : 100,
+                        ticks: {
+                            callback: v => '$' + v.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function _buildBarChartEgresos(ctx) {
+        const { labels, values } = buildChart3Data();
+        const maxVal = Math.max(...values, 0);
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length ? labels : ['Sin datos'],
+                datasets: [{
+                    label: 'Egresos ($)',
+                    data: values.length ? values : [0],
+                    backgroundColor: 'rgba(198,40,40,0.75)',
+                    borderColor: '#c62828',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 30,
+                            font: { size: 10 },
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: maxVal > 0 ? Math.ceil(maxVal * 1.15) : 100,
+                        ticks: {
+                            callback: v => '$' + v.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────────────────────────────
+
     async function init() {
         inicializarGrafica();
         await cargarDatosDelServidor();
@@ -296,18 +446,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         limitarNumero(document.getElementById('trans-amount'), 8, 2);
         limitarNumero(inpEditMonto, 8, 2);
 
-        // Llenar categorías iniciales para el formulario de nuevo movimiento
         llenarCategorias(selCategoria, selTipo.value);
-
-        // Actualizar categorías al cambiar el tipo (nuevo movimiento)
-        selTipo.addEventListener('change', () => {
-            llenarCategorias(selCategoria, selTipo.value);
-        });
-
-        // Actualizar categorías al cambiar el tipo (edición)
-        selEditTipo.addEventListener('change', () => {
-            llenarCategorias(selEditCat, selEditTipo.value);
-        });
+        selTipo.addEventListener('change', () => llenarCategorias(selCategoria, selTipo.value));
+        selEditTipo.addEventListener('change', () => llenarCategorias(selEditCat, selEditTipo.value));
 
         [inpIngreso, inpEgreso, inpMetaMonto, inpMetaNombre].forEach(input => {
             input.addEventListener('change', guardarDatosFijos);
@@ -317,16 +458,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnNextMonth.addEventListener('click', () => cambiarMes(1));
         btnCloseModal.addEventListener('click', cerrarModal);
         window.addEventListener('click', e => { if (e.target === modal) cerrarModal(); });
-
         formMovimiento.addEventListener('submit', agregarMovimiento);
-
-        // Formulario de edición
         formEdicion.addEventListener('submit', guardarEdicion);
         btnEditEliminar.addEventListener('click', eliminarDesdeEdicion);
 
         if (btnLogout) {
             btnLogout.addEventListener('click', e => { e.preventDefault(); logout(); });
         }
+
+        // ── Pestañas de gráfico ──────────────────────────────────────────
+        document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentChartType = parseInt(btn.dataset.chartType);
+                actualizarGrafica();
+            });
+        });
     }
 
     // --- CALENDARIO ---
@@ -367,7 +515,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span class="day-number">${dia}</span>
                 ${datosDia.balance !== 0 ? `<span class="day-balance-preview">$${datosDia.balance.toFixed(2)}</span>` : ''}
             `;
-
             celda.addEventListener('click', () => abrirModal(fechaKey, dia));
             gridCalendario.appendChild(celda);
         }
@@ -417,36 +564,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : 'En progreso';
         }
 
-        actualizarGrafica(ingresoTotal, egresoTotal, ahorroMensual);
-    }
-
-    function inicializarGrafica() {
-        const ctx = document.getElementById('monthlyChart').getContext('2d');
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Ingresos Totales', 'Egresos Totales', 'Balance Neto'],
-                datasets: [{
-                    label: 'Finanzas ($)',
-                    data: [0, 0, 0],
-                    backgroundColor: ['#A5D6A7', '#EF9A9A', '#B6C4DA'],
-                    borderColor: ['#1B5E20', '#B71C1C', '#2C405B'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-    }
-
-    function actualizarGrafica(ing, egr, bal) {
-        if (chartInstance) {
-            chartInstance.data.datasets[0].data = [ing, egr, bal];
-            chartInstance.update();
-        }
+        // Actualizar gráfico con datos del mes actual
+        actualizarGrafica();
     }
 
     // --- MODAL ---
@@ -464,9 +583,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         ocultarFormEdicion();
     }
 
-    // ========================================
-    // RENDERIZAR LISTA DE MOVIMIENTOS (con lápiz de edición)
-    // ========================================
     function actualizarContenidoModal() {
         const datos = obtenerDatosDia(diaSeleccionado);
 
@@ -493,49 +609,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="${m.tipo === 'income' ? 'text-green' : 'text-red'}" style="font-weight:bold; margin-right:10px;">
                         ${m.tipo === 'income' ? '+' : '-'}$${m.monto.toFixed(2)}
                     </span>
-                    <button
-                        class="btn-edit-mov"
-                        data-id="${m.id}"
-                        title="Editar movimiento"
-                        style="
-                            background: none;
-                            border: 1px solid #6585AA;
-                            border-radius: 6px;
-                            color: #6585AA;
-                            cursor: pointer;
-                            padding: 4px 8px;
-                            font-size: 0.85rem;
-                            transition: background 0.2s;
-                        "
-                    >✏️</button>
+                    <button class="btn-edit-mov" data-id="${m.id}" title="Editar movimiento"
+                        style="background:none;border:1px solid #6585AA;border-radius:6px;color:#6585AA;cursor:pointer;padding:4px 8px;font-size:0.85rem;transition:background 0.2s;">✏️</button>
                 `;
-
-                // Click en lápiz → mostrar formulario de edición
-                li.querySelector('.btn-edit-mov').addEventListener('click', () => {
-                    mostrarFormEdicion(m);
-                });
-
+                li.querySelector('.btn-edit-mov').addEventListener('click', () => mostrarFormEdicion(m));
                 listMovimientos.appendChild(li);
             });
         }
     }
 
-    // ========================================
-    // FORMULARIO DE EDICIÓN
-    // ========================================
     function mostrarFormEdicion(movimiento) {
         movimientoEnEdicion = movimiento;
-
-        // Rellenar tipo
         selEditTipo.value = movimiento.tipo;
-
-        // Rellenar categorías según tipo y preseleccionar la actual
         llenarCategorias(selEditCat, movimiento.tipo, movimiento.categoria);
-
-        // Rellenar monto
         inpEditMonto.value = movimiento.monto;
-
-        // Mostrar sección de edición
         editContainer.style.display = 'block';
         editContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -546,39 +633,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (formEdicion) formEdicion.reset();
     }
 
-    // Guardar cambios del movimiento editado
     async function guardarEdicion(e) {
         e.preventDefault();
         if (!movimientoEnEdicion) return;
 
-        const tipo       = selEditTipo.value;
-        const categoria  = selEditCat.value;
-        const montoRaw   = inpEditMonto.value;
+        const tipo      = selEditTipo.value;
+        const categoria = selEditCat.value;
+        const montoRaw  = inpEditMonto.value;
 
-        if (!categoria) {
-            alert('Selecciona una categoría.');
-            return;
-        }
+        if (!categoria) { alert('Selecciona una categoría.'); return; }
 
         const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
-        if (!montoRegex.test(montoRaw)) {
-            alert('Monto inválido. Máximo 8 dígitos y 2 decimales.');
-            return;
-        }
+        if (!montoRegex.test(montoRaw)) { alert('Monto inválido. Máximo 8 dígitos y 2 decimales.'); return; }
 
         const monto = parseFloat(montoRaw);
-        if (monto <= 0) {
-            alert('El monto debe ser mayor a 0.');
-            return;
-        }
+        if (monto <= 0) { alert('El monto debe ser mayor a 0.'); return; }
 
         try {
             const result = await updateMovement(movimientoEnEdicion.id, { tipo, categoria, monto });
-
             if (result.success) {
                 ocultarFormEdicion();
                 await cargarDatosDelServidor();
-                // Reabrir el modal en el mismo día
                 if (diaSeleccionado) actualizarContenidoModal();
             } else {
                 alert(result.message || 'Error al actualizar el movimiento.');
@@ -589,15 +664,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Eliminar desde el formulario de edición
     async function eliminarDesdeEdicion() {
         if (!movimientoEnEdicion) return;
-
         if (!confirm('¿Eliminar este movimiento? Esta acción no se puede deshacer.')) return;
 
         try {
             const result = await deleteMovement(movimientoEnEdicion.id, userId);
-
             if (result.success) {
                 ocultarFormEdicion();
                 await cargarDatosDelServidor();
@@ -611,39 +683,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- AGREGAR NUEVO MOVIMIENTO ---
     async function agregarMovimiento(e) {
         e.preventDefault();
 
         const tipo      = document.getElementById('trans-type').value;
         const categoria = document.getElementById('trans-category').value;
         const montoRaw  = document.getElementById('trans-amount').value;
-
         const montoRegex = /^\d{1,8}(\.\d{1,2})?$/;
 
-        if (!categoria) {
-            alert('Selecciona una categoría.');
-            return;
-        }
-
-        if (!montoRegex.test(montoRaw)) {
-            alert('Monto inválido. Máx 8 dígitos y 2 decimales.');
-            return;
-        }
+        if (!categoria) { alert('Selecciona una categoría.'); return; }
+        if (!montoRegex.test(montoRaw)) { alert('Monto inválido. Máx 8 dígitos y 2 decimales.'); return; }
 
         const monto = parseFloat(montoRaw);
-        if (monto <= 0) {
-            alert('El monto debe ser mayor a 0.');
-            return;
-        }
+        if (monto <= 0) { alert('El monto debe ser mayor a 0.'); return; }
 
         const movementData = {
-            user_id:     userId,
-            fecha:       diaSeleccionado,
-            tipo,
-            categoria,
-            monto,
-            descripcion: 'Movimiento desde Dashboard'
+            user_id: userId, fecha: diaSeleccionado,
+            tipo, categoria, monto, descripcion: 'Movimiento desde Dashboard'
         };
 
         try {

@@ -25,7 +25,6 @@
             padding: 16px;
             margin-top: 16px;
         }
-
         .edit-movement-form h3 {
             font-size: 1rem;
             color: #2C405B;
@@ -34,7 +33,6 @@
             padding-bottom: 0;
             display: block;
         }
-
         .edit-movement-form select,
         .edit-movement-form input {
             width: 100%;
@@ -47,59 +45,77 @@
             background: #fff;
             box-sizing: border-box;
         }
-
         .edit-movement-form select:focus,
-        .edit-movement-form input:focus {
-            border-color: #6585AA;
-            outline: none;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 4px;
-        }
-
+        .edit-movement-form input:focus { border-color: #6585AA; outline: none; }
+        .edit-actions { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
         .btn-edit-delete {
-            flex: 1;
-            background: #c62828;
-            color: white;
-            border: none;
-            padding: 11px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+            flex: 1; background: #c62828; color: white; border: none;
+            padding: 11px; border-radius: 40px; cursor: pointer;
+            font-weight: bold; font-size: 0.9rem; transition: background 0.2s;
         }
-
-        .btn-edit-delete:hover {
-            background: #b71c1c;
-        }
-
+        .btn-edit-delete:hover { background: #b71c1c; }
         .btn-edit-save {
-            flex: 2;
-            background: #6585AA;
-            color: white;
-            border: none;
-            padding: 11px;
-            border-radius: 40px;
+            flex: 2; background: #6585AA; color: white; border: none;
+            padding: 11px; border-radius: 40px; cursor: pointer;
+            font-weight: bold; font-size: 0.9rem; transition: background 0.2s;
+        }
+        .btn-edit-save:hover { background: #536e8d; }
+        .btn-edit-mov:hover { background: #6585AA !important; color: white !important; }
+
+        /* ── Pestañas del gráfico ── */
+        .chart-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .chart-tab-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 2px solid #6585AA;
+            background: transparent;
+            color: #6585AA;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+            transition: background 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+        .chart-tab-btn:hover {
+            background: #6585AA;
+            color: #fff;
+        }
+        .chart-tab-btn.active {
+            background: #2C405B;
+            border-color: #2C405B;
+            color: #fff;
         }
 
-        .btn-edit-save:hover {
-            background: #536e8d;
+        /* ── Leyenda personalizada del gráfico ── */
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #555;
         }
-
-        /* Hover en botón de lápiz */
-        .btn-edit-mov:hover {
-            background: #6585AA !important;
-            color: white !important;
+        .chart-legend span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        /* Ocultar/mostrar leyendas según tipo activo */
+        .legend-balance  { display: flex; }
+        .legend-ingresos { display: none; }
+        .legend-egresos  { display: none; }
     </style>
 </head>
 <body>
@@ -191,6 +207,35 @@
                 </div>
             </div>
 
+            <!-- ── PESTAÑAS DE GRÁFICO ── -->
+            <div class="chart-tabs" style="margin-top: 18px;">
+                <button class="chart-tab-btn active" data-chart-type="1">Balance neto</button>
+                <button class="chart-tab-btn" data-chart-type="2">Ingresos por categoría</button>
+                <button class="chart-tab-btn" data-chart-type="3">Egresos por categoría</button>
+            </div>
+
+            <!-- ── LEYENDA PERSONALIZADA ── -->
+            <div class="chart-legend" id="chart-legend">
+                <!-- Leyenda gráfico 1 (balance) -->
+                <span class="legend-balance">
+                    <span class="legend-dot" style="background:#2e7d32;"></span>Ingresos
+                </span>
+                <span class="legend-balance">
+                    <span class="legend-dot" style="background:#c62828;"></span>Egresos
+                </span>
+                <span class="legend-balance">
+                    <span class="legend-dot" style="background:#1565C0;"></span>Balance neto
+                </span>
+                <!-- Leyenda gráfico 2 (ingresos) -->
+                <span class="legend-ingresos">
+                    <span class="legend-dot" style="background:#2e7d32;"></span>Monto por categoría
+                </span>
+                <!-- Leyenda gráfico 3 (egresos) -->
+                <span class="legend-egresos">
+                    <span class="legend-dot" style="background:#c62828;"></span>Monto por categoría
+                </span>
+            </div>
+
             <div class="chart-container">
                 <canvas id="monthlyChart"></canvas>
             </div>
@@ -218,7 +263,6 @@
             <span id="close-modal" class="close-btn">&times;</span>
             <h2 id="modal-date-title">Detalle del Día</h2>
             
-            <!-- Resumen del Balance del Día -->
             <div class="day-balance-summary">
                 <div class="balance-item">
                     <span>Ingresos:</span> 
@@ -234,53 +278,30 @@
                 </div>
             </div>
 
-            <!-- Lista de Movimientos (con botón de lápiz) -->
             <div class="movements-list-section">
                 <h3>Movimientos Registrados</h3>
                 <ul id="movements-list"></ul>
             </div>
 
-            <!-- ══════════════════════════════════════
-                 FORMULARIO DE EDICIÓN DE MOVIMIENTO
-                 (oculto por defecto, aparece al hacer clic en ✏️)
-                 ══════════════════════════════════════ -->
             <div class="edit-movement-form" id="edit-movement-container" style="display:none;">
                 <h3>✏️ Editar Movimiento</h3>
                 <form id="edit-transaction-form">
-
                     <select id="edit-trans-type" required>
                         <option value="expense">Egreso (−)</option>
                         <option value="income">Ingreso (+)</option>
                     </select>
-
-                    <!-- Categorías se cargan dinámicamente por JS -->
                     <select id="edit-trans-category" required>
                         <option value="">-- Selecciona una categoría --</option>
                     </select>
-
-                    <input
-                        type="text"
-                        id="edit-trans-amount"
-                        placeholder="Monto"
-                        inputmode="decimal"
-                        maxlength="11"
-                        required
-                    >
-
+                    <input type="text" id="edit-trans-amount" placeholder="Monto"
+                           inputmode="decimal" maxlength="11" required>
                     <div class="edit-actions">
-                        <button type="button" class="btn-edit-delete" id="edit-btn-delete">
-                            🗑️ Eliminar
-                        </button>
-                        <button type="submit" class="btn-edit-save">
-                            ✔ Aceptar
-                        </button>
+                        <button type="button" class="btn-edit-delete" id="edit-btn-delete">🗑️ Eliminar</button>
+                        <button type="submit" class="btn-edit-save">✔ Aceptar</button>
                     </div>
-
                 </form>
             </div>
-            <!-- ══════════════════════════════════════ -->
 
-            <!-- Formulario para Agregar Movimiento -->
             <div class="add-movement-form">
                 <h3>➕ Nuevo Movimiento</h3>
                 <form id="transaction-form">
@@ -288,21 +309,11 @@
                         <option value="expense">Egreso (−)</option>
                         <option value="income">Ingreso (+)</option>
                     </select>
-
-                    <!-- Categorías cargadas dinámicamente por JS -->
                     <select id="trans-category" required>
                         <option value="">-- Selecciona una categoría --</option>
                     </select>
-
-                    <input
-                        type="text"
-                        id="trans-amount"
-                        placeholder="Monto"
-                        inputmode="decimal"
-                        maxlength="11"
-                        required
-                    >
-                    
+                    <input type="text" id="trans-amount" placeholder="Monto"
+                           inputmode="decimal" maxlength="11" required>
                     <button type="submit" class="btn-add">Agregar Movimiento</button>
                 </form>
             </div>
@@ -310,6 +321,27 @@
         </div>
     </div>
 </div>
+
+<!-- Script para sincronizar leyenda con pestaña activa -->
+<script>
+document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const type = parseInt(btn.dataset.chartType);
+        const legend = document.getElementById('chart-legend');
+
+        legend.querySelectorAll('.legend-balance, .legend-ingresos, .legend-egresos').forEach(el => {
+            el.style.display = 'none';
+        });
+        if (type === 1) {
+            legend.querySelectorAll('.legend-balance').forEach(el => el.style.display = 'flex');
+        } else if (type === 2) {
+            legend.querySelectorAll('.legend-ingresos').forEach(el => el.style.display = 'flex');
+        } else {
+            legend.querySelectorAll('.legend-egresos').forEach(el => el.style.display = 'flex');
+        }
+    });
+});
+</script>
 
 <script type="module" src="../public/js/pages/dashboard.js"></script>
 
