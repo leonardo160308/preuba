@@ -6,49 +6,35 @@
     <title>Quiz - TOO-EASY</title>
     <link rel="icon" type="image/x-icon" href="../public/img/favicon.png">
 
-    <!-- CSS -->
     <link rel="stylesheet" href="../public/css/preguntas.css">
     <link rel="stylesheet" href="../public/css/header.css">
     <link rel="stylesheet" href="../public/css/alerts.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- ========================================
-     CONTENEDOR PRINCIPAL (2 COLUMNAS)
-     ======================================== -->
+<!-- ============================================================
+     LAYOUT: imagen izquierda | quiz derecha
+============================================================ -->
 <div class="contenedor-quiz">
 
-    <!-- ========================================
-         COLUMNA IZQUIERDA: IMAGEN
-         ======================================== -->
+    <!-- IZQUIERDA: Ilustración decorativa -->
     <div class="lado-izquierdo">
         <img id="imagenPregunta"
              src="../public/img/Imagen1.1.png"
              alt="Ilustración de la pregunta">
     </div>
 
-    <!-- ========================================
-         COLUMNA DERECHA: QUIZ
-         ======================================== -->
+    <!-- DERECHA: Zona del quiz -->
     <div class="lado-derecho">
 
-        <!-- HEADER DEL QUIZ -->
+        <!-- HEADER -->
         <div class="quiz-header">
-            <div>
-                <h2 id="quiz-title">
-                    📚 Nivel <span id="nivel-actual">1</span>
-                </h2>
-                <p id="quiz-subtitle">
-                    Tema: <span id="tema-nombre">Fundamentos</span>
-                </p>
+            <div class="quiz-meta">
+                <h2>Nivel <span id="nivel-actual">1</span></h2>
+                <p>Pregunta <span id="pregunta-actual">1</span> de <span id="total-preguntas">5</span></p>
             </div>
-
-            <div class="contador">
-                <span>
-                    <span id="pregunta-actual">1</span> /
-                    <span id="total-preguntas">5</span>
-                </span>
-            </div>
+            <div class="contador" id="contador-label">1 / 5</div>
         </div>
 
         <!-- BARRA DE PROGRESO -->
@@ -56,77 +42,41 @@
             <div class="progreso" id="barra-progreso"></div>
         </div>
 
-        <!-- PREGUNTA -->
-        <div class="pregunta-section">
-            <h3 id="textoPregunta">
-                Cargando pregunta...
-            </h3>
+        <!-- TARJETA DE PREGUNTA -->
+        <div class="pregunta-section" id="pregunta-card">
+            <span class="q-deco" aria-hidden="true">?</span>
+            <h3 id="textoPregunta">Cargando pregunta...</h3>
         </div>
 
-        <!-- OPCIONES -->
-        <div class="opciones" id="opcionesContainer">
-            <!-- JS genera opciones -->
-        </div>
+        <!-- OPCIONES (generadas por JS) -->
+        <div class="opciones" id="opcionesContainer"></div>
 
-        <!-- BOTÓN -->
-        <button id="botonComprobar"
-                class="boton-comprobar"
-                style="display: none;">
-            Comprobar Respuesta
+        <!-- BOTÓN COMPROBAR -->
+        <button class="boton-comprobar" id="botonComprobar">
+            Comprobar respuesta
         </button>
 
-        <!-- RESULTADO -->
-        <div id="resultado"
-             class="resultado"
-             style="display: none;">
+        <!-- PANEL FEEDBACK — wrapper con animación de altura -->
+        <div class="resultado-wrapper" id="resultadoWrapper">
+            <div class="resultado" id="resultado">
+                <div class="resultado-txt">
+                    <span class="ico" id="resultado-ico"></span>
+                    <span id="resultado-msg"></span>
+                </div>
+                <button id="btn-next">Siguiente →</button>
+            </div>
         </div>
 
+    </div><!-- fin .lado-derecho -->
+</div><!-- fin .contenedor-quiz -->
+
+<!-- MODAL FINAL -->
+<div id="modal-final" class="modal-final">
+    <div class="modal-content-final" id="modal-body">
+        <!-- Generado por JS -->
     </div>
 </div>
 
-<!-- ========================================
-     MODAL FINAL
-     ======================================== -->
-<div id="modal-final" class="modal-final" style="display: none;">
-    <div class="modal-content-final">
-
-        <div id="modal-icono"
-             style="font-size: 5rem; text-align: center; margin-bottom: 20px;">
-        </div>
-
-        <h2 id="modal-titulo"
-            style="text-align: center; color: #2C405B;">
-        </h2>
-
-        <p id="modal-puntaje"
-           style="text-align: center; font-size: 1.3rem;">
-        </p>
-
-        <div id="modal-recompensa"
-             style="background:#e8f5e9; padding:15px; border-radius:10px; text-align:center;">
-        </div>
-
-        <p id="modal-mensaje"
-           style="text-align:center; color:#666;">
-        </p>
-
-        <div style="display:flex; gap:15px; justify-content:center;">
-            <button onclick="window.location.href='lecciones.html'"
-                    class="btn-modal btn-secondary">
-                📚 Ver Niveles
-            </button>
-
-            <button id="btn-reintentar"
-                    class="btn-modal btn-primary"
-                    style="display:none;">
-                🔄 Reintentar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- SCRIPT -->
 <script type="module" src="../public/js/pages/quiz.js"></script>
-
 </body>
 </html>

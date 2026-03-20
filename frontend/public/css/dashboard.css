@@ -289,9 +289,10 @@ h2 {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 7px;
+    gap: 5px;
 }
 
+/* ── FIX OVERFLOW CALENDARIO ── */
 .day-cell {
     aspect-ratio: 1;
     background: var(--bg-card-alt);
@@ -304,7 +305,11 @@ h2 {
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
     position: relative;
-    padding: 2px;
+    padding: 3px 2px;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
 }
 
 .day-cell:hover {
@@ -316,16 +321,24 @@ h2 {
 
 .day-number {
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: clamp(0.6rem, 1.5vw, 0.9rem);
     color: var(--text-primary);
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .day-balance-preview {
-    font-size: 0.62rem;
-    margin-top: 3px;
+    font-size: clamp(0.45rem, 1vw, 0.6rem);
+    margin-top: 2px;
     font-weight: 700;
     line-height: 1;
+    /* FIX: evitar overflow con texto largo */
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 2px;
 }
 
 .day-green  { background: var(--success-bg); border-color: #81c784; }
@@ -628,7 +641,9 @@ h2 {
     .app-container { margin: 16px auto; }
     .card { padding: 20px; }
     .fixed-data-grid, .goal-data-grid { grid-template-columns: 1fr; }
-    .calendar-grid { gap: 4px; }
+    .calendar-grid { gap: 3px; }
     .summary-results { padding: 16px; }
     .modal-content { padding: 24px 20px; }
+    .day-number { font-size: 0.7rem; }
+    .day-balance-preview { font-size: 0.42rem; }
 }
