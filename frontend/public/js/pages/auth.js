@@ -96,6 +96,7 @@ if (registerForm) {
             if (data.success && data.requiresVerification) {
                 // Guardar userId temporalmente para el paso de verificación
                 sessionStorage.setItem('pendingVerificationUserId', data.userId);
+                sessionStorage.setItem('pendingVerificationEmail', email);
                 alertaExito('¡Cuenta creada! Revisa tu correo para verificarla.', {
                     duration: 3000,
                     onClose:  () => { window.location.href = '/verificar-email.html'; },
@@ -140,6 +141,7 @@ if (loginForm) {
             } else if (data.requiresVerification) {
                 // Cuenta existe pero email no verificado
                 sessionStorage.setItem('pendingVerificationUserId', data.userId);
+                sessionStorage.setItem('pendingVerificationEmail', email);
                 alertaAdvertencia('Debes verificar tu correo primero.', {
                     duration: 4000,
                     onClose:  () => { window.location.href = '/verificar-email.html'; },
