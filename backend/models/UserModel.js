@@ -13,7 +13,6 @@ class User {
             .single();
 
         if (error) {
-            // Simular el código de error de MySQL para duplicados
             if (error.code === '23505') {
                 const dupError = new Error(error.message);
                 dupError.code = 'ER_DUP_ENTRY';
@@ -34,7 +33,7 @@ class User {
             .single();
 
         if (error) {
-            if (error.code === 'PGRST116') return null; // No encontrado
+            if (error.code === 'PGRST116') return null;
             throw error;
         }
 
@@ -42,69 +41,64 @@ class User {
     }
 
     // 3. ACTUALIZAR
-// ============================================================
-// REEMPLAZA el método update() en backend/models/UserModel.js
-// ============================================================
+    static async update(id, updateData) {
+        const allowedFields = [
+            'nombre', 'password_hash', 'edad', 'genero', 'foto',
+            'level', 'coins', 'wood', 'dashboard_balance',
+            'house_level', 'beaver_level', 'current_appearance', 'current_beaver',
+            'email_verified', 'email_verified_at', 'is_active',
+            'failed_login_attempts', 'locked_until', 'last_login_at'
+        ];
 
-static async update(id, updateData) {
-    const allowedFields = [
-        'nombre', 'password_hash', 'edad', 'genero', 'foto',
-        'level', 'coins', 'wood', 'dashboard_balance',
-        'house_level', 'beaver_level', 'current_appearance', 'current_beaver',
-        'email_verified', 'email_verified_at', 'is_active',
-        'failed_login_attempts', 'locked_until', 'last_login_at'
-    ];
+        const filteredData = {};
+        Object.keys(updateData).forEach(key => {
+            if (allowedFields.includes(key)) {
+                filteredData[key] = updateData[key];
+            }
+        });
 
-    const filteredData = {};
-    Object.keys(updateData).forEach(key => {
-        if (allowedFields.includes(key)) {
-            filteredData[key] = updateData[key];
-        }
-    });
-
-    // Si no hay ningún campo válido para actualizar, salir limpiamente
-    if (Object.keys(filteredData).length === 0) {
-        console.warn('UserModel.update: no hay campos válidos para actualizar');
-        return { affectedRows: 0, data: null };
-    }
-
-    const { data, error } = await supabase
-        .from('users')
-        .update(filteredData)
-        .eq('id', id)
-        .select()
-        .single();
-
-    if (error) {
-        // Unique constraint: nombre o email duplicado
-        if (error.code === '23505') {
-            const field = error.message.includes('nombre') ? 'nombre de usuario' : 'correo';
-            const friendly = new Error(`Ese ${field} ya está en uso.`);
-            friendly.code = 'ER_DUP_ENTRY';
-            throw friendly;
-        }
-        // Fila no encontrada (PGRST116 = 0 rows de .single())
-        if (error.code === 'PGRST116') {
+        if (Object.keys(filteredData).length === 0) {
+            console.warn('UserModel.update: no hay campos válidos para actualizar');
             return { affectedRows: 0, data: null };
         }
-        throw error;
-    }
 
-    return { affectedRows: data ? 1 : 0, data };
-}
-
-    // 4. BAJA LÓGICA
-    static async deleteLogical(id) {
         const { data, error } = await supabase
             .from('users')
-            .update({ is_active: false })
+            .update(filteredData)
             .eq('id', id)
             .select()
             .single();
 
+        if (error) {
+            if (error.code === '23505') {
+                const field = error.message.includes('nombre') ? 'nombre de usuario' : 'correo';
+                const friendly = new Error(`Ese ${field} ya está en uso.`);
+                friendly.code = 'ER_DUP_ENTRY';
+                throw friendly;
+            }
+            if (error.code === 'PGRST116') {
+                return { affectedRows: 0, data: null };
+            }
+            throw error;
+        }
+
+        return { affectedRows: data ? 1 : 0, data };
+    }
+
+    // 4. ELIMINAR (DELETE directo)
+    // NOTA: Antes se usaba update({ is_active: false }) pero el trigger
+    // trg_hard_delete_on_deactivate cancelaba el UPDATE (RETURN NULL) y
+    // Supabase lanzaba PGRST116 al no recibir filas, causando un 500.
+    // Solución: DELETE directo que bypasea el trigger.
+    static async deleteLogical(id) {
+        const { error } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', id);
+
         if (error) throw error;
 
-        return { affectedRows: data ? 1 : 0 };
+        return { affectedRows: 1 };
     }
 }
 

@@ -1,7 +1,7 @@
 /* assets/js/pages/profile.js - CON ALERTAS VISUALES COMPLETAS */
 
 import { getUserData, upgradeItem, equipSkin, deleteUser, updateUserData } from '../modules/api.js';import { protectRoute, getAuthData, logout } from '../modules/auth.js';
-import { alertaExito, alertaError, alertaInfo, alertaAdvertencia, alertaConfirmacion } from '../modules/alerts.js'; // ✅ NUEVO
+import { alertaExito, alertaError, alertaInfo, alertaAdvertencia, alertaConfirmacion } from '../modules/alerts.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -78,27 +78,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnDeleteAccount = document.getElementById('btn-delete-account');
     const inputEdad = document.getElementById("inputEdad");
 
-if(inputEdad){
-    inputEdad.addEventListener("input", () => {
-        inputEdad.value = inputEdad.value.replace(/[^0-9]/g,'');
-        if(inputEdad.value.length > 2){
-            inputEdad.value = inputEdad.value.slice(0,2);
-        }
-    });
+    if(inputEdad){
+        inputEdad.addEventListener("input", () => {
+            inputEdad.value = inputEdad.value.replace(/[^0-9]/g,'');
+            if(inputEdad.value.length > 2){
+                inputEdad.value = inputEdad.value.slice(0,2);
+            }
+        });
 
-    inputEdad.addEventListener("keydown", (e) => {
-        if(e.key === "e" || e.key === "." || e.key === "-"){
-            e.preventDefault();
-        }
-    });
-}
+        inputEdad.addEventListener("keydown", (e) => {
+            if(e.key === "e" || e.key === "." || e.key === "-"){
+                e.preventDefault();
+            }
+        });
+    }
 
     let selectedAvatar = null;
 
     // --- 4. CARGAR DATOS DEL SERVIDOR ---
     async function init() {
         try {
-            // ✅ Alerta de carga
             const loadingAlert = alertaInfo('Cargando tu perfil...', { 
                 duration: 0, 
                 closable: false 
@@ -106,7 +105,6 @@ if(inputEdad){
             
             currentUserData = await getUserData(userId);
             
-            // ✅ Cerrar alerta de carga
             loadingAlert.close();
             
             if(welcomeMsg) welcomeMsg.textContent = `Hola, ${currentUserData.nombre}!`;
@@ -119,7 +117,6 @@ if(inputEdad){
                 }
             }
 
-
             actualizarUI();
             
             idxCasa = obtenerIndiceSkin(currentUserData.current_appearance, UNLOCKS_CASA_LIST);
@@ -130,7 +127,7 @@ if(inputEdad){
 
         } catch (error) {
             console.error("💥 Error:", error);
-            alertaError('Error al cargar datos del servidor. Recarga la página.'); // ✅ CAMBIO
+            alertaError('Error al cargar datos del servidor. Recarga la página.');
         }
     }
 
@@ -140,14 +137,14 @@ if(inputEdad){
         domMadera.textContent = currentUserData.wood || 0;
         lblHouseLevel.textContent = currentUserData.house_level || 1;
         lblBeaverLevel.textContent = currentUserData.beaver_level || 1;
-        const generoEl = document.getElementById('user-genero');
-    const edadEl   = document.getElementById('user-edad');
-    const levelEl  = document.getElementById('user-level');
-    if (generoEl) generoEl.textContent = currentUserData.genero || '—';
-    if (edadEl)   edadEl.textContent   = currentUserData.edad ? `${currentUserData.edad} años` : '—';
-    if (levelEl)  levelEl.textContent  = currentUserData.level || 1;
 
-        // BOTÓN CASA
+        const generoEl = document.getElementById('user-genero');
+        const edadEl   = document.getElementById('user-edad');
+        const levelEl  = document.getElementById('user-level');
+        if (generoEl) generoEl.textContent = currentUserData.genero || '—';
+        if (edadEl)   edadEl.textContent   = currentUserData.edad ? `${currentUserData.edad} años` : '—';
+        if (levelEl)  levelEl.textContent  = currentUserData.level || 1;
+
         if (txtCostHouse) txtCostHouse.textContent = COSTO_CASA_BASE;
         
         if (currentUserData.house_level >= MAX_LEVEL) {
@@ -161,7 +158,6 @@ if(inputEdad){
             btnHouse.title = "";
         }
 
-        // BOTÓN CASTOR
         if (txtCostBeaver) txtCostBeaver.textContent = COSTO_CASTOR_BASE;
         
         if (currentUserData.beaver_level >= MAX_LEVEL) {
@@ -176,68 +172,58 @@ if(inputEdad){
         }
     }
 
-    // --- 6. MEJORAS CON ALERTAS ---
+    // --- 6. MEJORAS ---
     btnHouse.addEventListener('click', async () => {
         if (btnHouse.disabled) {
-            alertaError(`Necesitas ${COSTO_CASA_BASE} madera. Actualmente tienes: ${currentUserData.wood} 🪵`); // ✅ CAMBIO
+            alertaError(`Necesitas ${COSTO_CASA_BASE} madera. Actualmente tienes: ${currentUserData.wood} 🪵`);
             return;
         }
         
         try {
-            // ✅ Alerta de proceso
             alertaInfo('Mejorando tu hogar...', { duration: 2000 });
-            
             const result = await upgradeItem(userId, 'house');
             
             if (result.success) {
                 currentUserData.wood = result.new_stats.wood;
                 currentUserData.house_level = result.new_stats.house_level;
-                
-                // ✅ Alerta de éxito con detalles
                 alertaExito(`¡Casa mejorada a nivel ${result.new_stats.house_level}! 🏠`, {
                     title: '¡Mejora completada!',
                     duration: 4000
                 });
-                
                 actualizarUI();
             } else {
-                alertaError(result.message); // ✅ CAMBIO
+                alertaError(result.message);
             }
         } catch (error) {
             console.error(error);
-            alertaError('Error de conexión al mejorar casa.'); // ✅ CAMBIO
+            alertaError('Error de conexión al mejorar casa.');
         }
     });
 
     btnBeaver.addEventListener('click', async () => {
         if (btnBeaver.disabled) {
-            alertaError(`Necesitas ${COSTO_CASTOR_BASE} monedas. Actualmente tienes: ${currentUserData.coins} 🪙`); // ✅ CAMBIO
+            alertaError(`Necesitas ${COSTO_CASTOR_BASE} monedas. Actualmente tienes: ${currentUserData.coins} 🪙`);
             return;
         }
         
         try {
-            // ✅ Alerta de proceso
             alertaInfo('Entrenando a tu castor...', { duration: 2000 });
-            
             const result = await upgradeItem(userId, 'beaver');
             
             if (result.success) {
                 currentUserData.coins = result.new_stats.coins;
                 currentUserData.beaver_level = result.new_stats.beaver_level;
-                
-                // ✅ Alerta de éxito con detalles
                 alertaExito(`¡Castor entrenado a nivel ${result.new_stats.beaver_level}! 🦫`, {
                     title: '¡Entrenamiento exitoso!',
                     duration: 4000
                 });
-                
                 actualizarUI();
             } else {
-                alertaError(result.message); // ✅ CAMBIO
+                alertaError(result.message);
             }
         } catch (error) {
             console.error(error);
-            alertaError('Error de conexión al entrenar castor.'); // ✅ CAMBIO
+            alertaError('Error de conexión al entrenar castor.');
         }
     });
 
@@ -328,18 +314,14 @@ if(inputEdad){
 
     async function equiparSkinAPI(skinId, type) {
         try {
-            // ✅ Alerta de proceso
             const tipoTexto = type === 'house' ? 'apariencia del hogar' : 'apariencia del castor';
             alertaInfo(`Actualizando ${tipoTexto}...`, { duration: 1500 });
-            
             const result = await equipSkin(userId, skinId, type);
             
             if (result.success) {
                 if (type === 'house') currentUserData.current_appearance = skinId;
                 if (type === 'beaver') currentUserData.current_beaver = skinId;
                 
-                
-                // ✅ Alerta de éxito
                 const nombreSkin = type === 'house' ? SKIN_NAMES[skinId] : CASTOR_NAMES[skinId];
                 alertaExito(`¡${nombreSkin} equipado correctamente!`, {
                     title: 'Apariencia actualizada',
@@ -351,7 +333,7 @@ if(inputEdad){
             }
         } catch (error) {
             console.error(error);
-            alertaError('Error al equipar apariencia.'); // ✅ CAMBIO
+            alertaError('Error al equipar apariencia.');
         }
     }
 
@@ -374,58 +356,50 @@ if(inputEdad){
         if(idxCastor < UNLOCKS_CASTOR_LIST.length - 1) idxCastor++; renderizarCastor(); 
     };
 
-    // --- ELIMINAR CUENTA CON ALERTAS ---
+    // --- ELIMINAR CUENTA ---
     if (btnDeleteAccount) {
         btnDeleteAccount.onclick = async () => {
-            // ✅ Primera confirmación
             const confirmado1 = await alertaConfirmacion(
                 '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
                 'Eliminar Cuenta'
             );
-            
             if (!confirmado1) return;
             
-            // ✅ Segunda confirmación final
             const confirmado2 = await alertaConfirmacion(
-                ' ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
+                '⚠️ ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
                 'Confirmación Final'
             );
-            
             if (!confirmado2) return;
 
             try {
                 btnDeleteAccount.disabled = true;
                 btnDeleteAccount.textContent = 'Eliminando...';
                 
-                // ✅ Alerta de proceso
                 alertaInfo('Eliminando cuenta...', { duration: 0, closable: false });
                 
                 const result = await deleteUser(userId);
                 
                 if (result.success) {
-                    // ✅ Éxito con redirección
                     alertaExito('Cuenta eliminada exitosamente. Redirigiendo...', {
                         duration: 2000,
                         onClose: () => logout()
                     });
-                    
                     setTimeout(() => logout(), 2000);
-                    
                 } else {
-                    alertaError('Error: ' + result.message); // ✅ CAMBIO
+                    alertaError('Error: ' + result.message);
                     btnDeleteAccount.disabled = false;
                     btnDeleteAccount.textContent = 'Eliminar Cuenta';
                 }
             } catch (error) {
                 console.error(error);
-                alertaError('Error de conexión al intentar eliminar la cuenta.'); // ✅ CAMBIO
+                alertaError('Error de conexión al intentar eliminar la cuenta.');
                 btnDeleteAccount.disabled = false;
                 btnDeleteAccount.textContent = 'Eliminar Cuenta';
             }
         };
     }
 
-    // --- AVATAR CON ALERTAS ---
+    // --- AVATAR ---
     if (btnChangeAvatar) {
         btnChangeAvatar.onclick = () => avatarModal.style.display = 'flex';
     }
@@ -443,17 +417,14 @@ if(inputEdad){
 
     if(btnConfirmAvatar) {
         btnConfirmAvatar.onclick = async () => {
-            // ✅ Validación con alerta
             if(!selectedAvatar) {
-                alertaAdvertencia('Por favor, selecciona un avatar primero'); // ✅ CAMBIO
+                alertaAdvertencia('Por favor, selecciona un avatar primero');
                 return;
             }
 
             try {
                 btnConfirmAvatar.disabled = true;
                 btnConfirmAvatar.textContent = 'Guardando...';
-                
-                // ✅ Alerta de proceso
                 alertaInfo('Actualizando avatar...', { duration: 1500 });
                 
                 const result = await equipSkin(userId, selectedAvatar, 'avatar');
@@ -463,18 +434,16 @@ if(inputEdad){
                     userAvatar.src = `/public/img/avatars/perfil${selectedAvatar.replace('avatar','')}.png`;
                     localStorage.setItem('userAvatar', selectedAvatar);
                     avatarModal.style.display = 'none';
-                    
-                    // ✅ Alerta de éxito
                     alertaExito('¡Avatar actualizado correctamente!', {
                         title: '¡Genial!',
                         duration: 3000
                     });
                 } else {
-                    alertaError('Error: ' + result.message); // ✅ CAMBIO
+                    alertaError('Error: ' + result.message);
                 }
             } catch (error) {
                 console.error(error);
-                alertaError('Error de conexión al actualizar avatar.'); // ✅ CAMBIO
+                alertaError('Error de conexión al actualizar avatar.');
             } finally {
                 btnConfirmAvatar.disabled = false;
                 btnConfirmAvatar.textContent = 'Guardar Avatar';
@@ -483,150 +452,85 @@ if(inputEdad){
     }
 
     // ============================================================
-// PEGA ESTE BLOQUE AL FINAL DEL DOMContentLoaded DE profile.js
-// JUSTO ANTES DE: init();
-// ============================================================
+    // FUNCIONES GLOBALES PARA EL MODAL DE EDITAR PERFIL (HTML inline)
+    // ============================================================
 
-// Exponer funciones al scope global para que el HTML inline pueda llamarlas.
-// Aquí sí tienen acceso a currentUserData, userId, etc. porque están dentro
-// del mismo módulo.
+    window.openProfileModal = function () {
+        document.getElementById('profileOverlay').classList.add('active');
 
-window.openProfileModal = function () {
-    document.getElementById('profileOverlay').classList.add('active');
+        if (!currentUserData) return;
+        document.getElementById('inputUsername').value = currentUserData.nombre || '';
+        document.getElementById('selectGenero').value  = currentUserData.genero || '';
+        document.getElementById('inputEdad').value     = currentUserData.edad   || '';
 
-    // Prellenar campos con los datos actuales del usuario
-    if (!currentUserData) return;
-    document.getElementById('inputUsername').value = currentUserData.nombre || '';
-    document.getElementById('selectGenero').value  = currentUserData.genero || '';
-    document.getElementById('inputEdad').value     = currentUserData.edad   || '';
-
-    // Sincronizar preview de avatar con el avatar actual
-    if (currentUserData.foto) {
-        const num = currentUserData.foto.replace('avatar', '');
-        const preview = document.getElementById('avatarPreview');
-        if (preview) preview.src = `/public/img/avatars/perfil${num}.png`;
-    }
-};
-
-window.closeProfileModal = function () {
-    document.getElementById('profileOverlay').classList.remove('active');
-};
-
-window.saveProfile = async function () {
-    const nombre  = document.getElementById('inputUsername').value.trim();
-    const edadRaw = document.getElementById('inputEdad').value;
-    const genero  = document.getElementById('selectGenero').value;
-    const edad    = parseInt(edadRaw);
-
-    // Validaciones
-    if (!nombre || nombre.length < 3 || nombre.length > 16) {
-        alertaAdvertencia('El nombre debe tener entre 3 y 16 caracteres.');
-        return;
-    }
-    if (!edad || edad < 15 || edad > 99) {
-        alertaAdvertencia('La edad debe ser entre 15 y 99 años.');
-        return;
-    }
-
-    try {
-        alertaInfo('Guardando cambios...', { duration: 1500 });
-
-        const result = await updateUserData(userId, { nombre, edad, genero });
-
-        if (result && result.success !== false) {
-            // Actualizar estado local del módulo
-            currentUserData.nombre = nombre;
-            currentUserData.edad   = edad;
-            currentUserData.genero = genero;
-
-            // Reflejar cambios en el DOM
-            if (welcomeMsg)  welcomeMsg.textContent  = `Hola, ${nombre}!`;
-            if (userNameLbl) userNameLbl.textContent = nombre;
-
-            const generoEl = document.getElementById('user-genero');
-            const edadEl   = document.getElementById('user-edad');
-            if (generoEl) generoEl.textContent = genero  || '—';
-            if (edadEl)   edadEl.textContent   = `${edad} años`;
-
-            alertaExito('Perfil actualizado correctamente');
-            setTimeout(() => {
-                document.getElementById('profileOverlay').classList.remove('active');
-            }, 1200);
-
-        } else {
-            // El error más común aquí es nombre duplicado (unique constraint)
-            const msg = result?.message || 'Error al guardar';
-            alertaError(msg.includes('23505') || msg.includes('duplicate')
-                ? 'Ese nombre de usuario ya está en uso.'
-                : msg);
+        if (currentUserData.foto) {
+            const num = currentUserData.foto.replace('avatar', '');
+            const preview = document.getElementById('avatarPreview');
+            if (preview) preview.src = `/public/img/avatars/perfil${num}.png`;
         }
+    };
 
-    } catch (error) {
-        console.error('Error en saveProfile:', error);
-        alertaError('Error de conexión al guardar el perfil.');
-    }
-};
+    window.closeProfileModal = function () {
+        document.getElementById('profileOverlay').classList.remove('active');
+    };
 
-window.deleteAccountFromModal = function () {
-    window.closeConfirmDelete?.();
-    window.closeProfileModal?.();
-    document.getElementById('btn-delete-account')?.click();
-};
-
-// --- AHORA SÍ ---
-init();
-
-    init();
     window.saveProfile = async function () {
+        const nombre  = document.getElementById('inputUsername').value.trim();
+        const edadRaw = document.getElementById('inputEdad').value;
+        const genero  = document.getElementById('selectGenero').value;
+        const edad    = parseInt(edadRaw);
 
-    const nombre = document.getElementById('inputUsername').value.trim();
-    const edad = parseInt(document.getElementById('inputEdad').value);
-    const genero = document.getElementById('selectGenero').value;
-
-    if (!nombre || nombre.length < 3) {
-        alertaAdvertencia("El nombre debe tener al menos 3 caracteres");
-        return;
-    }
-
-    if (!edad || edad < 15 || edad > 99) {
-        alertaAdvertencia("Edad inválida (15 - 99)");
-        return;
-    }
-
-    try {
-
-        alertaInfo("Guardando cambios...", { duration: 1500 });
-
-        const result = await updateUserData(userId, {
-            nombre,
-            edad,
-            genero
-        });
-
-        if (result.success) {
-
-            currentUserData.nombre = nombre;
-            currentUserData.edad = edad;
-            currentUserData.genero = genero;
-
-            // actualizar UI
-            userNameLbl.textContent = nombre;
-            welcomeMsg.textContent = `Hola, ${nombre}!`;
-
-            document.getElementById('user-genero').textContent = genero || "—";
-            document.getElementById('user-edad').textContent = `${edad} años`;
-
-            alertaExito("Perfil actualizado correctamente");
-
-            document.getElementById('profileOverlay').classList.remove('active');
-
-        } else {
-            alertaError(result.message);
+        if (!nombre || nombre.length < 3 || nombre.length > 16) {
+            alertaAdvertencia('El nombre debe tener entre 3 y 16 caracteres.');
+            return;
+        }
+        if (!edad || edad < 15 || edad > 99) {
+            alertaAdvertencia('La edad debe ser entre 15 y 99 años.');
+            return;
         }
 
-    } catch (error) {
-        console.error(error);
-        alertaError("Error al actualizar perfil");
-    }
-};
+        try {
+            alertaInfo('Guardando cambios...', { duration: 1500 });
+
+            const result = await updateUserData(userId, { nombre, edad, genero });
+
+            if (result && result.success !== false) {
+                currentUserData.nombre = nombre;
+                currentUserData.edad   = edad;
+                currentUserData.genero = genero;
+
+                if (welcomeMsg)  welcomeMsg.textContent  = `Hola, ${nombre}!`;
+                if (userNameLbl) userNameLbl.textContent = nombre;
+
+                const generoEl = document.getElementById('user-genero');
+                const edadEl   = document.getElementById('user-edad');
+                if (generoEl) generoEl.textContent = genero  || '—';
+                if (edadEl)   edadEl.textContent   = `${edad} años`;
+
+                alertaExito('Perfil actualizado correctamente');
+                setTimeout(() => {
+                    document.getElementById('profileOverlay').classList.remove('active');
+                }, 1200);
+
+            } else {
+                const msg = result?.message || 'Error al guardar';
+                alertaError(msg.includes('23505') || msg.includes('duplicate')
+                    ? 'Ese nombre de usuario ya está en uso.'
+                    : msg);
+            }
+
+        } catch (error) {
+            console.error('Error en saveProfile:', error);
+            alertaError('Error de conexión al guardar el perfil.');
+        }
+    };
+
+    window.deleteAccountFromModal = function () {
+        window.closeConfirmDelete?.();
+        window.closeProfileModal?.();
+        document.getElementById('btn-delete-account')?.click();
+    };
+
+    // --- INICIAR ---
+    init();
 });
