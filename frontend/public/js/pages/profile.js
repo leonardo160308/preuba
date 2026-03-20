@@ -380,14 +380,14 @@ if(inputEdad){
             // ✅ Primera confirmación
             const confirmado1 = await alertaConfirmacion(
                 '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
-                '⚠️ Eliminar Cuenta'
+                'Eliminar Cuenta'
             );
             
             if (!confirmado1) return;
             
             // ✅ Segunda confirmación final
             const confirmado2 = await alertaConfirmacion(
-                '🛑 ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
+                ' ÚLTIMA ADVERTENCIA: Todos tus datos se perderán permanentemente. ¿Continuar?',
                 'Confirmación Final'
             );
             
@@ -414,13 +414,13 @@ if(inputEdad){
                 } else {
                     alertaError('Error: ' + result.message); // ✅ CAMBIO
                     btnDeleteAccount.disabled = false;
-                    btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
+                    btnDeleteAccount.textContent = 'Eliminar Cuenta';
                 }
             } catch (error) {
                 console.error(error);
                 alertaError('Error de conexión al intentar eliminar la cuenta.'); // ✅ CAMBIO
                 btnDeleteAccount.disabled = false;
-                btnDeleteAccount.textContent = '🗑️ Eliminar Cuenta';
+                btnDeleteAccount.textContent = 'Eliminar Cuenta';
             }
         };
     }

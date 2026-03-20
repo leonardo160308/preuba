@@ -222,25 +222,43 @@ body {
 }
 
 /* ======== PIE DE PÁGINA ======== */
+/* ── FOOTER ── */
 .footer {
-  background-color: #4d4d4d; /* Cambia color */
-  color: #fff;
-  text-align: center;
-  padding: 25px 10px;
-  font-size: 0.9rem;
+    background: linear-gradient(135deg, #1e2e42 0%, #2C405B 100%);
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+    padding: 36px 20px;
+    font-size: 0.9rem;
+    line-height: 2;
 }
 
 .footer a {
-  color: #fff;
-  text-decoration: none;
-  margin: 0 5px;
+    color: #BA8E58;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .footer a:hover {
-  text-decoration: underline;
+    color: #d4a96a;
+    text-decoration: underline;
 }
-.footer span:hover {
-  text-decoration: underline;
+
+.terms-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.terms-group label {
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    transition: color 0.2s;
+}
+
+.terms-group label:hover {
+    color: #BA8E58;
 }
 /* ======== RESPONSIVO ======== */
 @media (max-width: 768px) {
@@ -306,3 +324,4 @@ body {
         grid-template-columns: 1fr !important;
     }
 }
+

@@ -462,6 +462,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         formEdicion.addEventListener('submit', guardarEdicion);
         btnEditEliminar.addEventListener('click', eliminarDesdeEdicion);
 
+        const btnCloseEdit = document.getElementById('btn-close-edit');
+        if (btnCloseEdit) {
+            btnCloseEdit.addEventListener('click', () => {
+                ocultarFormEdicion();
+            });
+        }
+
         if (btnLogout) {
             btnLogout.addEventListener('click', e => { e.preventDefault(); logout(); });
         }

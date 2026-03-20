@@ -1,254 +1,313 @@
-/* ====== RESET BÁSICO ====== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ========================================
+   RETOS - TOO-EASY (v2)
+   ======================================== */
+
+:root {
+    --primary:   #2C405B;
+    --secondary: #6585AA;
+    --accent:    #B6823E;
+    --bg-dark:   #1f2d3d;
+    --bg-panel:  #dbe4ef;
+    --bg-card:   #ffffff;
+    --border:    rgba(101,133,170,0.25);
+    --text-dark: #1a2332;
+    --text-mid:  #4a5568;
+    --text-muted:#8a9ab0;
+    --success:   #27ae60;
+    --shadow-sm: 0 2px 8px rgba(44,64,91,0.08);
+    --shadow-md: 0 8px 24px rgba(44,64,91,0.14);
 }
 
-/* IMPORTANTE: Forzamos al body a ocupar el 100% de la pantalla sin scroll general */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    background-color: #1f2d3d;
-    color: #333;
-    font-family: 'Nunito', 'Segoe UI', 'Arial', sans-serif;
-    height: 100vh; /* Altura total de la ventana */
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    height: 100vh;
     display: flex;
-    flex-direction: column; /* Organiza Header arriba y Contenido abajo */
-    overflow: hidden; /* Evita que se mueva toda la página */
+    flex-direction: column;
+    overflow: hidden;
 }
 
+/* ── LOGO ── */
 .logo h1 {
-  font-family: 'Arial', sans-serif; 
-  font-weight: 700;
-  font-size: 48px; 
+    font-family: 'Arial', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
 }
 
-/* ====== HEADER (No lo tocamos, solo aseguramos que no crezca) ====== */
-.header {
-    flex-shrink: 0; /* Evita que el header se aplaste */
-    /* Aquí tus estilos del header existentes... */
-    background: #fff; /* Ejemplo */
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-}
-/* (Asegúrate que tu header.css no tenga alturas raras) */
-
-/* ====== CONTENEDOR PRINCIPAL (Ocupa el resto del espacio) ====== */
+/* ── LAYOUT ── */
 .split-layout {
-    display: flex; /* Usamos Flex en vez de Grid para mejor control de altura */
-    flex: 1;       /* Ocupa todo el espacio sobrante debajo del header */
+    display: flex;
+    flex: 1;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 20px; /* Un poco de margen interno */
-    gap: 30px;     /* Separación entre izquierda y derecha */
-    overflow: hidden; /* Clave para que el scroll sea interno */
+    padding: 24px;
+    gap: 28px;
+    overflow: hidden;
 }
 
-/* ====== PANEL IZQUIERDO (UI) ====== */
+/* ── PANEL IZQUIERDO ── */
 .left-panel {
-    width: 450px; /* Ancho fijo */
-    display: flex;
-    flex-direction: column; /* Elementos uno debajo del otro */
-    gap: 20px;
-    height: 100%; /* Ocupa toda la altura disponible */
-    min-width: 400px; /* Para que no se haga muy pequeño */
-}
-
-/* Tarjeta superior (Título) */
-
-
-
-/* Contenedor GRANDE de la lista */
-.challenges-list-container {
-    background-color: #dbe4ef;
-    border-radius: 25px;
-    padding: 20px;
-    
-    /* MAGIA PARA EL SCROLL: */
-    flex: 1; /* Crece para ocupar todo el espacio vertical sobrante */
+    width: 480px;
+    min-width: 380px;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Contiene el scroll hijo */
-}
-
-/* Área donde van las tarjetas (El que hace scroll) */
-#challenges-container {
-    flex: 1;          /* Ocupa el espacio dentro del contenedor azul */
-    overflow-y: auto; /* AQUÍ está el scroll */
-    padding-right: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Scrollbar bonita */
-#challenges-container::-webkit-scrollbar { width: 8px; }
-#challenges-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-
-/* ====== PANEL DERECHO (IMAGEN) ====== */
-.right-panel-image {
-    flex: 1; /* Ocupa todo el ancho restante a la derecha */
+    gap: 16px;
     height: 100%;
-    border-radius: 20px;
-    
-    /* IMAGEN DE FONDO */
-    /* Asegúrate que la ruta sea correcta desde donde está el CSS */
-    background-image: url("../img/mapacheEscalando.png"); /* Ajusta los ../ según tu carpeta */
-    background-size: contain; /* Ajusta la imagen sin cortarla */
-    background-repeat: no-repeat;
-    background-position: bottom right; /* Pegada abajo a la derecha */
 }
 
-/* ====== ESTILOS DE TARJETA (Los mismos de antes) ====== */
-.challenge-card {
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding: 10px 0;
-}
-.challenge-card:last-child { border: none; }
-
-.card-top-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-.card-top-row h3 { font-size: 1rem; color: #2c3e50; }
-
-.btn-claim {
-    background: white; border: 1px solid #bdc3c7; 
-    border-radius: 6px; padding: 4px 12px; cursor: pointer;
-}
-
-.progress-row { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    margin-top: 12px; 
-    background-color: #3E587A;
-    padding: 10px 15px;
-    border-radius: 50px;
-}
-.progress-track { 
-    position: relative;
-    flex: 1; 
-    height: 10px; 
-    background-color: #E9EAEB;
-    border-radius: 10px; 
-    overflow: hidden; 
-}
-.progress-fill { 
-    height: 100%; 
-    background: #2c3e50; 
-    width: 0%; 
-}
-/* El contenedor de la recompensa */
-.reward-pill {
-    display: flex;
-    align-items: center; /* Centra verticalmente el icono y el número */
-    gap: 5px;            /* Espacio pequeño entre imagen y número */
-    padding: 4px 8px;
-    border-radius: 12px;
-}
-
-/* La imagen "en bebé" */
-.reward-icon {
-    width: 45px;  /* Tamaño pequeño */
-    height: 45px; /* Mantener proporción cuadrada */
-    object-fit: contain; /* Evita que se deforme */
-}
-
-/* ======== BOTONES ======== */
-
-button {
-  margin-top: 5px;
-  padding: 5px 8px;
-
-  background-color: transparent;      /* NORMAL */
-  border: 2px solid #6585AA;
-  border-radius: 10px;
-
-  color: #6585AA;
-  font-weight: 600;
-  font-size: 14px;
-  text-align: center;
-
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-button:hover {
-  background-color: #6585AA;  /* HOVER */
-  color: #ffffff;
-}
-
-/* El contenedor principal separa el título del grupo de la derecha */
+/* ── STATS CARD ── */
 .top-stats-card {
-    background-color: #e9ecef;
-    padding: 10px 20px; /* Ajustado para que no sea tan alto */
-    border-radius: 20px;
+    background: rgba(255,255,255,0.96);
+    padding: 16px 22px;
+    border-radius: 18px;
     display: flex;
-    justify-content: space-between; /* Empuja el H2 a la izquierda y el stats-bar a la derecha */
+    justify-content: space-between;
     align-items: center;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(255,255,255,0.5);
 }
 
-/* El contenedor del icono y el número */
+.top-stats-card h2 {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 1px;
+}
+
+.stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(44, 64, 91, 0.07);
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 2px solid rgba(101,133,170,0.3);
+}
+
 .stat-item {
     display: flex;
-    align-items: center; /* Centra verticalmente el icono con el texto */
-    gap: 10px; /* Espacio entre la madera y el 1000 */
+    align-items: center;
+    gap: 8px;
 }
 
 .stat-item img {
-    width: 100px; /* Ajusta según el tamaño de tu imagen */
-    height: auto;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
 }
 
 #wood-count {
     font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
+    font-weight: 800;
+    color: var(--primary);
 }
 
-/* ── AGREGAR AL FINAL DE frontend/public/css/retos.css ────────────────────── */
+/* ── CHALLENGES LIST CONTAINER ── */
+.challenges-list-container {
+    background: rgba(255,255,255,0.95);
+    border-radius: 22px;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255,255,255,0.6);
+}
 
-/* Botón listo para reclamar */
-.btn-claim.ready {
-    background-color: #27ae60;
-    border-color: #27ae60;
-    color: #ffffff;
+.challenges-list-container > div:first-child {
+    font-size: 0.75rem;
     font-weight: 700;
-    animation: pulse-green 1.5s ease-in-out infinite;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--secondary);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(101,133,170,0.2);
 }
+
+#challenges-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* scrollbar */
+#challenges-container::-webkit-scrollbar { width: 6px; }
+#challenges-container::-webkit-scrollbar-track { background: transparent; }
+#challenges-container::-webkit-scrollbar-thumb {
+    background: rgba(101,133,170,0.3);
+    border-radius: 10px;
+}
+#challenges-container::-webkit-scrollbar-thumb:hover { background: rgba(101,133,170,0.6); }
+
+/* ── CHALLENGE CARD ── */
+.challenge-card {
+    border-bottom: 1px solid rgba(226,232,240,0.8);
+    padding: 13px 0;
+    transition: background 0.2s ease;
+    border-radius: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.challenge-card:last-child { border: none; }
+.challenge-card:hover { background: rgba(101,133,170,0.05); }
+
+.card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.card-top-row h3 {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.3;
+    flex: 1;
+}
+
+.card-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+/* ── CLAIM BUTTON ── */
+.btn-claim {
+    background: rgba(44,64,91,0.08);
+    border: 1.5px solid rgba(101,133,170,0.4);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--text-mid);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-claim:hover:not(:disabled):not(.claimed) {
+    background: rgba(101,133,170,0.15);
+    border-color: var(--secondary);
+    color: var(--primary);
+}
+
+.btn-claim.ready {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+    font-weight: 800;
+    animation: pulseGreen 1.8s ease-in-out infinite;
+    box-shadow: 0 3px 12px rgba(39, 174, 96, 0.35);
+}
+
 .btn-claim.ready:hover {
-    background-color: #1e8449;
-    border-color: #1e8449;
+    background: #1e8449;
+    transform: scale(1.04);
 }
 
-/* Botón ya reclamado */
 .btn-claim.claimed {
-    background-color: #7f8c8d;
-    border-color: #7f8c8d;
-    color: #ffffff;
+    background: rgba(127,140,141,0.15);
+    border-color: rgba(127,140,141,0.3);
+    color: #95a5a6;
     cursor: default;
-    opacity: 0.75;
 }
 
-/* Tarjeta completada / reclamada */
-.challenge-card.completed {
-    opacity: 0.8;
-}
-.challenge-card.completed .progress-fill {
-    background: #27ae60;
+/* ── PROGRESS ROW ── */
+.progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary);
+    padding: 9px 14px;
+    border-radius: 40px;
 }
 
-/* Tarjeta lista para reclamar */
+.progress-track {
+    flex: 1;
+    height: 7px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.7), #fff);
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+.progress-text {
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+    font-family: inherit;
+}
+
+.reward-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.8rem;
+}
+
+.reward-icon { width: 28px; height: 28px; object-fit: contain; }
+
+/* ── ESTADOS DE TARJETA ── */
+.challenge-card.completed { opacity: 0.7; }
+.challenge-card.completed .progress-fill { background: var(--success); }
+
 .challenge-card.claimable {
-    border-left: 4px solid #27ae60;
-}
-.challenge-card.claimable .progress-fill {
-    background: #27ae60;
+    border-left: 3px solid var(--success);
+    padding-left: 9px;
 }
 
-/* Animación pulso para botón listo */
-@keyframes pulse-green {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
-    50%       { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+.challenge-card.claimable .progress-fill {
+    background: linear-gradient(90deg, #69f0ae, var(--success));
+}
+
+/* ── PANEL DERECHO (imagen) ── */
+.right-panel-image {
+    flex: 1;
+    height: 100%;
+    border-radius: 24px;
+    background-image: url("../img/mapacheEscalando.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    opacity: 0.9;
+}
+
+/* ── ANIMACIONES ── */
+@keyframes pulseGreen {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(39,174,96,0.4); }
+    50%       { box-shadow: 0 0 0 7px rgba(39,174,96,0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .split-layout { flex-direction: column; padding: 14px; overflow-y: auto; }
+    body { overflow: auto; height: auto; }
+    .left-panel { width: 100%; min-width: 0; }
+    .right-panel-image { height: 200px; }
 }
