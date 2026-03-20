@@ -51,3 +51,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor TOO-EASY listo en http://localhost:${PORT}`);
 });
+
+import authRecoveryRoutes from './backend/routes/authRecoveryRoutes.js';
+app.use('/api', authRecoveryRoutes);
