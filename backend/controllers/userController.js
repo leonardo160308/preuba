@@ -118,23 +118,45 @@ export const getUserProfile = async (req, res) => {
     }
 };
 
+// ============================================================
+// REEMPLAZA la función updateUser en backend/controllers/userController.js
+// ============================================================
+
 export const updateUser = async (req, res) => {
     try {
-        const dataToUpdate = req.body;
+        const dataToUpdate = { ...req.body };
         delete dataToUpdate.id;
         delete dataToUpdate.password_hash;
+        delete dataToUpdate.role;          // nunca permitir cambiar role desde aquí
+        delete dataToUpdate.email;         // nunca cambiar email desde perfil
 
         const result = await User.update(req.params.id, dataToUpdate);
+
         if (!result || result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Sin cambios' });
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado o sin cambios.'
+            });
         }
 
-        res.json({ success: true, message: 'Actualizado', data: dataToUpdate });
+        res.json({ success: true, message: 'Perfil actualizado.', data: result.data });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('Error en updateUser:', error);
+
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                success: false,
+                message: error.message  // "Ese nombre de usuario ya está en uso."
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al actualizar el perfil.'
+        });
     }
 };
-
 export const deleteUser = async (req, res) => {
     try {
         const result = await User.deleteLogical(req.params.id);

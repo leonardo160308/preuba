@@ -42,37 +42,56 @@ class User {
     }
 
     // 3. ACTUALIZAR
-    static async update(id, updateData) {
-        const allowedFields = [
-            'nombre', 'password_hash', 'edad', 'genero', 'foto',
-            'level', 'coins', 'wood', 'dashboard_balance',
-            'house_level', 'beaver_level', 'current_appearance', 'current_beaver'
-        ];
+// ============================================================
+// REEMPLAZA el método update() en backend/models/UserModel.js
+// ============================================================
 
-        const filteredData = {};
-        Object.keys(updateData).forEach(key => {
-            if (allowedFields.includes(key)) {
-                filteredData[key] = updateData[key];
-            }
-        });
+static async update(id, updateData) {
+    const allowedFields = [
+        'nombre', 'password_hash', 'edad', 'genero', 'foto',
+        'level', 'coins', 'wood', 'dashboard_balance',
+        'house_level', 'beaver_level', 'current_appearance', 'current_beaver',
+        'email_verified', 'email_verified_at', 'is_active',
+        'failed_login_attempts', 'locked_until', 'last_login_at'
+    ];
 
-        if (Object.keys(filteredData).length === 0) {
-            console.warn('No hay campos válidos para actualizar');
-            return null;
+    const filteredData = {};
+    Object.keys(updateData).forEach(key => {
+        if (allowedFields.includes(key)) {
+            filteredData[key] = updateData[key];
         }
+    });
 
-        const { data, error } = await supabase
-            .from('users')
-            .update(filteredData)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-
-        // Simular affectedRows para compatibilidad con el código existente
-        return { affectedRows: data ? 1 : 0, data };
+    // Si no hay ningún campo válido para actualizar, salir limpiamente
+    if (Object.keys(filteredData).length === 0) {
+        console.warn('UserModel.update: no hay campos válidos para actualizar');
+        return { affectedRows: 0, data: null };
     }
+
+    const { data, error } = await supabase
+        .from('users')
+        .update(filteredData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) {
+        // Unique constraint: nombre o email duplicado
+        if (error.code === '23505') {
+            const field = error.message.includes('nombre') ? 'nombre de usuario' : 'correo';
+            const friendly = new Error(`Ese ${field} ya está en uso.`);
+            friendly.code = 'ER_DUP_ENTRY';
+            throw friendly;
+        }
+        // Fila no encontrada (PGRST116 = 0 rows de .single())
+        if (error.code === 'PGRST116') {
+            return { affectedRows: 0, data: null };
+        }
+        throw error;
+    }
+
+    return { affectedRows: data ? 1 : 0, data };
+}
 
     // 4. BAJA LÓGICA
     static async deleteLogical(id) {

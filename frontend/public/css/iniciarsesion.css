@@ -166,3 +166,26 @@ button.btn-primary:hover {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.login {
+    display: block;
+    margin-top: 20px;
+    font-size: 17px;
+    text-decoration: none;
+    color: var(--title-brown);
+    font-weight: 600;
+}
+
+.login:hover {
+    text-decoration: underline;
+}
+
+.login-ask {
+    display: block;
+    margin-top: 20px;
+    font-size: 14px;
+    text-decoration: none;
+    color: var(--title-brown);
+    font-weight: 600;
+}
+

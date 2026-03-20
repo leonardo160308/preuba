@@ -482,6 +482,100 @@ if(inputEdad){
         };
     }
 
+    // ============================================================
+// PEGA ESTE BLOQUE AL FINAL DEL DOMContentLoaded DE profile.js
+// JUSTO ANTES DE: init();
+// ============================================================
+
+// Exponer funciones al scope global para que el HTML inline pueda llamarlas.
+// Aquí sí tienen acceso a currentUserData, userId, etc. porque están dentro
+// del mismo módulo.
+
+window.openProfileModal = function () {
+    document.getElementById('profileOverlay').classList.add('active');
+
+    // Prellenar campos con los datos actuales del usuario
+    if (!currentUserData) return;
+    document.getElementById('inputUsername').value = currentUserData.nombre || '';
+    document.getElementById('selectGenero').value  = currentUserData.genero || '';
+    document.getElementById('inputEdad').value     = currentUserData.edad   || '';
+
+    // Sincronizar preview de avatar con el avatar actual
+    if (currentUserData.foto) {
+        const num = currentUserData.foto.replace('avatar', '');
+        const preview = document.getElementById('avatarPreview');
+        if (preview) preview.src = `/public/img/avatars/perfil${num}.png`;
+    }
+};
+
+window.closeProfileModal = function () {
+    document.getElementById('profileOverlay').classList.remove('active');
+};
+
+window.saveProfile = async function () {
+    const nombre  = document.getElementById('inputUsername').value.trim();
+    const edadRaw = document.getElementById('inputEdad').value;
+    const genero  = document.getElementById('selectGenero').value;
+    const edad    = parseInt(edadRaw);
+
+    // Validaciones
+    if (!nombre || nombre.length < 3 || nombre.length > 16) {
+        alertaAdvertencia('El nombre debe tener entre 3 y 16 caracteres.');
+        return;
+    }
+    if (!edad || edad < 15 || edad > 99) {
+        alertaAdvertencia('La edad debe ser entre 15 y 99 años.');
+        return;
+    }
+
+    try {
+        alertaInfo('Guardando cambios...', { duration: 1500 });
+
+        const result = await updateUserData(userId, { nombre, edad, genero });
+
+        if (result && result.success !== false) {
+            // Actualizar estado local del módulo
+            currentUserData.nombre = nombre;
+            currentUserData.edad   = edad;
+            currentUserData.genero = genero;
+
+            // Reflejar cambios en el DOM
+            if (welcomeMsg)  welcomeMsg.textContent  = `Hola, ${nombre}!`;
+            if (userNameLbl) userNameLbl.textContent = nombre;
+
+            const generoEl = document.getElementById('user-genero');
+            const edadEl   = document.getElementById('user-edad');
+            if (generoEl) generoEl.textContent = genero  || '—';
+            if (edadEl)   edadEl.textContent   = `${edad} años`;
+
+            alertaExito('Perfil actualizado correctamente');
+            setTimeout(() => {
+                document.getElementById('profileOverlay').classList.remove('active');
+            }, 1200);
+
+        } else {
+            // El error más común aquí es nombre duplicado (unique constraint)
+            const msg = result?.message || 'Error al guardar';
+            alertaError(msg.includes('23505') || msg.includes('duplicate')
+                ? 'Ese nombre de usuario ya está en uso.'
+                : msg);
+        }
+
+    } catch (error) {
+        console.error('Error en saveProfile:', error);
+        alertaError('Error de conexión al guardar el perfil.');
+    }
+};
+
+window.deleteAccountFromModal = function () {
+    window.closeConfirmDelete?.();
+    window.closeProfileModal?.();
+    document.getElementById('btn-delete-account')?.click();
+};
+
+// --- AHORA SÍ ---
+init();
+
     init();
     window.saveProfile = async function () {
 
